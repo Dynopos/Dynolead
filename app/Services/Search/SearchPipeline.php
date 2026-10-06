@@ -1,0 +1,212 @@
+<?php
+
+namespace App\Services\Search;
+
+use App\Enums\LeadStatus;
+use App\Enums\SearchStatus;
+use App\Jobs\FetchDetailsJob;
+use App\Jobs\FilterCandidatesJob;
+use App\Jobs\SearchPlacesJob;
+use App\Models\Lead;
+use App\Models\Product;
+use App\Models\Search;
+use App\Services\Leads\RuleFilter;
+use App\Services\Places\PlaceRepository;
+use App\Services\Places\PlacesClient;
+use InvalidArgumentException;
+
+/**
+ * Search pipeline (spec §4). Each step runs in its own queue job and is
+ * idempotent, so a failed step can be retried without repeating finished work.
+ *
+ *   SearchPlacesJob → FilterCandidatesJob → FetchDetailsJob → (AI steps)
+ */
+class SearchPipeline
+{
+    public function __construct(
+        private PlacesClient $places,
+        private PlaceRepository $repository,
+        private RuleFilter $filter,
+    ) {}
+
+    /** @param  array<int, string>  $areas */
+    public function start(Product $product, string $businessType, array $areas, int $max, ?float $estimateMyr = null): Search
+    {
+        $areas = array_values(array_filter(array_map('trim', $areas), 'strlen'));
+        $businessType = trim($businessType);
+
+        if ($businessType === '' || $areas === []) {
+            throw new InvalidArgumentException('Jenis bisnes dan kawasan wajib diisi.');
+        }
+
+        $search = Search::query()->create([
+            'product_id' => $product->id,
+            'business_type' => $businessType,
+            'areas' => $areas,
+            'max_candidates' => self::clampMax($max),
+            'status' => SearchStatus::Pending,
+            'estimate_myr' => $estimateMyr,
+        ]);
+
+        SearchPlacesJob::dispatch($search->id);
+
+        return $search;
+    }
+
+    public static function clampMax(int $max): int
+    {
+        return max(1, min((int) config('dynoleads.search.hard_max', 60), $max));
+    }
+
+    /** Step 1: Text Search (cheap fields only). */
+    public function searchPlaces(Search $search): void
+    {
+        if ($search->candidate_place_ids !== null) {
+            FilterCandidatesJob::dispatch($search->id);
+
+            return;
+        }
+
+        $search->markStatus(SearchStatus::Searching);
+
+        $candidates = [];   // place_id => area
+        $max = $search->max_candidates;
+
+        foreach ($search->areas as $area) {
+            $token = null;
+            // Places returns at most 3 pages (60 results) per query.
+            for ($page = 0; $page < 3 && count($candidates) < $max; $page++) {
+                $result = $this->places->textSearch(
+                    query: $search->business_type.' '.$area,
+                    pageSize: min(20, $max - count($candidates)),
+                    pageToken: $token,
+                    searchId: $search->id,
+                );
+                $search->increment('places_calls');
+
+                foreach ($result['places'] as $place) {
+                    if (count($candidates) >= $max || empty($place['id']) || isset($candidates[$place['id']])) {
+                        continue;
+                    }
+                    $this->repository->storeSummary($place);
+                    $candidates[$place['id']] = $area;
+                }
+
+                $token = $result['next_page_token'];
+                if ($token === null) {
+                    break;
+                }
+            }
+
+            if (count($candidates) >= $max) {
+                break;
+            }
+        }
+
+        $search->forceFill([
+            'candidate_place_ids' => $candidates,
+            'found_count' => count($candidates),
+        ])->save();
+
+        FilterCandidatesJob::dispatch($search->id);
+    }
+
+    /** Step 2: rule filter on Text Search data. No AI, no Places calls. */
+    public function filterCandidates(Search $search): void
+    {
+        if ($search->passed_place_ids !== null) {
+            FetchDetailsJob::dispatch($search->id);
+
+            return;
+        }
+
+        $search->markStatus(SearchStatus::Filtering);
+
+        $places = [];
+        foreach (array_keys($search->candidate_place_ids ?? []) as $placeId) {
+            $cached = $this->repository->cached($placeId);
+            if ($cached === null) {
+                $search->addRejection($placeId, 'Data carian dah tamat tempoh');
+
+                continue;
+            }
+            $places[] = $cached;
+        }
+
+        $result = $this->filter->beforeDetails($search->product, $places);
+        foreach ($result->rejected as $placeId => $reason) {
+            $search->addRejection($placeId, $reason);
+        }
+
+        $search->forceFill([
+            'passed_place_ids' => array_column($result->passed, 'id'),
+            'passed_count' => count($result->passed),
+        ])->save();
+
+        FetchDetailsJob::dispatch($search->id);
+    }
+
+    /** Step 3: Place Details for candidates that passed, then the post-details rules. */
+    public function fetchDetails(Search $search): void
+    {
+        $search->markStatus(SearchStatus::Details);
+        $product = $search->product;
+        $areas = $search->candidate_place_ids ?? [];
+
+        foreach ($search->passed_place_ids ?? [] as $placeId) {
+            if (isset(($search->rejections ?? [])[$placeId])
+                || Lead::query()->where('place_id', $placeId)->where('product_id', $product->id)->exists()) {
+                continue;
+            }
+
+            $place = $this->repository->details($placeId, $search->id);
+            $search->increment('places_calls');
+
+            $reason = $this->filter->afterDetails($product, $place);
+            if ($reason !== null) {
+                $search->addRejection($placeId, $reason);
+                $search->save();
+
+                continue;
+            }
+
+            Lead::query()->firstOrCreate(
+                ['place_id' => $placeId, 'product_id' => $product->id],
+                [
+                    'search_id' => $search->id,
+                    'status' => LeadStatus::Baru,
+                    'business_type' => $search->business_type,
+                    'area' => $areas[$placeId] ?? null,
+                ],
+            );
+        }
+
+        $search->forceFill([
+            'lead_count' => Lead::query()->where('search_id', $search->id)->count(),
+        ])->save();
+
+        $this->afterDetails($search);
+    }
+
+    protected function afterDetails(Search $search): void
+    {
+        $this->finish($search);
+    }
+
+    public function finish(Search $search): void
+    {
+        $search->refresh();
+        $search->forceFill([
+            'actual_cost_myr' => $this->actualCost($search),
+        ])->save();
+        $search->markStatus(SearchStatus::Done);
+    }
+
+    public function actualCost(Search $search): float
+    {
+        $places = (float) \App\Models\PlacesUsage::query()->where('search_id', $search->id)->sum('cost_estimate');
+        $ai = (float) \App\Models\AiUsage::query()->where('search_id', $search->id)->sum('cost_estimate');
+
+        return round($places + $ai, 4);
+    }
+}

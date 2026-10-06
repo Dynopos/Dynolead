@@ -12,3 +12,13 @@
 - `.env.example` ikut spec §9.1, `config/ai_prices.php` (harga kosong), `config/dynoleads.php`.
 - Layout mesra telefon dengan menu bawah: Produk, Cari, Lead, Follow-up, Kos.
 - Login satu kata laluan (`APP_LOGIN_PASSWORD`).
+
+### Langkah 2 — Places, tapisan peraturan, cache
+- `PlacesClient` (Places API New) dengan field mask: Text Search medan murah sahaja,
+  Place Details untuk telefon, `websiteUri` dan maksimum 5 review (300 aksara setiap satu).
+- `RuleFilter`: suppression (place_id + telefon), dihubungi < 30 hari (mana-mana produk),
+  rating/review minimum, kedai tutup, lead sedia ada, `require_no_website`, tiada telefon.
+- `place_cache` ikut `PLACES_CACHE_HOURS`, `PurgePlaceCacheJob` dijadual.
+- `MalaysianPhone`: 01x → 601x untuk wa.me, talian tetap 03–09 tiada WhatsApp.
+- Pipeline sebagai job berasingan: `SearchPlacesJob`, `FilterCandidatesJob`, `FetchDetailsJob`.
+- Rekod setiap panggilan Places dalam `places_usage`.
