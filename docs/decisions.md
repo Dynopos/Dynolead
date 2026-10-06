@@ -259,7 +259,11 @@ contoh kos RM50 kita caj RM60." Ini **menggantikan** model kredit (commit sebelu
 - **Kos Google Places dimasukkan dalam caj** (`include_places_cost = true`). Sebab: satu
   Place Details (dengan review) ~USD0.025 setiap kedai, selalunya lebih mahal daripada token
   AI untuk kedai yang sama. Caj ikut token Claude sahaja akan rugi. Bob boleh tukar ke
-  `false` (`BILL_PLACES_COST=false`).
+  `false` (`BILL_PLACES_COST=false`). Bob sahkan: kekalkan caj Google Places.
+- **Tiada harga Places, tiada carian berbayar.** Jika `include_places_cost` aktif tetapi
+  `places.text_search`/`places.details`/`usd_to_myr` kosong, kos Places akan dikira RM0 dan
+  pelanggan tak dicaj. Jadi carian berbayar disekat sehingga harga diisi. Percubaan percuma
+  dan workspace `dalaman` tidak terjejas kerana tidak dicaj.
 - **Meter penggunaan:** setiap peringkat pipeline berjalan dalam `UsageMeter::runFor()`;
   `AiGateway` dan `PlacesClient` tanda baris `ai_usage`/`places_usage` dengan
   `billable_search_id`. Jana semula, follow-up dan paparan kad lead berlaku di luar meter,

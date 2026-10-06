@@ -107,7 +107,7 @@ Jika tukar model dalam `.env`, tambah baris harga untuk ID model baru juga.
 | `TRIAL_DAYS` | 14 | Had hari percubaan (mana dulu) |
 | `ACTIVATION_FEE_MYR` | 23.90 | Yuran aktif, sekali bayar |
 | `USAGE_MARKUP_PERCENT` | 20 | Caj = kos sebenar × 1.20 |
-| `BILL_PLACES_COST` | true | Masukkan kos Google Places dalam caj (disyorkan) |
+| `BILL_PLACES_COST` | true | Masukkan kos Google Places dalam caj (disyorkan). Carian berbayar disekat selagi harga `places` dalam `config/ai_prices.php` kosong |
 | `topup_options` | 20, 50, 100 | Pilihan tambah baki (RM), dalam `config/billing.php` |
 
 **Penting:** caj pelanggan dikira dari harga dalam `config/ai_prices.php`. Pastikan harga

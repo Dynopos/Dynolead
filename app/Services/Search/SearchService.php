@@ -57,6 +57,15 @@ class SearchService
             }
         }
 
+        // A paid search bills Places cost too; without Places prices it would be billed at RM0.
+        if (config('billing.include_places_cost', true)
+            && ! $this->wallet->isUnlimited() && ! $this->wallet->inTrial()
+            && ! $this->prices->arePlacesPricesConfigured()) {
+            return auth()->user()?->isAdmin()
+                ? 'Harga Google Places belum diisi dalam config/ai_prices.php (places.text_search, places.details, usd_to_myr).'
+                : 'Perkhidmatan carian belum sedia. Sila cuba sebentar lagi atau hubungi kami.';
+        }
+
         if ($reason = $this->wallet->searchBlocker($this->estimate($candidates, array_fill(0, max(1, $areas), ''))->total())) {
             return $reason;
         }

@@ -153,6 +153,27 @@ it('can bill AI cost only, if Bob turns Places billing off', function () {
     expect($search->charged_sen)->toBe((int) ceil(round($ai * 1.2 * 100, 4)));
 });
 
+it('refuses a paid search while Places prices are missing, so Places is never billed at RM0', function () {
+    config(['ai_prices.places' => ['text_search' => null, 'details' => null, 'details_display' => null]]);
+    activate(2000);
+    Http::fake();
+
+    expect(fn () => app(SearchService::class)->start($this->product, 'kedai', ['Pasir Mas'], 20))
+        ->toThrow(AccountLimitReached::class, 'Perkhidmatan carian belum sedia');
+    expect(Search::count())->toBe(0);
+    Http::assertNothingSent();
+
+    // A free trial search is not billed, so it is not blocked.
+    $this->workspace->forceFill(['activated_at' => null])->save();
+    app(CurrentWorkspace::class)->set($this->workspace->refresh());
+    expect(app(SearchService::class)->blocker(20))->toBeNull();
+
+    // With Places billing turned off, AI prices alone are enough.
+    activate();
+    config(['billing.include_places_cost' => false]);
+    expect(app(SearchService::class)->blocker(20))->toBeNull();
+});
+
 it('refuses a paid search when the balance is below the estimate, and calls no API', function () {
     activate(1);
     Http::fake();

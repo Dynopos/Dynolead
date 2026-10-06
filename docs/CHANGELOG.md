@@ -118,3 +118,5 @@
 - Halaman Bayaran (status percubaan, aktifkan, tambah baki), Baki (sejarah), anggaran RM
   di skrin Cari, admin (yuran aktif, tambah baki, untung guna, lanjut percubaan).
 - Halaman jualan, FAQ dan Terma dikemas kini. 187 test lulus.
+- Kekalkan caj Google Places (keputusan Bob). Carian berbayar disekat selagi harga Places
+  belum diisi, supaya Places tidak dicaj RM0. 188 test lulus.
