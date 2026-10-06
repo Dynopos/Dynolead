@@ -295,3 +295,12 @@ contoh kos RM50 kita caj RM60." Ini **menggantikan** model kredit (commit sebelu
   ke bawah ke gandaan 5 supaya contoh tidak berjanji lebih.
 - Masih anggaran: caj sebenar tetap ikut kos sebenar + markup (`WalletService::settle`).
   Jika harga belum diisi, halaman kembali ke "Kos + 20%".
+
+## 2026-10-06 — Nama, logo dan warna (Bob)
+
+- Nama produk: **Dyno Lead** (ikut logo), bukan "Dyno Leads". Ditukar dalam UI, e-mel, CHIP,
+  SEO, Terma/Privasi, README, DEPLOY dan CLAUDE.md. Kunci config dalaman (`dynoleads.*`) dan
+  nama fail spec tidak diubah. `APP_NAME` dalam `.env` Forge perlu ditukar sendiri.
+- Warna: hijau zamrud kekal warna utama app; oren dari logo untuk butang ajakan utama
+  (`btn-accent`) dan sorotan di halaman jualan. Tiada gradien hijau→oren terus (jadi warna
+  zaitun yang kusam); dua warna diletak sebagai blok berasingan.

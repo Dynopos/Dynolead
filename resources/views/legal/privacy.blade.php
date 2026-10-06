@@ -2,7 +2,7 @@
     @php($c = config('dynoleads.company'))
     <article class="max-w-none space-y-4 text-[15px] leading-relaxed text-slate-700 [&_h2]:mt-8 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-slate-900 [&_li]:ml-5 [&_li]:list-disc">
         <x-alert type="warning">DRAF. Perlu disemak oleh peguam (PDPA 2010) sebelum perkhidmatan dijual.</x-alert>
-        <h1 class="text-2xl font-bold text-slate-900">Polisi Privasi Dyno Leads</h1>
+        <h1 class="text-2xl font-bold text-slate-900">Polisi Privasi Dyno Lead</h1>
         <p>Polisi ini menerangkan bagaimana {{ $c['name'] }} memproses data peribadi di bawah Akta Perlindungan Data Peribadi 2010 (PDPA).</p>
 
         <h2>1. Data yang kami kumpul</h2>

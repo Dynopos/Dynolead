@@ -2,7 +2,7 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "dynopos/dynolead",
     "type": "project",
-    "description": "Dyno Leads: AI lead finder and WhatsApp message writer for Malaysian SMEs.",
+    "description": "Dyno Lead: AI lead finder and WhatsApp message writer for Malaysian SMEs.",
     "keywords": [
         "laravel",
         "livewire",

@@ -12,12 +12,12 @@
 <body class="bg-white text-slate-900 antialiased">
     <header class="sticky top-0 z-30 border-b border-slate-100 bg-white/85 backdrop-blur-lg">
         <nav class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3" aria-label="Navigasi utama">
-            <a href="{{ route('home') }}" class="flex items-center gap-2.5"><x-logo /><span class="font-bold tracking-tight">Dyno Leads</span></a>
+            <a href="{{ route('home') }}" class="flex items-center gap-2.5"><x-logo /><span class="font-bold tracking-tight">Dyno Lead</span></a>
             <div class="flex items-center gap-1 text-sm">
                 <a href="#cara" class="hidden px-3 py-2 font-medium text-slate-600 hover:text-slate-900 sm:block">Cara guna</a>
                 <a href="#harga" class="hidden px-3 py-2 font-medium text-slate-600 hover:text-slate-900 sm:block">Harga</a>
                 <a href="{{ route('login') }}" class="px-3 py-2 font-medium text-slate-600 hover:text-slate-900">Masuk</a>
-                <a href="{{ route('register') }}" class="btn-primary px-3.5 py-2">Daftar percuma</a>
+                <a href="{{ route('register') }}" class="btn-accent px-3.5 py-2">Daftar percuma</a>
             </div>
         </nav>
     </header>

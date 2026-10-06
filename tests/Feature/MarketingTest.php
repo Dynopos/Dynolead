@@ -9,7 +9,7 @@ it('shows the public sales page with one h1, meta tags and schema', function () 
     $html = $this->get('/')->assertOk()->getContent();
 
     expect(substr_count($html, '<h1'))->toBe(1)
-        ->and($html)->toContain('<title>Susah Cari Customer? Kami Cari Lead untuk SME | Dyno Leads</title>')
+        ->and($html)->toContain('<title>Susah Cari Customer? Kami Cari Lead untuk SME | Dyno Lead</title>')
         ->and($html)->toMatch('/<meta name="description" content="[^"]{120,160}">/')
         ->and($html)->toContain('<link rel="canonical" href="'.url('/').'">')
         ->and($html)->toContain('property="og:image"')
@@ -69,7 +69,7 @@ it('falls back to "cost + markup" while prices are missing', function () {
     $this->get('/')->assertSee('Kos + 20%');
 });
 
-it('shows the Dyno Leads logo and icons', function () {
+it('shows the Dyno Lead logo and icons', function () {
     $this->get('/')->assertSee('images/logo-mark.webp', false)->assertSee('/favicon.png', false)->assertSee('/apple-touch-icon.png', false);
     $this->get('/masuk')->assertSee('images/logo-mark.webp', false);
 
@@ -80,7 +80,7 @@ it('shows the Dyno Leads logo and icons', function () {
 
 it('lets prospects WhatsApp the company from the sales page, terms and privacy', function () {
     config(['dynoleads.company.whatsapp' => '0182889932']);
-    $link = 'https://wa.me/60182889932?text='.rawurlencode('Salam, saya nak tahu tentang Dyno Leads.');
+    $link = 'https://wa.me/60182889932?text='.rawurlencode('Salam, saya nak tahu tentang Dyno Lead.');
 
     $this->get('/')->assertSee($link, false)->assertSee('WhatsApp kami')->assertSee('018-288 9932');
     $this->get('/terma')->assertSee('wa.me/60182889932', false);

@@ -135,3 +135,5 @@
   utama telefon. Logo penuh dalam `public/images/logo.png` (JSON-LD).
 - WhatsApp syarikat (`COMPANY_WHATSAPP`, lalai 018-288 9932): butang "WhatsApp kami" terapung
   di halaman jualan, nombor di footer, Terma dan Privasi. Pautan `wa.me` dengan mesej awal.
+- Nama produk ditukar ke **Dyno Lead**. Warna oren dari logo untuk butang ajakan dan sorotan
+  di halaman jualan (`btn-accent`); hijau kekal warna utama app.

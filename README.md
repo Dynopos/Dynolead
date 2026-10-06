@@ -1,4 +1,4 @@
-# Dyno Leads
+# Dyno Lead
 
 App prospek untuk SME Malaysia dalam ekosistem DYNOPRO (DynoPOS Technologies).
 Cari bisnes tempatan, AI nilai dan tulis mesej WhatsApp custom, jejak status lead.

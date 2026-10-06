@@ -1,5 +1,5 @@
 {{-- Link to the company's own WhatsApp (prospects contacting us). Hidden when no mobile number is set. --}}
-@props(['variant' => 'link', 'message' => 'Salam, saya nak tahu tentang Dyno Leads.'])
+@props(['variant' => 'link', 'message' => 'Salam, saya nak tahu tentang Dyno Lead.'])
 @php
     $raw = config('dynoleads.company.whatsapp');
     $href = \App\Support\MalaysianPhone::waLink($raw, $message);

@@ -35,7 +35,7 @@ class HomeController
         }
 
         return [
-            ['Adakah Dyno Leads hantar mesej secara automatik?', 'Tidak. Dyno Leads cari kedai, pilih yang sesuai dan tulis mesej. Anda tekan "Buka WhatsApp", semak mesej, dan tekan hantar sendiri. Ini jaga nombor WhatsApp anda daripada disekat dan memastikan setiap mesej betul.'],
+            ['Adakah Dyno Lead hantar mesej secara automatik?', 'Tidak. Dyno Lead cari kedai, pilih yang sesuai dan tulis mesej. Anda tekan "Buka WhatsApp", semak mesej, dan tekan hantar sendiri. Ini jaga nombor WhatsApp anda daripada disekat dan memastikan setiap mesej betul.'],
             ['Dari mana senarai kedai datang?', 'Dari Google Maps. Anda pilih jenis bisnes dan kawasan (contoh: kedai runcit, Kota Bharu). Sistem tapis ikut rating, bilangan review dan sama ada kedai dah ada website.'],
             ['Boleh guna untuk produk saya?', 'Boleh, untuk apa-apa produk atau servis yang anda jual kepada bisnes lain: sistem POS, website, pemasaran, katering, percetakan dan lain-lain. Anda tulis profil produk sekali, AI guna untuk setiap mesej.'],
             ['AI akan reka harga atau janji palsu?', 'Tidak. AI hanya guna ayat dan fakta dalam profil produk anda dan review kedai. Mesej yang ada harga luar profil, perkataan dilarang atau tiada pilihan STOP akan ditolak secara automatik.'],

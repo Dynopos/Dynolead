@@ -2,10 +2,10 @@
     @php($c = config('dynoleads.company'))
     <article class="prose-sm max-w-none space-y-4 text-[15px] leading-relaxed text-slate-700 [&_h2]:mt-8 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-slate-900 [&_li]:ml-5 [&_li]:list-disc">
         <x-alert type="warning">DRAF. Perlu disemak oleh peguam sebelum perkhidmatan dijual.</x-alert>
-        <h1 class="text-2xl font-bold text-slate-900">Terma Perkhidmatan Dyno Leads</h1>
+        <h1 class="text-2xl font-bold text-slate-900">Terma Perkhidmatan Dyno Lead</h1>
         <p>Dikemas kini: {{ \Illuminate\Support\Carbon::parse('2026-10-07')->translatedFormat('j F Y') }}</p>
 
-        <p>Dyno Leads ("Perkhidmatan") disediakan oleh {{ $c['name'] }}@if($c['registration']) ({{ $c['registration'] }})@endif, {{ $c['address'] }} ("kami"). Dengan mendaftar, anda ("Pelanggan") bersetuju dengan terma ini.</p>
+        <p>Dyno Lead ("Perkhidmatan") disediakan oleh {{ $c['name'] }}@if($c['registration']) ({{ $c['registration'] }})@endif, {{ $c['address'] }} ("kami"). Dengan mendaftar, anda ("Pelanggan") bersetuju dengan terma ini.</p>
 
         <h2>1. Apa Perkhidmatan ini buat</h2>
         <ul>

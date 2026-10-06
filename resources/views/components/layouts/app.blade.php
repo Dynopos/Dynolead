@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="icon" href="/favicon.png" type="image/png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <title>{{ $title ?? 'Dyno Leads' }} · Dyno Leads</title>
+    <title>{{ $title ?? 'Dyno Lead' }} · Dyno Lead</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-full bg-slate-100 text-slate-900 antialiased">
@@ -17,7 +17,7 @@
                 <a href="{{ route('leads') }}" wire:navigate class="flex items-center gap-2.5">
                     <x-logo />
                     <span class="leading-tight">
-                        <span class="block text-[15px] font-bold tracking-tight">Dyno Leads</span>
+                        <span class="block text-[15px] font-bold tracking-tight">Dyno Lead</span>
                         <span class="block max-w-[200px] truncate text-[11px] font-medium text-slate-500">{{ app(\App\Support\Tenancy\CurrentWorkspace::class)->get()?->name }}</span>
                     </span>
                 </a>

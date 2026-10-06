@@ -32,7 +32,7 @@ class BillingService
             throw new AccountLimitReached('Akaun ini dah aktif.');
         }
 
-        return $this->checkout($workspace, $user, 'activation', $this->wallet->activationFeeSen(), 'Dyno Leads: aktifkan akaun (sekali bayar)');
+        return $this->checkout($workspace, $user, 'activation', $this->wallet->activationFeeSen(), 'Dyno Lead: aktifkan akaun (sekali bayar)');
     }
 
     public function startTopup(Workspace $workspace, User $user, int $amountMyr): string
@@ -45,7 +45,7 @@ class BillingService
             throw new AccountLimitReached('Aktifkan akaun dahulu sebelum tambah baki.');
         }
 
-        return $this->checkout($workspace, $user, 'topup', $amountMyr * 100, 'Dyno Leads: tambah baki RM'.$amountMyr);
+        return $this->checkout($workspace, $user, 'topup', $amountMyr * 100, 'Dyno Lead: tambah baki RM'.$amountMyr);
     }
 
     private function checkout(Workspace $workspace, User $user, string $kind, int $amountSen, string $label): string
