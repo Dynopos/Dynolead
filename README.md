@@ -6,4 +6,4 @@ Cari bisnes tempatan, AI nilai dan tulis mesej WhatsApp custom, jejak status lea
 - Spec: [docs/dyno-leads-spec.md](docs/dyno-leads-spec.md)
 - Arahan untuk Claude Code: [CLAUDE.md](CLAUDE.md)
 
-Status: Fasa 0 belum dibina.
+Status: Fasa 0 sedang dibina. Lihat [docs/CHANGELOG.md](docs/CHANGELOG.md).
