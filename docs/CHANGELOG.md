@@ -122,3 +122,4 @@
   belum diisi, supaya Places tidak dicaj RM0. 188 test lulus.
 - Harga Claude diisi dalam `config/ai_prices.php` (Haiku 4.5, Sonnet 5.5). Harga Places dan
   `usd_to_myr` masih untuk Bob isi.
+- `usd_to_myr` = 4.70 (Bob). Harga Google Places masih untuk Bob isi.

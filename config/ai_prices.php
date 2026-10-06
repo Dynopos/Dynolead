@@ -42,6 +42,6 @@ return [
         'details_display' => null,  // Bob isi ikut harga semasa (Details tanpa review)
     ],
 
-    // Kadar tukaran USD ke RM. Bob isi ikut kadar semasa.
-    'usd_to_myr' => null,
+    // Kadar tukaran USD ke RM (ditetapkan Bob, Oktober 2026).
+    'usd_to_myr' => 4.70,
 ];
