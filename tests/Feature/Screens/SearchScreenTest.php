@@ -20,7 +20,8 @@ beforeEach(function () {
     $this->dynopos = Product::where('slug', 'dynopos')->first();
 });
 
-it('shows a cost estimate before running and only runs after confirming', function () {
+it('shows the admin a cost estimate before running and only runs after confirming', function () {
+    actingAsAdmin();
     fakePlaces([apiPlace('a'), apiPlace('b')]);
     fakeClaude();
 

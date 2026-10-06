@@ -14,7 +14,7 @@ class Search extends Model
     use BelongsToWorkspace, HasFactory;
 
     protected $fillable = [
-        'product_id', 'business_type', 'areas', 'max_candidates', 'status',
+        'product_id', 'business_type', 'areas', 'max_candidates', 'credits_charged', 'status',
         'candidate_place_ids', 'passed_place_ids', 'found_count', 'passed_count', 'lead_count',
         'scored_count', 'written_count', 'places_calls', 'estimate_myr', 'actual_cost_myr',
         'rejections', 'error', 'finished_at',
@@ -31,6 +31,8 @@ class Search extends Model
             'estimate_myr' => 'float',
             'actual_cost_myr' => 'float',
             'finished_at' => 'datetime',
+            'credits_charged' => 'integer',
+            'credits_refunded_at' => 'datetime',
         ];
     }
 

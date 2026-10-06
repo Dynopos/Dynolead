@@ -1,5 +1,5 @@
 <div class="space-y-5">
-    <x-page-header title="Langganan" subtitle="Pelan, kuota dan bayaran." />
+    <x-page-header title="Tambah kredit" subtitle="Bayar ikut carian. Kredit tak luput." />
 
     @if (session('status'))
         <x-alert type="success">{{ session('status') }}</x-alert>
@@ -7,86 +7,57 @@
     @if (session('warning'))
         <x-alert type="warning">{{ session('warning') }}</x-alert>
     @endif
-    @if ($blocker)
-        <x-alert type="warning">{{ $blocker }}</x-alert>
-    @endif
 
-    {{-- Current plan --}}
-    <section class="card p-4">
-        <div class="flex items-start justify-between gap-3">
-            <div>
-                <p class="label">Pelan semasa</p>
-                <p class="mt-1 text-xl font-bold">{{ $plan->name }}</p>
-                <p class="text-sm text-slate-500">
-                    @if ($endsAt === null)
-                        Tiada tarikh tamat.
-                    @elseif ($active)
-                        {{ $isTrial ? 'Percubaan tamat' : 'Aktif sehingga' }} {{ $endsAt->translatedFormat('j M Y') }} ({{ $endsAt->diffForHumans() }})
-                    @else
-                        Tamat {{ $endsAt->translatedFormat('j M Y') }}
-                    @endif
-                </p>
-            </div>
-            <span @class(['shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset', 'bg-emerald-50 text-emerald-700 ring-emerald-200' => $active, 'bg-rose-50 text-rose-700 ring-rose-200' => ! $active])>
-                {{ $active ? 'Aktif' : 'Tamat' }}
-            </span>
+    <section class="card flex items-center justify-between p-4">
+        <div>
+            <p class="label">Baki anda</p>
+            <p class="mt-1 text-3xl font-bold tabular-nums">{{ $unlimited ? '∞' : $balance }} <span class="text-base font-semibold text-slate-500">kredit</span></p>
         </div>
-
-        <dl class="mt-4 space-y-3">
-            <div>
-                <div class="flex justify-between text-sm"><dt class="text-slate-500">Lead bulan ni</dt><dd class="font-semibold tabular-nums">{{ $leadsUsed }}{{ $plan->monthlyLeads !== null ? ' / '.$plan->monthlyLeads : '' }}</dd></div>
-                @if ($plan->monthlyLeads)
-                    <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-emerald-500" style="width: {{ min(100, round($leadsUsed / max(1, $plan->monthlyLeads) * 100)) }}%"></div></div>
-                @endif
-            </div>
-            <div>
-                <div class="flex justify-between text-sm"><dt class="text-slate-500">Penggunaan AI bulan ni</dt><dd class="font-semibold tabular-nums">{{ $aiLimit > 0 ? min(100, round($aiSpent / $aiLimit * 100)) : 100 }}%</dd></div>
-                <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-sky-500" style="width: {{ $aiLimit > 0 ? min(100, round($aiSpent / $aiLimit * 100)) : 100 }}%"></div></div>
-            </div>
-        </dl>
+        <span class="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-50 text-emerald-600"><x-icon name="wallet" class="h-6 w-6" /></span>
     </section>
 
-    {{-- Plans --}}
+    <x-alert type="info">1 kredit = 1 carian sehingga {{ $perCredit }} kedai. Carian {{ $perCredit * 2 }} kedai guna 2 kredit, {{ $perCredit * 3 }} kedai guna 3 kredit. Kredit dipulangkan jika carian tak jumpa satu lead pun.</x-alert>
+
     <section class="space-y-3">
-        <h2 class="label">Pilih pelan</h2>
-        @foreach ($plans as $p)
-            <article wire:key="plan-{{ $p->key }}" @class(['card p-4', 'ring-2 ring-emerald-500' => $p->key === $plan->key])>
-                <div class="flex items-baseline justify-between">
-                    <h3 class="text-lg font-bold">{{ $p->name }}</h3>
-                    <p class="text-right">
+        <h2 class="label">Pilih pek</h2>
+        @foreach ($packs as $p)
+            <article wire:key="pack-{{ $p->key }}" @class(['card relative p-4', 'ring-2 ring-emerald-500' => $p->popular])>
+                @if ($p->popular)
+                    <span class="absolute -top-2.5 right-4 rounded-full bg-emerald-600 px-2.5 py-0.5 text-[11px] font-bold text-white">Paling popular</span>
+                @endif
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-lg font-bold">{{ $p->name }}</h3>
+                        <p class="text-sm text-slate-500">{{ $p->credits }} carian · sehingga {{ $p->credits * $perCredit }} kedai</p>
+                    </div>
+                    <div class="text-right">
                         @if ($p->priceMyr !== null)
-                            <span class="text-2xl font-bold tabular-nums">RM{{ number_format($p->priceMyr, 0) }}</span><span class="text-sm text-slate-500"> / 30 hari</span>
+                            <p class="text-2xl font-bold tabular-nums">RM{{ number_format($p->priceMyr, 0) }}</p>
+                            <p class="text-xs text-slate-500">RM{{ number_format($p->pricePerCredit(), 2) }} / kredit</p>
                         @else
-                            <span class="text-sm text-slate-400">Harga belum ditetapkan</span>
+                            <p class="text-sm text-slate-400">Harga belum ditetapkan</p>
                         @endif
-                    </p>
+                    </div>
                 </div>
-                <ul class="mt-3 space-y-1.5 text-sm text-slate-600">
-                    @foreach ($p->features as $f)
-                        <li class="flex items-center gap-2"><x-icon name="check" class="h-4 w-4 text-emerald-600" :solid="true" />{{ $f }}</li>
-                    @endforeach
-                </ul>
                 @if ($p->isForSale())
-                    <button type="button" wire:click="subscribe('{{ $p->key }}')" wire:loading.attr="disabled" class="btn-primary mt-4 w-full py-3">
-                        {{ $p->key === $plan->key && $active ? 'Sambung 30 hari' : 'Langgan '.$p->name }}
-                    </button>
+                    <button type="button" wire:click="buy('{{ $p->key }}')" wire:loading.attr="disabled" class="{{ $p->popular ? 'btn-primary' : 'btn-dark' }} mt-4 w-full py-3">Beli {{ $p->name }}</button>
                 @else
                     <button type="button" disabled class="btn-soft mt-4 w-full">Belum dibuka</button>
                 @endif
             </article>
         @endforeach
-        <p class="text-xs text-slate-500">Bayaran sekali untuk setiap 30 hari melalui CHIP (FPX, kad, e-wallet). Tiada caj automatik.</p>
+        <p class="text-xs text-slate-500">Bayaran sekali melalui CHIP (FPX, kad, e-wallet). Tiada langganan, tiada caj automatik.</p>
     </section>
 
     @if ($payments->isNotEmpty())
         <section class="space-y-2">
-            <h2 class="label">Sejarah bayaran</h2>
+            <h2 class="label">Sejarah pembelian</h2>
             <ul class="card divide-y divide-slate-100">
                 @foreach ($payments as $payment)
                     <li class="flex items-center justify-between px-4 py-3 text-sm">
                         <div>
-                            <p class="font-medium">{{ ucfirst($payment->plan) }} · {{ $payment->reference() }}</p>
-                            <p class="text-xs text-slate-500">{{ $payment->period_start?->translatedFormat('j M') }} – {{ $payment->period_end?->translatedFormat('j M Y') }}</p>
+                            <p class="font-medium">{{ $payment->credits }} kredit · {{ $payment->reference() }}</p>
+                            <p class="text-xs text-slate-500">{{ $payment->paid_at?->translatedFormat('j M Y, g:i a') }}</p>
                         </div>
                         <p class="font-semibold tabular-nums">RM{{ number_format($payment->amountMyr(), 2) }}</p>
                     </li>

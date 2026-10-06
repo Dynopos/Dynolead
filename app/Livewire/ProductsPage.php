@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Exceptions\PlanLimitReached;
+use App\Exceptions\AccountLimitReached;
 use App\Models\Product;
 use App\Services\Products\ProductService;
 use App\Support\Tenancy\CurrentWorkspace;
@@ -132,7 +132,7 @@ class ProductsPage extends Component
 
         try {
             $product = $service->save($this->editingId ? Product::query()->findOrFail($this->editingId) : null, $data);
-        } catch (PlanLimitReached $e) {
+        } catch (AccountLimitReached $e) {
             $this->addError('name', $e->getMessage());
 
             return;

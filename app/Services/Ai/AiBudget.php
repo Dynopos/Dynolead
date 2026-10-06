@@ -5,16 +5,15 @@ namespace App\Services\Ai;
 use App\Exceptions\BudgetExceeded;
 use App\Models\AiUsage;
 use App\Models\Setting;
-use App\Services\Billing\PlanService;
-use App\Support\Tenancy\CurrentWorkspace;
 
 /**
  * Monthly AI cost limits (spec §9.4). Checked before every Claude call.
  *
- * Two limits apply:
- *  - the workspace limit: the customer's own setting, never above their plan's ai_budget_myr;
- *  - the platform limit (AI_MONTHLY_BUDGET_MYR): all customers together, protecting the
- *    central Anthropic key.
+ *  - Platform limit (AI_MONTHLY_BUDGET_MYR): all customers together, protecting the
+ *    central Anthropic key. Always applies.
+ *  - Workspace limit: only when one is set (the admin's own workspace on the Kos page).
+ *    Customers pay per search with credits, and free extras are capped per lead, so they
+ *    have no separate RM limit.
  */
 class AiBudget
 {
@@ -22,32 +21,17 @@ class AiBudget
 
     public const PLATFORM_MESSAGE = 'Perkhidmatan AI berehat sekejap sebab had penggunaan platform bulan ini dah dicapai. Kami sedang uruskan, cuba lagi nanti.';
 
-    public function __construct(
-        private PlanService $plans,
-        private CurrentWorkspace $current,
-    ) {}
-
-    /** The plan's cap for this workspace, or null when the plan has none. */
-    public function planCap(): ?float
-    {
-        return $this->current->id() === null ? null : $this->plans->planOf()->aiBudgetMyr;
-    }
-
+    /** Workspace limit, or the platform limit when the workspace has none. */
     public function limit(): float
     {
         $value = Setting::get(self::SETTING_KEY);
-        $cap = $this->planCap();
-        $own = is_numeric($value) ? (float) $value : ($cap ?? (float) config('dynoleads.ai.monthly_budget_myr'));
 
-        return $cap === null ? $own : min($own, $cap);
+        return is_numeric($value) ? (float) $value : $this->platformLimit();
     }
 
     public function setLimit(float $myr): void
     {
-        $cap = $this->planCap();
-        $myr = max(0, round($myr, 2));
-
-        Setting::put(self::SETTING_KEY, (string) ($cap === null ? $myr : min($myr, $cap)));
+        Setting::put(self::SETTING_KEY, (string) max(0, round($myr, 2)));
     }
 
     public function spentThisMonth(): float

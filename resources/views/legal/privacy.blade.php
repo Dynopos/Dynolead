@@ -30,7 +30,7 @@
         <p>Bila anda tanda sesebuah bisnes sebagai STOP, ID tempat dan nombor telefonnya disimpan dalam workspace anda supaya bisnes itu tidak dihubungi lagi. Rekod ini disimpan selagi akaun anda wujud.</p>
 
         <h2>5. Tempoh simpanan</h2>
-        <p>Data akaun disimpan selagi akaun aktif dan sehingga 12 bulan selepas langganan tamat, kemudian dipadam, kecuali rekod bayaran yang perlu disimpan mengikut undang-undang.</p>
+        <p>Data akaun disimpan selagi akaun aktif dan sehingga 12 bulan selepas akaun tidak digunakan, kemudian dipadam, kecuali rekod bayaran yang perlu disimpan mengikut undang-undang.</p>
 
         <h2>6. Hak anda</h2>
         <p>Anda boleh meminta akses, pembetulan atau pemadaman data anda dengan menghubungi kami. Kami akan membalas dalam 21 hari.</p>

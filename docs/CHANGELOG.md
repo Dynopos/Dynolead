@@ -102,3 +102,11 @@
 - `docs/DEPLOY.md` dikemas kini untuk Fasa 2 (CHIP, SMTP, akaun admin, senarai sebelum jual).
 - `docs/fasa2-semakan.md`: pemetaan ciri ke test. CLAUDE.md dan spec dikemas kini.
 - 175 test lulus.
+
+### F2.6 — Bayar ikut carian (kredit)
+- Kredit prabayar ganti pelan bulanan: 1 kredit setiap 20 calon, dipotong bila carian
+  bermula, dipulangkan jika tiada lead. 3 kredit percuma bila daftar.
+- Pek kredit melalui CHIP; halaman Kredit (baki + sejarah) dan Tambah kredit.
+- Jana semula / follow-up percuma dengan had setiap lead.
+- Admin: beri kredit, rekod bayaran manual pek, statistik kredit dijual/diguna.
+- Halaman jualan, Terma dan FAQ dikemas kini untuk model kredit.

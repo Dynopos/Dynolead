@@ -20,12 +20,12 @@
                         'inLanguage' => 'ms',
                         'url' => url('/'),
                         'description' => 'Cari prospek kedai tempatan dengan AI dan tulis mesej WhatsApp custom untuk setiap kedai.',
-                        'offers' => collect($plans)->filter(fn ($p) => $p->priceMyr !== null)->map(fn ($p) => [
+                        'offers' => collect($packs)->filter(fn ($p) => $p->priceMyr !== null)->map(fn ($p) => [
                             '@type' => 'Offer',
-                            'name' => $p->name,
+                            'name' => $p->name.' ('.$p->credits.' kredit)',
                             'price' => number_format($p->priceMyr, 2, '.', ''),
                             'priceCurrency' => 'MYR',
-                        ])->values()->all() ?: ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'MYR', 'description' => "Percubaan percuma {$trialDays} hari"],
+                        ])->values()->all() ?: ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'MYR', 'description' => "{$bonus} carian percuma"],
                     ],
                     [
                         '@type' => 'FAQPage',
@@ -56,10 +56,10 @@
                         Dyno Leads bantu anda cari prospek dengan AI: cari kedai tempatan di Google Maps, pilih yang paling sesuai untuk produk anda, dan tulis mesej WhatsApp custom ikut review setiap kedai. Anda semak, tekan hantar, dan jejak siapa yang balas.
                     </p>
                     <div class="mt-7 flex flex-col gap-3 sm:flex-row">
-                        <a href="{{ route('register') }}" class="btn-primary px-6 py-3.5 text-base">Cuba percuma {{ $trialDays }} hari</a>
+                        <a href="{{ route('register') }}" class="btn-primary px-6 py-3.5 text-base">Dapat {{ $bonus }} carian percuma</a>
                         <a href="#cara" class="btn-soft px-6 py-3.5 text-base">Tengok cara guna</a>
                     </div>
-                    <p class="mt-3 text-sm text-slate-500">Tanpa kad kredit · {{ $trial->monthlyLeads }} lead percuma</p>
+                    <p class="mt-3 text-sm text-slate-500">Tanpa kad kredit · tiada yuran bulanan · bayar ikut carian</p>
                 </div>
 
                 {{-- Product preview, built in HTML (no image to load) --}}
@@ -97,7 +97,7 @@
                 <p class="mt-2 max-w-2xl text-slate-600">Empat langkah, semua dari telefon.</p>
                 <ol class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     @foreach ([
-                        ['search', 'Pilih jenis & kawasan', 'Contoh: kedai runcit di Kota Bharu. Anda nampak anggaran kos sebelum mula.'],
+                        ['search', 'Pilih jenis & kawasan', 'Contoh: kedai runcit di Kota Bharu. Anda nampak berapa kredit sebelum mula.'],
                         ['funnel', 'Tapis automatik', 'Buang kedai rating rendah, yang dah ada website (jika perlu), dan yang pernah minta STOP.'],
                         ['sparkles', 'AI nilai & tulis', 'AI baca review, beri skor kesesuaian dan tulis mesej custom ikut profil produk anda.'],
                         ['chat', 'Anda tekan hantar', 'Buka WhatsApp dengan mesej siap. Tanda status, dapat peringatan follow-up.'],
@@ -152,34 +152,32 @@
         {{-- Pricing --}}
         <section id="harga" class="scroll-mt-16 py-16">
             <div class="mx-auto max-w-5xl px-4">
-                <h2 class="text-3xl font-bold tracking-tight">Harga</h2>
-                <p class="mt-2 text-slate-600">Mula dengan percubaan percuma. Bayar setiap 30 hari melalui FPX, kad atau e-wallet. Tiada kontrak.</p>
-                <div class="mt-8 grid gap-4 md:grid-cols-3">
+                <h2 class="text-3xl font-bold tracking-tight">Harga: bayar ikut carian</h2>
+                <p class="mt-2 max-w-2xl text-slate-600">Tiada yuran bulanan. Beli kredit bila perlu: 1 kredit = 1 carian sehingga {{ $perCredit }} kedai, termasuk penilaian AI dan mesej custom untuk setiap kedai yang sesuai. Kredit tak luput.</p>
+                <div class="mt-8 grid gap-4 md:grid-cols-4">
                     <article class="card p-6">
-                        <h3 class="text-lg font-bold">{{ $trial->name }}</h3>
-                        <p class="mt-2"><span class="text-3xl font-extrabold">Percuma</span> <span class="text-slate-500">{{ $trialDays }} hari</span></p>
-                        <ul class="mt-5 space-y-2 text-sm text-slate-600">
-                            @foreach ($trial->features as $f)<li class="flex gap-2"><x-icon name="check" class="h-4 w-4 text-emerald-600" :solid="true" />{{ $f }}</li>@endforeach
-                        </ul>
-                        <a href="{{ route('register') }}" class="btn-soft mt-6 w-full">Mula percuma</a>
+                        <h3 class="text-lg font-bold">Percuma</h3>
+                        <p class="mt-2"><span class="text-3xl font-extrabold">{{ $bonus }}</span> <span class="text-slate-500">kredit</span></p>
+                        <p class="mt-1 text-sm text-slate-500">Bila daftar</p>
+                        <a href="{{ route('register') }}" class="btn-soft mt-6 w-full">Daftar</a>
                     </article>
-                    @foreach ($plans as $p)
-                        <article @class(['card p-6', 'ring-2 ring-emerald-500' => $loop->first])>
+                    @foreach ($packs as $p)
+                        <article @class(['card p-6', 'ring-2 ring-emerald-500' => $p->popular])>
                             <h3 class="text-lg font-bold">{{ $p->name }}</h3>
                             <p class="mt-2">
                                 @if ($p->priceMyr !== null)
-                                    <span class="text-3xl font-extrabold">RM{{ number_format($p->priceMyr, 0) }}</span> <span class="text-slate-500">/ 30 hari</span>
+                                    <span class="text-3xl font-extrabold">RM{{ number_format($p->priceMyr, 0) }}</span>
                                 @else
                                     <span class="text-lg font-semibold text-slate-400">Harga akan diumumkan</span>
                                 @endif
                             </p>
-                            <ul class="mt-5 space-y-2 text-sm text-slate-600">
-                                @foreach ($p->features as $f)<li class="flex gap-2"><x-icon name="check" class="h-4 w-4 text-emerald-600" :solid="true" />{{ $f }}</li>@endforeach
-                            </ul>
-                            <a href="{{ route('register') }}" class="{{ $loop->first ? 'btn-primary' : 'btn-soft' }} mt-6 w-full">Cuba dulu</a>
+                            <p class="mt-1 text-sm text-slate-500">{{ $p->credits }} carian · sehingga {{ $p->credits * $perCredit }} kedai</p>
+                            @if ($p->pricePerCredit())<p class="text-xs text-slate-400">RM{{ number_format($p->pricePerCredit(), 2) }} setiap carian</p>@endif
+                            <a href="{{ route('register') }}" class="{{ $p->popular ? 'btn-primary' : 'btn-soft' }} mt-6 w-full">Mula</a>
                         </article>
                     @endforeach
                 </div>
+                <p class="mt-4 text-sm text-slate-500">Kredit dipulangkan jika carian tak jumpa satu lead pun. Bayar melalui FPX, kad atau e-wallet (CHIP).</p>
             </div>
         </section>
 
@@ -207,7 +205,7 @@
                 <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-700 px-6 py-12 text-center text-white">
                     <h2 class="text-3xl font-bold tracking-tight">Prospek pertama anda, hari ni</h2>
                     <p class="mx-auto mt-3 max-w-xl text-emerald-50/90">Daftar dalam satu minit, isi profil produk, dan buat carian pertama.</p>
-                    <a href="{{ route('register') }}" class="btn mt-7 bg-white px-7 py-3.5 text-base text-emerald-700 hover:bg-emerald-50">Cuba percuma {{ $trialDays }} hari</a>
+                    <a href="{{ route('register') }}" class="btn mt-7 bg-white px-7 py-3.5 text-base text-emerald-700 hover:bg-emerald-50">Dapat {{ $bonus }} carian percuma</a>
                 </div>
             </div>
         </section>

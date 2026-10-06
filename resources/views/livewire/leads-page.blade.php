@@ -158,9 +158,10 @@
                         @if ($lead->message)
                             <button type="button" wire:click="editMessage({{ $lead->id }})" class="btn-soft flex-col gap-1 px-1 py-2 text-xs"><x-icon name="pencil" class="h-4 w-4" />Edit</button>
                         @endif
-                        @php($est = $service->regenerateEstimate($lead))
+                        @php($left = $service->regenerationsLeft($lead))
+                        @php($est = $isAdmin ? $service->regenerateEstimate($lead) : null)
                         <button type="button" wire:click="regenerate({{ $lead->id }})"
-                                wire:confirm="Jana semula mesej guna AI?{{ $est !== null ? ' Anggaran kos RM'.number_format($est, 3).'.' : '' }} Teruskan?"
+                                wire:confirm="Jana semula mesej guna AI?{{ $est !== null ? ' Anggaran kos RM'.number_format($est, 3).'.' : '' }}{{ ! $isAdmin && $left < PHP_INT_MAX ? ' Percuma, baki '.$left.' kali untuk lead ini.' : '' }} Teruskan?"
                                 class="btn-soft flex-col gap-1 px-1 py-2 text-xs"><x-icon name="refresh" class="h-4 w-4" />Jana semula</button>
                     </div>
                 </div>

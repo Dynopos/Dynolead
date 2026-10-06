@@ -26,12 +26,12 @@ it('says clearly that messages are sent by the user, not automatically', functio
     $this->get('/')->assertSee('Anda tekan hantar')->assertSee('Tiada blast');
 });
 
-it('shows prices only once Bob sets them', function () {
-    $this->get('/')->assertSee('Harga akan diumumkan');
+it('sells credit packs and shows prices only once Bob sets them', function () {
+    $this->get('/')->assertSee('Harga akan diumumkan')->assertSee('bayar ikut carian')->assertSee('3 carian percuma');
 
-    config(['plans.plans.asas.price_myr' => 79]);
-    $html = $this->get('/')->assertSee('RM79')->getContent();
-    expect($html)->toContain('"price":"79.00"');
+    config(['credits.packs.pek30.price_myr' => 90]);
+    $html = $this->get('/')->assertSee('RM90')->assertSee('RM3.00 setiap carian')->getContent();
+    expect($html)->toContain('"price":"90.00"');
 });
 
 it('sends signed-in users to their leads', function () {

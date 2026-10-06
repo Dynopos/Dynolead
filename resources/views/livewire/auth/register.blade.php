@@ -1,4 +1,4 @@
-<x-auth-card title="Cuba percuma {{ config('plans.trial_days') }} hari" subtitle="AI cari kedai sesuai dan tulis mesej WhatsApp untuk anda.">
+<x-auth-card title="Dapat {{ config('credits.signup_bonus') }} carian percuma" subtitle="Tiada yuran bulanan. Bayar ikut carian bila perlu.">
     <form wire:submit="register" class="space-y-4">
         <x-field label="Nama anda" name="name" hint="Nama ni muncul dalam mesej, cth: “Saya Ali dari ...”">
             <input type="text" wire:model="name" autocomplete="name" class="input" placeholder="Ali">

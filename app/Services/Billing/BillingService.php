@@ -2,16 +2,15 @@
 
 namespace App\Services\Billing;
 
-use App\Exceptions\PlanLimitReached;
+use App\Exceptions\AccountLimitReached;
 use App\Models\Payment;
 use App\Models\User;
 use App\Models\Workspace;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Prepaid 30-day periods paid through CHIP.
+ * Credit packs paid through CHIP (one-off purchases, no recurring charge).
  *
  * A payment only counts after CHIP confirms it: the signed callback is verified,
  * then the purchase is fetched again from CHIP and its amount, currency and
@@ -19,27 +18,26 @@ use Illuminate\Support\Facades\Log;
  */
 class BillingService
 {
-    public const PERIOD_DAYS = 30;
-
     public function __construct(
         private ChipClient $chip,
-        private PlanService $plans,
+        private CreditService $credits,
     ) {}
 
-    /** Create a CHIP purchase and return the checkout URL. */
-    public function startCheckout(Workspace $workspace, User $user, string $planKey): string
+    /** Create a CHIP purchase for a credit pack and return the checkout URL. */
+    public function startCheckout(Workspace $workspace, User $user, string $packKey): string
     {
-        $plan = $this->plans->find($planKey);
+        $pack = $this->credits->pack($packKey);
 
-        if (! $plan->isForSale()) {
-            throw new PlanLimitReached('Pelan ini belum dibuka untuk dibeli.');
+        if (! $pack->isForSale()) {
+            throw new AccountLimitReached('Pek ini belum dibuka untuk dibeli.');
         }
 
         $payment = Payment::query()->create([
             'workspace_id' => $workspace->id,
             'user_id' => $user->id,
-            'plan' => $plan->key,
-            'amount_sen' => $plan->priceSen(),
+            'pack' => $pack->key,
+            'credits' => $pack->credits,
+            'amount_sen' => $pack->priceSen(),
             'currency' => 'MYR',
             'status' => 'created',
         ]);
@@ -49,8 +47,8 @@ class BillingService
             'purchase' => [
                 'currency' => 'MYR',
                 'products' => [[
-                    'name' => 'Dyno Leads '.$plan->name.' (30 hari)',
-                    'price' => $plan->priceSen(),
+                    'name' => 'Dyno Leads '.$pack->name.' ('.$pack->credits.' kredit)',
+                    'price' => $pack->priceSen(),
                     'quantity' => '1',
                 ]],
             ],
@@ -133,51 +131,38 @@ class BillingService
                 return;
             }
 
-            $workspace = Workspace::query()->lockForUpdate()->findOrFail($payment->workspace_id);
-            [$start, $end] = $this->nextPeriod($workspace);
+            $payment->forceFill(['status' => 'paid', 'paid_at' => now()])->save();
 
-            $payment->forceFill([
-                'status' => 'paid',
-                'paid_at' => now(),
-                'period_start' => $start,
-                'period_end' => $end,
-            ])->save();
-
-            $workspace->forceFill(['plan' => $payment->plan, 'paid_until' => $end])->save();
+            $this->credits->grant(
+                Workspace::query()->findOrFail($payment->workspace_id),
+                $payment->credits,
+                'purchase',
+                $payment->reference(),
+                paymentId: $payment->id,
+                userId: $payment->user_id,
+            );
         });
     }
 
     /** Bob records a payment made outside CHIP (bank transfer, cash). */
-    public function recordManual(Workspace $workspace, string $planKey, ?string $note = null): Payment
+    public function recordManual(Workspace $workspace, string $packKey, ?string $note = null): Payment
     {
-        return DB::transaction(function () use ($workspace, $planKey, $note) {
-            $plan = $this->plans->find($planKey);
-            [$start, $end] = $this->nextPeriod($workspace);
+        return DB::transaction(function () use ($workspace, $packKey, $note) {
+            $pack = $this->credits->pack($packKey);
 
             $payment = Payment::query()->create([
                 'workspace_id' => $workspace->id,
-                'plan' => $plan->key,
-                'amount_sen' => $plan->priceSen(),
+                'pack' => $pack->key,
+                'credits' => $pack->credits,
+                'amount_sen' => $pack->priceSen(),
                 'status' => 'manual',
                 'paid_at' => now(),
-                'period_start' => $start,
-                'period_end' => $end,
                 'note' => $note,
             ]);
 
-            $workspace->forceFill(['plan' => $plan->key, 'paid_until' => $end])->save();
+            $this->credits->grant($workspace, $pack->credits, 'purchase', $note ?: $payment->reference(), paymentId: $payment->id);
 
             return $payment;
         });
-    }
-
-    /** A new period starts now, or when the current paid period ends (no lost days). */
-    private function nextPeriod(Workspace $workspace): array
-    {
-        $start = $workspace->paid_until !== null && $workspace->paid_until->isFuture()
-            ? Carbon::parse($workspace->paid_until)
-            : now();
-
-        return [$start, $start->copy()->addDays(self::PERIOD_DAYS)];
     }
 }

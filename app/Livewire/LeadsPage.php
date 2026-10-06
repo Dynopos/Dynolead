@@ -146,6 +146,7 @@ class LeadsPage extends Component
             'sentToday' => $service->sentToday(),
             'regenerating' => $regenerating,
             'service' => $service,
+            'isAdmin' => (bool) auth()->user()?->isAdmin(),
         ]);
     }
 }

@@ -5,6 +5,7 @@ use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\ResetPassword;
+use App\Models\CreditTransaction;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Workspace;
@@ -17,7 +18,7 @@ use Livewire\Livewire;
 
 beforeEach(fn () => app(CurrentWorkspace::class)->clear());
 
-it('registers a new business with its own workspace on the trial plan', function () {
+it('registers a new business with its own workspace and free starter credits', function () {
     Livewire::test(Register::class)
         ->set('name', 'Ali')
         ->set('business', 'Ali Digital')
@@ -30,8 +31,9 @@ it('registers a new business with its own workspace on the trial plan', function
     $user = User::where('email', 'ali@contoh.my')->firstOrFail();
     expect($user->workspace->name)->toBe('Ali Digital')
         ->and($user->workspace->sender_name)->toBe('Ali')
-        ->and($user->workspace->plan)->toBe('percubaan')
-        ->and($user->workspace->trial_ends_at->isSameDay(now()->addDays(14)))->toBeTrue()
+        ->and($user->workspace->plan)->toBe('kredit')
+        ->and($user->workspace->credits)->toBe(3)
+        ->and(CreditTransaction::withoutGlobalScope('workspace')->where('workspace_id', $user->workspace_id)->value('reason'))->toBe('signup_bonus')
         ->and($user->isAdmin())->toBeFalse()
         ->and(Hash::check('rahsia123', $user->password))->toBeTrue();
 
@@ -146,4 +148,12 @@ it('gives the admin the workspace that holds migrated Fasa 0 data', function () 
         ->assertSuccessful();
 
     expect(User::where('email', 'bob@dynopos.my')->value('workspace_id'))->toBe($legacy->id);
+});
+
+it('sends new sign-ups to onboarding', function () {
+    Livewire::test(Register::class)
+        ->set('name', 'Siti')->set('business', 'Siti Web')->set('email', 'siti@contoh.my')
+        ->set('password', 'rahsia123')->set('agree', true)
+        ->call('register')
+        ->assertRedirect(route('onboarding'));
 });

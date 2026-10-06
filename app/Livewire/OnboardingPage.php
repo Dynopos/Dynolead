@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Exceptions\PlanLimitReached;
+use App\Exceptions\AccountLimitReached;
 use App\Services\Products\ProductService;
 use App\Support\Tenancy\CurrentWorkspace;
 use Livewire\Attributes\Layout;
@@ -76,7 +76,7 @@ class OnboardingPage extends Component
                 'min_reviews' => 10,
                 'active' => true,
             ]);
-        } catch (PlanLimitReached $e) {
+        } catch (AccountLimitReached $e) {
             $this->addError('name', $e->getMessage());
 
             return null;

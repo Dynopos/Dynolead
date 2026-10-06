@@ -4,10 +4,8 @@
     @if ($blocker)
         <x-alert type="warning">
             {{ $blocker }}
-            <a href="{{ route('billing') }}" wire:navigate class="mt-1 block font-semibold underline">Lihat pelan</a>
+            <a href="{{ route('billing') }}" wire:navigate class="mt-1 block font-semibold underline">Tambah kredit</a>
         </x-alert>
-    @elseif ($leadsRemaining !== null)
-        <p class="flex items-center gap-1.5 text-xs text-slate-500"><x-icon name="info" class="h-4 w-4 text-slate-400" />Baki kuota bulan ni: <strong class="text-slate-700">{{ $leadsRemaining }} lead</strong></p>
     @endif
 
     <form wire:submit="calculate" class="card space-y-5 p-4">
@@ -60,7 +58,10 @@
                 <span class="rounded-lg bg-slate-900 px-2 py-0.5 text-sm font-bold tabular-nums text-white">{{ $max_candidates }}</span>
             </div>
             <input type="range" min="1" max="{{ $maxCandidates }}" step="1" wire:model.live.debounce.250ms="max_candidates" class="w-full accent-emerald-600" aria-label="Bilangan maksimum calon">
-            <div class="flex justify-between text-[11px] text-slate-400"><span>1</span><span>Had pelan anda: {{ $maxCandidates }} setiap carian.</span><span>{{ $maxCandidates }}</span></div>
+            <div class="flex justify-between text-[11px] text-slate-400"><span>1</span><span>Had {{ $maxCandidates }} setiap carian</span><span>{{ $maxCandidates }}</span></div>
+            @unless ($unlimited)
+                <p class="mt-2 flex items-center gap-1.5 text-xs text-slate-600"><x-icon name="wallet" class="h-4 w-4 text-emerald-600" />Carian ini guna <strong>{{ $creditCost }} kredit</strong> · baki {{ $balance }}</p>
+            @endunless
             @error('max_candidates')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
         </div>
 
@@ -74,21 +75,33 @@
     @if ($estimate)
         <section class="card overflow-hidden ring-2 ring-emerald-500" aria-label="Anggaran kos">
             <div class="bg-gradient-to-br from-emerald-500 to-teal-600 px-4 py-4 text-white">
-                <p class="text-xs font-semibold uppercase tracking-wide text-emerald-50/90">Anggaran kos carian ni</p>
-                <p class="mt-1 text-3xl font-bold tabular-nums">RM{{ number_format($estimate['total'], 2) }}</p>
+                @if ($isAdmin)
+                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-50/90">Anggaran kos carian ni</p>
+                    <p class="mt-1 text-3xl font-bold tabular-nums">RM{{ number_format($estimate['total'], 2) }}</p>
+                @else
+                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-50/90">Sahkan carian</p>
+                    <p class="mt-1 text-3xl font-bold tabular-nums">{{ $estimate['credits'] }} kredit</p>
+                @endif
                 <p class="text-xs text-emerald-50/90">{{ $estimate['candidates'] }} calon · {{ implode(' · ', $estimate['areas']) }}</p>
             </div>
             <dl class="divide-y divide-dashed divide-slate-200 px-4 text-sm">
                 <div class="flex justify-between py-2.5"><dt class="text-slate-500">Lulus tapisan (~{{ round($estimate['pass_rate'] * 100) }}%)</dt><dd class="font-medium tabular-nums">{{ $estimate['passed'] }} kedai</dd></div>
                 <div class="flex justify-between py-2.5"><dt class="text-slate-500">Sesuai (~{{ round($estimate['fit_rate'] * 100) }}%)</dt><dd class="font-medium tabular-nums">{{ $estimate['fit'] }} kedai</dd></div>
-                <div class="flex justify-between py-2.5"><dt class="text-slate-500">Kos AI</dt><dd class="font-medium tabular-nums">RM{{ number_format($estimate['ai'], 2) }}</dd></div>
-                <div class="flex justify-between py-2.5"><dt class="text-slate-500">Google Places ({{ $estimate['text_search_calls'] + $estimate['details_calls'] }} panggilan)</dt>
-                    <dd class="font-medium tabular-nums">@if($estimate['places_prices']) RM{{ number_format($estimate['places'], 2) }} @else <span class="text-amber-700">harga belum diisi</span> @endif</dd></div>
+                @if ($isAdmin)
+                    <div class="flex justify-between py-2.5"><dt class="text-slate-500">Kos AI</dt><dd class="font-medium tabular-nums">RM{{ number_format($estimate['ai'], 2) }}</dd></div>
+                    <div class="flex justify-between py-2.5"><dt class="text-slate-500">Google Places ({{ $estimate['text_search_calls'] + $estimate['details_calls'] }} panggilan)</dt>
+                        <dd class="font-medium tabular-nums">@if($estimate['places_prices']) RM{{ number_format($estimate['places'], 2) }} @else <span class="text-amber-700">harga belum diisi</span> @endif</dd></div>
+                @elseif (! $unlimited)
+                    <div class="flex justify-between py-2.5"><dt class="text-slate-500">Baki selepas carian</dt><dd class="font-medium tabular-nums">{{ max(0, $balance - $estimate['credits']) }} kredit</dd></div>
+                @endif
             </dl>
             <div class="space-y-3 p-4 pt-1">
                 @if ($estimate['defaults'])
                     <p class="flex gap-1.5 text-xs text-slate-500"><x-icon name="info" class="h-4 w-4 text-slate-400" />Belum cukup data 30 hari, jadi sebahagian anggaran guna nilai default (lulus 50%, sesuai 60%).</p>
                 @endif
+                @unless ($unlimited)
+                    <p class="flex gap-1.5 text-xs text-slate-500"><x-icon name="check-circle" class="h-4 w-4 text-emerald-500" />Kredit dipulangkan jika carian tak jumpa satu lead pun.</p>
+                @endunless
                 <div class="flex gap-2">
                     <button type="button" wire:click="confirm" wire:loading.attr="disabled" class="btn-primary flex-1 py-3">
                         <x-icon name="bolt" class="h-5 w-5" /> Sahkan &amp; cari
@@ -154,8 +167,12 @@
 
                 <div class="mt-3 flex items-center justify-between text-xs">
                     <span class="text-slate-500">
-                        Anggaran RM{{ number_format((float) $search->estimate_myr, 2) }}
-                        @if ($search->status->isFinished()) · <span class="font-semibold text-slate-700">kos sebenar RM{{ number_format($search->actual_cost_myr, 2) }}</span> @endif
+                            @if ($isAdmin)
+                            Anggaran RM{{ number_format((float) $search->estimate_myr, 2) }}
+                            @if ($search->status->isFinished()) · <span class="font-semibold text-slate-700">kos sebenar RM{{ number_format($search->actual_cost_myr, 2) }}</span> @endif
+                        @elseif ($search->credits_charged > 0)
+                            {{ $search->credits_charged }} kredit @if ($search->credits_refunded_at) · <span class="font-semibold text-emerald-700">dipulangkan</span> @endif
+                        @endif
                     </span>
                     @if ($done)
                         <a href="{{ route('leads', ['product' => $search->product_id]) }}" wire:navigate class="inline-flex items-center gap-0.5 font-semibold text-emerald-700">Tengok lead <x-icon name="chevron-right" class="h-4 w-4" /></a>

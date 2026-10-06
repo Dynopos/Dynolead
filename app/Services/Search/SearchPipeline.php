@@ -18,7 +18,7 @@ use App\Models\Product;
 use App\Models\Search;
 use App\Services\Ai\LeadScorer;
 use App\Services\Ai\MessageWriter;
-use App\Services\Billing\PlanService;
+use App\Services\Billing\CreditService;
 use App\Services\Leads\RuleFilter;
 use App\Services\Places\PlaceRepository;
 use App\Services\Places\PlacesClient;
@@ -38,11 +38,11 @@ class SearchPipeline
         private RuleFilter $filter,
         private LeadScorer $scorer,
         private MessageWriter $writer,
-        private PlanService $plans,
+        private CreditService $credits,
     ) {}
 
     /** @param  array<int, string>  $areas */
-    public function start(Product $product, string $businessType, array $areas, int $max, ?float $estimateMyr = null): Search
+    public function start(Product $product, string $businessType, array $areas, int $max, ?float $estimateMyr = null, int $creditsCharged = 0): Search
     {
         $areas = array_values(array_filter(array_map('trim', $areas), 'strlen'));
         $businessType = trim($businessType);
@@ -56,6 +56,7 @@ class SearchPipeline
             'business_type' => $businessType,
             'areas' => $areas,
             'max_candidates' => self::clampMax($max),
+            'credits_charged' => $creditsCharged,
             'status' => SearchStatus::Pending,
             'estimate_myr' => $estimateMyr,
         ]);
@@ -171,14 +172,6 @@ class SearchPipeline
                 continue;
             }
 
-            // Plan quota: stop before paying for Place Details or AI.
-            if ($this->plans->leadsRemaining() === 0) {
-                $search->addRejection($placeId, 'Kuota lead bulan ini habis');
-                $search->save();
-
-                continue;
-            }
-
             $place = $this->repository->details($placeId, $search->id);
             $search->increment('places_calls');
 
@@ -286,6 +279,7 @@ class SearchPipeline
         $search->refresh();
         $search->forceFill(['actual_cost_myr' => $this->actualCost($search)])->save();
         $search->markStatus($status, $message);
+        $this->credits->settleSearch($search);
     }
 
     public function finish(Search $search): void
@@ -295,6 +289,7 @@ class SearchPipeline
             'actual_cost_myr' => $this->actualCost($search),
         ])->save();
         $search->markStatus(SearchStatus::Done);
+        $this->credits->settleSearch($search);
     }
 
     public function actualCost(Search $search): float

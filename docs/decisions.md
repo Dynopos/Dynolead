@@ -217,3 +217,30 @@ melalui wa.me (spec §8: Fasa 0–2), tiada API WhatsApp tidak rasmi.
   hasil bulan ini, kos AI platform berbanding had, panggilan Places. Tindakan: rekod bayaran
   manual (+30 hari), lanjut percubaan 7 hari, gantung/aktifkan.
 - **Tiada data kad disimpan.** Jadual `payments` hanya simpan jumlah, status, ID pembelian CHIP.
+
+## 2026-10-08 — Tukar ke bayar ikut carian (arahan Bob)
+
+Bob: "Lead dicari semasa perlu sahaja. Caj pun berdasarkan carian sahaja."
+
+- **Pelan bulanan, percubaan 14 hari dan kuota lead bulanan dibuang.** Ganti dengan
+  **kredit prabayar** (`config/credits.php`, `CreditService`, jadual `credit_transactions`).
+- **Kos carian ikut saiz:** `ceil(calon / 20)` kredit (20 → 1, 40 → 2, 60 → 3). Dipapar
+  sebelum pelanggan sahkan. Sebab: kos sebenar (Places + AI) naik dengan bilangan calon;
+  kadar rata untuk 60 calon akan rugi.
+- **Kredit dipotong semasa carian bermula**, dalam satu transaksi DB dengan baris workspace
+  dikunci. Baki tidak boleh jadi negatif.
+- **Pulangan automatik** (`settleSearch`) bila carian tamat tanpa lead, atau berhenti kerana
+  ralat/had platform sebelum ada mesej ditulis. Tiada pulangan bila lead dijumpa tetapi
+  semuanya "tak sesuai" (AI dan Places sudah digunakan). Pulangan berlaku sekali sahaja.
+- **3 kredit percuma** bila daftar (`SIGNUP_CREDITS`), ganti percubaan.
+- **Jana semula dan follow-up AI percuma**, tetapi dihadkan 3 kali setiap lead. Ini kawal kos
+  AI tanpa perlu had RM untuk pelanggan.
+- **Had AI RM setiap pelanggan dibuang.** Had platform `AI_MONTHLY_BUDGET_MYR` kekal
+  sebagai pengaman kunci pusat. Workspace admin masih boleh tetapkan had sendiri.
+- **Pek kredit dibeli melalui CHIP** (pembelian sekali, sesuai untuk FPX). Harga pek kosong
+  sehingga Bob isi; pek tanpa harga "Belum dibuka". Kredit tidak luput.
+- **Workspace `dalaman`** (Bob) tidak dicaj.
+- **Pelanggan tidak nampak RM kos dalaman:** skrin Cari tunjuk kredit; RM hanya untuk admin.
+- **Fasa 1 (agen harian) tidak dibina**: carian hanya bila pelanggan minta.
+- Kolum lama (`trial_ends_at`, `paid_until`, `payments.period_*`) dibiarkan tetapi tidak
+  digunakan; boleh dibuang dalam migration kemudian.

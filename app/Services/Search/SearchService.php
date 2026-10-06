@@ -2,17 +2,18 @@
 
 namespace App\Services\Search;
 
+use App\Exceptions\AccountLimitReached;
 use App\Exceptions\BudgetExceeded;
-use App\Exceptions\PlanLimitReached;
 use App\Exceptions\PricesNotConfigured;
 use App\Models\Product;
 use App\Models\Search;
 use App\Services\Ai\AiBudget;
-use App\Services\Billing\PlanService;
+use App\Services\Billing\CreditService;
 use App\Services\Costs\CostEstimate;
 use App\Services\Costs\CostEstimator;
 use App\Services\Costs\PriceTable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /** Search screen logic: estimate first, then start after the user confirms (spec §3.2). */
 class SearchService
@@ -22,7 +23,7 @@ class SearchService
         private SearchPipeline $pipeline,
         private AiBudget $budget,
         private PriceTable $prices,
-        private PlanService $plans,
+        private CreditService $credits,
     ) {}
 
     /** One area per line (or separated by ";"). Commas stay: "Pasir Mas, Kelantan" is one area. */
@@ -42,15 +43,11 @@ class SearchService
         return $this->estimator->forSearch(SearchPipeline::clampMax($max), max(1, count($areas)));
     }
 
-    /** Why a search cannot start right now, or null. */
-    public function blocker(): ?string
+    /** Why a search of $candidates cannot start right now, or null. */
+    public function blocker(int $candidates = 1): ?string
     {
-        if ($reason = $this->plans->accessBlocker()) {
+        if ($reason = $this->credits->searchBlocker($candidates)) {
             return $reason;
-        }
-
-        if ($this->plans->leadsRemaining() === 0) {
-            return 'Kuota lead bulan ini dah habis. Naik taraf pelan atau tunggu bulan depan.';
         }
 
         foreach ([config('dynoleads.ai.model_score'), config('dynoleads.ai.model_write')] as $model) {
@@ -68,16 +65,35 @@ class SearchService
         return null;
     }
 
+    /** Credits for a search of $max candidates (0 for the internal workspace). */
+    public function creditCost(int $max): int
+    {
+        return $this->credits->isUnlimited() ? 0 : $this->credits->costFor(SearchPipeline::clampMax($max));
+    }
+
+    /**
+     * Charge credits, then start the pipeline. Credits come back automatically
+     * if the search ends with no leads (CreditService::settleSearch).
+     */
     public function start(Product $product, string $businessType, array $areas, int $max): Search
     {
-        if ($reason = $this->blocker()) {
-            throw new PlanLimitReached($reason);
+        $max = SearchPipeline::clampMax($max);
+
+        if ($reason = $this->blocker($max)) {
+            throw new AccountLimitReached($reason);
         }
 
-        $max = min($max, $this->plans->maxCandidates());
+        $workspace = $this->credits->workspace();
         $estimate = $this->estimate($max, $areas);
 
-        return $this->pipeline->start($product, $businessType, $areas, $max, $estimate->total());
+        return DB::transaction(function () use ($workspace, $product, $businessType, $areas, $max, $estimate) {
+            $charged = $this->credits->chargeForSearch($workspace, $max, auth()->id());
+
+            $search = $this->pipeline->start($product, $businessType, $areas, $max, $estimate->total(), $charged);
+            $this->credits->attachSearch($workspace, $search);
+
+            return $search->refresh();
+        });
     }
 
     /** @return Collection<int, Search> */

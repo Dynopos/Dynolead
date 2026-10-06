@@ -28,13 +28,16 @@
         <h2>3. Akaun</h2>
         <p>Anda bertanggungjawab menjaga kerahsiaan kata laluan. Satu akaun untuk satu bisnes. Kami boleh menggantung akaun yang melanggar terma ini.</p>
 
-        <h2>4. Percubaan, pelan dan bayaran</h2>
+        <h2>4. Kredit dan bayaran</h2>
         <ul>
-            <li>Akaun baru mendapat tempoh percubaan dengan kuota terhad.</li>
-            <li>Langganan dibayar terlebih dahulu bagi setiap tempoh 30 hari melalui CHIP. Kami tidak menyimpan maklumat kad anda.</li>
-            <li>Kuota lead dan had penggunaan AI ikut pelan. Kuota yang tidak digunakan tidak dibawa ke bulan seterusnya.</li>
-            <li>Jika langganan tamat, akses kepada carian dan AI dihentikan; data lead anda kekal untuk tempoh yang dinyatakan dalam Polisi Privasi.</li>
-            <li>Bayaran tidak dikembalikan bagi tempoh yang telah bermula, kecuali dikehendaki undang-undang.</li>
+            <li>Perkhidmatan dibayar ikut carian menggunakan kredit prabayar. Tiada yuran bulanan atau caj automatik.</li>
+            <li>Kos setiap carian (dalam kredit) dipaparkan sebelum anda mengesahkan carian.</li>
+            <li>Akaun baru mungkin menerima kredit percuma. Kredit percuma tiada nilai tunai.</li>
+            <li>Pek kredit dibayar melalui CHIP. Kami tidak menyimpan maklumat kad atau akaun bank anda.</li>
+            <li>Kredit tidak luput selagi akaun aktif, dan tidak boleh ditukar kepada wang tunai atau dipindah ke akaun lain.</li>
+            <li>Kredit dipulangkan secara automatik jika carian gagal atau tidak menghasilkan sebarang lead. Kredit yang telah digunakan untuk carian yang berjaya tidak dipulangkan.</li>
+            <li>Jana semula mesej dan follow-up AI disediakan percuma dengan had penggunaan munasabah bagi setiap lead.</li>
+            <li>Bayaran pek kredit tidak dikembalikan, kecuali dikehendaki undang-undang.</li>
         </ul>
 
         <h2>5. Data Google Maps</h2>

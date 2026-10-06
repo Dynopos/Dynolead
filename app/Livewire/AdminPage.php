@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Workspace;
 use App\Services\Admin\AdminService;
-use App\Services\Billing\PlanService;
+use App\Services\Billing\CreditService;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -17,7 +17,11 @@ class AdminPage extends Component
 
     public ?int $managing = null;
 
-    public string $plan = 'asas';
+    public string $mode = 'grant';
+
+    public string $amount = '5';
+
+    public string $pack = '';
 
     public string $note = '';
 
@@ -34,20 +38,22 @@ class AdminPage extends Component
         $this->note = '';
     }
 
-    public function addPeriod(int $id, AdminService $admin, PlanService $plans): void
+    public function grant(int $id, AdminService $admin): void
     {
-        $this->validate(['plan' => 'required|in:'.implode(',', array_keys($plans->forSale())), 'note' => 'nullable|string|max:190']);
+        $this->validate(['amount' => 'required|integer|min:1|max:10000', 'note' => 'nullable|string|max:190']);
         $workspace = Workspace::query()->findOrFail($id);
-        $admin->addPaidPeriod($workspace, $this->plan, $this->note);
-        $this->flash = "{$workspace->name}: +30 hari pelan {$this->plan}.";
+        $admin->grantCredits($workspace, (int) $this->amount, $this->note, auth()->id());
+        $this->flash = "{$workspace->name}: +{$this->amount} kredit.";
         $this->managing = null;
     }
 
-    public function extendTrial(int $id, AdminService $admin): void
+    public function recordPayment(int $id, AdminService $admin, CreditService $credits): void
     {
+        $this->validate(['pack' => 'required|in:'.implode(',', array_keys($credits->packs())), 'note' => 'nullable|string|max:190']);
         $workspace = Workspace::query()->findOrFail($id);
-        $admin->extendTrial($workspace);
-        $this->flash = "{$workspace->name}: percubaan +7 hari.";
+        $admin->recordPackPayment($workspace, $this->pack, $this->note);
+        $this->flash = "{$workspace->name}: bayaran {$credits->pack($this->pack)->name} direkod.";
+        $this->managing = null;
     }
 
     public function toggleSuspend(int $id, AdminService $admin): void
@@ -57,12 +63,14 @@ class AdminPage extends Component
         $this->flash = $workspace->name.($workspace->refresh()->suspended_at ? ' digantung.' : ' diaktifkan semula.');
     }
 
-    public function render(AdminService $admin, PlanService $plans)
+    public function render(AdminService $admin, CreditService $credits)
     {
+        $this->pack = $this->pack ?: (string) array_key_first($credits->packs());
+
         return view('livewire.admin-page', [
             'totals' => $admin->totals(),
             'rows' => $admin->workspaces(trim($this->search)),
-            'salePlans' => $plans->forSale(),
+            'packs' => $credits->packs(),
         ]);
     }
 }

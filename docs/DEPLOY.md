@@ -65,7 +65,7 @@ Site → *Environment*. Mula dari `.env.example` dan isi:
 | `MAIL_*` | Tetapan SMTP dari langkah 0 (`MAIL_FROM_ADDRESS` mesti domain yang disahkan) |
 | `COMPANY_NAME`, `COMPANY_REGISTRATION`, `COMPANY_EMAIL`, `COMPANY_ADDRESS` | Butiran penjual (muncul di Terma, Privasi, halaman utama) |
 | `CHIP_SECRET_KEY`, `CHIP_BRAND_ID` | Dari langkah 0 (kunci ujian dahulu) |
-| `TRIAL_DAYS` | `14` |
+| `SIGNUP_CREDITS` | `3` (kredit percuma untuk akaun baru) |
 | `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Dari Forge |
 | `QUEUE_CONNECTION` | `database` |
 | `DB_QUEUE_RETRY_AFTER` | `900` (mesti lebih besar daripada `--timeout` worker) |
@@ -77,7 +77,7 @@ Site → *Environment*. Mula dari `.env.example` dan isi:
 | `CLAUDE_EFFORT_WRITE` | `low` |
 | `CLAUDE_USE_BATCH` | `false` |
 | `CLAUDE_WEB_SEARCH` | `false` |
-| `AI_MONTHLY_BUDGET_MYR` | Had kos AI **semua pelanggan bersama** sebulan (RM). Mula dengan jumlah `ai_budget_myr` pelan × bilangan pelanggan dijangka, dan sentiasa di bawah had di console Anthropic. |
+| `AI_MONTHLY_BUDGET_MYR` | Had kos AI **semua pelanggan bersama** sebulan (RM). Naikkan bila jualan kredit bertambah, dan sentiasa di bawah had di console Anthropic. |
 | `GOOGLE_PLACES_API_KEY` | Key dari langkah 0 |
 | `PLACES_CACHE_HOURS` | `24` |
 | `PRICE_TABLE_PATH` | `config/ai_prices.php` |
@@ -99,14 +99,15 @@ amaran. Ini sengaja supaya had kos bulanan sentiasa betul.
 
 Jika tukar model dalam `.env`, tambah baris harga untuk ID model baru juga.
 
-### 4b. Harga jualan dan kuota dalam `config/plans.php`
+### 4b. Harga pek kredit dalam `config/credits.php`
 
-- Isi `price_myr` untuk `asas` dan `pro`. Selagi kosong, pelan itu dipapar "Belum dibuka"
-  dan tidak boleh dibeli; halaman utama tunjuk "Harga akan diumumkan".
-- Semak `monthly_leads` dan `ai_budget_myr` setiap pelan. Selepas beberapa carian sebenar,
-  lihat kos AI setiap lead di halaman Kos (admin) dan pastikan
-  `monthly_leads × kos setiap lead < ai_budget_myr`, dan harga jualan jauh di atas kos
-  AI + Places + yuran CHIP.
+- Isi `price_myr` untuk setiap pek (`pek10`, `pek30`, `pek100`). Selagi kosong, pek itu
+  dipapar "Belum dibuka" dan halaman utama tunjuk "Harga akan diumumkan".
+- 1 kredit = 1 carian sehingga `candidates_per_credit` (20) calon. Selepas beberapa carian
+  sebenar, lihat kos sebenar setiap carian di skrin Cari/Kos (admin) dan pastikan harga
+  satu kredit jauh di atas kos AI + Places + yuran CHIP.
+- `signup_bonus` (atau `SIGNUP_CREDITS` dalam `.env`): kredit percuma bila daftar.
+- `max_regenerations_per_lead`, `max_followups_per_lead`: had AI percuma setiap lead.
 - Commit, push dan deploy.
 
 ## 5. Skrip deploy
@@ -203,9 +204,9 @@ Semak dengan SSH: `php artisan schedule:list`.
 7. **Pelanggan ujian**: dalam tetingkap inkognito, daftar akaun baru di `/daftar`,
    lalui wizard, buat satu carian kecil. Pastikan ia tidak nampak lead Bob.
 8. **Lupa kata laluan**: cuba dengan akaun ujian, pastikan e-mel sampai.
-9. **Bayaran (kunci ujian CHIP)**: isi harga pelan, dari akaun ujian tekan *Langgan*,
-   bayar dengan kad ujian `4444 3333 2222 1111` (CVC `123`). Selepas kembali, Langganan
-   tunjuk "Aktif sehingga ..." dan Panel admin tunjuk hasil. Kemudian tukar ke kunci live.
+9. **Bayaran (kunci ujian CHIP)**: isi harga pek, dari akaun ujian buka *Tambah kredit*,
+   tekan *Beli*, bayar dengan kad ujian `4444 3333 2222 1111` (CVC `123`). Selepas kembali,
+   baki kredit bertambah dan Panel admin tunjuk hasil. Kemudian tukar ke kunci live.
 10. Jika carian tersekat di "Dalam giliran": queue worker tidak berjalan (langkah 6).
 
 ## 9. Masalah biasa
@@ -222,7 +223,7 @@ Semak dengan SSH: `php artisan schedule:list`.
 | Lead tiada nama ("Nama tak dapat dimuat") | Cache tamat dan Places gagal. Semak log (`storage/logs`). |
 | Pelanggan nampak "Perkhidmatan AI belum sedia" | Harga model dalam `config/ai_prices.php` kosong. |
 | "Perkhidmatan AI berehat sekejap" | Had platform `AI_MONTHLY_BUDGET_MYR` dicapai. Naikkan (dan had di console Anthropic) atau tunggu bulan depan. |
-| Bayar tapi langganan tak aktif | Semak log untuk "CHIP". Job `sync-pending-payments` akan cuba lagi setiap jam; admin boleh rekod bayaran manual di Panel admin. |
+| Bayar tapi kredit tak masuk | Semak log untuk "CHIP". Job `sync-pending-payments` akan cuba lagi setiap jam; admin boleh rekod bayaran manual di Panel admin. |
 | "Sistem bayaran tak dapat dihubungi" | `CHIP_SECRET_KEY`/`CHIP_BRAND_ID` salah atau kosong. |
 | E-mel reset tak sampai | Semak `MAIL_*` dan log; pastikan domain pengirim disahkan (SPF/DKIM). |
 
@@ -237,8 +238,9 @@ Push ke branch site. Jika Quick Deploy hidup, Forge deploy sendiri; jika tidak, 
       Buang amaran DRAF dalam `resources/views/legal/*.blade.php` selepas disemak.
 - [ ] **Syarat Google Maps Platform** untuk perkhidmatan yang dijual semula (spec §6).
       Catat keputusan dalam `docs/decisions.md`.
-- [ ] **Harga pelan** dalam `config/plans.php` (4b) berdasarkan kos sebenar.
+- [ ] **Harga pek kredit** dalam `config/credits.php` (4b) berdasarkan kos sebenar.
 - [ ] **CHIP live**: akaun merchant disahkan, tukar ke kunci live.
-- [ ] **Polisi bayaran balik** jelas (Terma §4) dan sepadan dengan apa yang CHIP minta.
+- [ ] **Polisi bayaran balik** jelas (Terma §4: kredit dipulangkan untuk carian tanpa lead,
+      pek tidak dikembalikan) dan sepadan dengan apa yang CHIP minta.
 - [ ] **Pendaftaran PDPA** jika perlu untuk kategori perniagaan anda.
 - [ ] **Google Search Console**: sahkan domain dan hantar `https://domain-anda/sitemap.xml`.

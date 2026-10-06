@@ -1,33 +1,36 @@
 <div class="space-y-5">
 @if (! $isAdmin)
-    <x-page-header title="Kuota" subtitle="Penggunaan akaun anda bulan ini." />
-
-    @if ($month['exhausted'])
-        <x-alert type="danger">{{ \App\Exceptions\BudgetExceeded::MESSAGE }}</x-alert>
-    @endif
+    <x-page-header title="Kredit" subtitle="Baki dan sejarah penggunaan." />
 
     <section class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 p-5 text-white shadow-lg shadow-emerald-700/20">
         <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10"></div>
-        <p class="relative text-xs font-semibold uppercase tracking-wide text-white/80">Lead · {{ now()->translatedFormat('F Y') }}</p>
-        <p class="relative mt-1 text-4xl font-bold tabular-nums">{{ $leadsUsed }}<span class="text-xl font-semibold text-white/70">{{ $plan->monthlyLeads !== null ? ' / '.$plan->monthlyLeads : '' }}</span></p>
-        <p class="relative text-sm text-white/80">Pelan {{ $plan->name }}</p>
-        @if ($plan->monthlyLeads)
-            <div class="relative mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/25"><div class="h-full rounded-full bg-white" style="width: {{ max(2, min(100, round($leadsUsed / $plan->monthlyLeads * 100))) }}%"></div></div>
-        @endif
+        <p class="relative text-xs font-semibold uppercase tracking-wide text-white/80">Baki kredit</p>
+        <p class="relative mt-1 text-5xl font-bold tabular-nums">{{ $unlimited ? '∞' : $balance }}</p>
+        <p class="relative text-sm text-white/80">{{ $creditsUsedThisMonth }} kredit diguna bulan ni · {{ $searchesThisMonth }} carian</p>
+        <a href="{{ route('billing') }}" wire:navigate class="btn relative mt-4 bg-white px-4 py-2.5 text-emerald-700 hover:bg-emerald-50"><x-icon name="plus" class="h-4 w-4" />Tambah kredit</a>
     </section>
 
-    <dl class="grid grid-cols-2 gap-2">
-        <div class="card p-3.5">
-            <dt class="flex items-center gap-2 text-xs font-medium text-slate-500"><span class="grid h-7 w-7 place-items-center rounded-lg bg-sky-50 text-sky-600"><x-icon name="search" class="h-4 w-4" /></span>Carian</dt>
-            <dd class="mt-2 text-lg font-bold tabular-nums">{{ $searchesThisMonth }}</dd>
-        </div>
-        <div class="card p-3.5">
-            <dt class="flex items-center gap-2 text-xs font-medium text-slate-500"><span class="grid h-7 w-7 place-items-center rounded-lg bg-violet-50 text-violet-600"><x-icon name="sparkles" class="h-4 w-4" /></span>Penggunaan AI</dt>
-            <dd class="mt-2 text-lg font-bold tabular-nums">{{ $aiPercent }}%</dd>
-        </div>
-    </dl>
-
-    <a href="{{ route('billing') }}" wire:navigate class="btn-primary w-full py-3">Lihat pelan &amp; langganan</a>
+    <section class="space-y-2">
+        <h2 class="label">Sejarah kredit</h2>
+        <ul class="card divide-y divide-slate-100">
+            @forelse ($ledger as $t)
+                <li class="flex items-center justify-between gap-3 px-4 py-3">
+                    <div class="min-w-0">
+                        <p class="text-sm font-medium">{{ $t->label() }}</p>
+                        <p class="truncate text-xs text-slate-500">
+                            @if ($t->search){{ $t->search->business_type }} · {{ implode(', ', $t->search->areas) }} · @endif{{ $t->created_at?->translatedFormat('j M, g:i a') }}
+                        </p>
+                    </div>
+                    <div class="shrink-0 text-right">
+                        <p @class(['text-sm font-bold tabular-nums', 'text-emerald-600' => $t->amount > 0, 'text-slate-700' => $t->amount < 0])>{{ $t->amount > 0 ? '+' : '' }}{{ $t->amount }}</p>
+                        <p class="text-[11px] text-slate-400">baki {{ $t->balance_after }}</p>
+                    </div>
+                </li>
+            @empty
+                <li class="px-4 py-8 text-center text-sm text-slate-500">Belum ada transaksi.</li>
+            @endforelse
+        </ul>
+    </section>
 @else
     <x-page-header title="Kos" subtitle="Penggunaan AI dan Google Places bulan ini." />
 
@@ -59,10 +62,6 @@
         <p class="relative mt-1.5 text-xs text-white/80">{{ $month['percent'] }}% digunakan · baki RM{{ number_format(max(0, $month['limit'] - $month['ai_cost']), 2) }}</p>
     </section>
 
-    <a href="{{ route('billing') }}" wire:navigate class="card flex items-center justify-between p-4 text-sm">
-        <span>Pelan <strong>{{ $plan->name }}</strong> · lead bulan ni <strong class="tabular-nums">{{ $leadsUsed }}{{ $plan->monthlyLeads !== null ? '/'.$plan->monthlyLeads : '' }}</strong></span>
-        <span class="inline-flex items-center gap-0.5 font-semibold text-emerald-700">Langganan <x-icon name="chevron-right" class="h-4 w-4" /></span>
-    </a>
 
     {{-- Stat tiles --}}
     <dl class="grid grid-cols-2 gap-2">

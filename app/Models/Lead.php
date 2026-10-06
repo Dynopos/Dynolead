@@ -25,6 +25,8 @@ class Lead extends Model
             'status' => LeadStatus::class,
             'fit' => 'integer',
             'needs_review' => 'boolean',
+            'regenerate_count' => 'integer',
+            'followup_count' => 'integer',
             'contacted_at' => 'datetime',
             'next_followup_at' => 'datetime',
             'status_changed_at' => 'datetime',

@@ -2,9 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Models\CreditTransaction;
 use App\Models\Search;
 use App\Services\Ai\AiBudget;
-use App\Services\Billing\PlanService;
+use App\Services\Billing\CreditService;
 use App\Services\Costs\CostReport;
 use App\Services\Costs\PriceTable;
 use Livewire\Attributes\Title;
@@ -36,7 +37,7 @@ class CostsPage extends Component
         $this->saved = 'Had bulanan dikemas kini.';
     }
 
-    public function render(CostReport $report, PriceTable $prices, PlanService $plans, AiBudget $budget)
+    public function render(CostReport $report, PriceTable $prices, CreditService $credits, AiBudget $budget)
     {
         $models = array_filter([config('dynoleads.ai.model_score'), config('dynoleads.ai.model_write')]);
 
@@ -44,10 +45,11 @@ class CostsPage extends Component
             'month' => $report->thisMonth(),
             'calls' => $report->lastCalls(50),
             'isAdmin' => (bool) auth()->user()?->isAdmin(),
-            'plan' => $plans->planOf(),
+            'balance' => $credits->balance(),
+            'unlimited' => $credits->isUnlimited(),
             'searchesThisMonth' => Search::query()->where('created_at', '>=', now()->startOfMonth())->count(),
-            'aiPercent' => $budget->limit() > 0 ? min(100, round($budget->spentThisMonth() / $budget->limit() * 100)) : 100,
-            'leadsUsed' => $plans->leadsUsedThisMonth(),
+            'creditsUsedThisMonth' => (int) -CreditTransaction::query()->where('created_at', '>=', now()->startOfMonth())->whereIn('reason', ['search', 'refund'])->sum('amount'),
+            'ledger' => CreditTransaction::query()->with('search')->latest('id')->limit(30)->get(),
             'missingPrices' => array_values(array_filter($models, fn ($m) => ! $prices->isModelConfigured((string) $m))),
         ]);
     }

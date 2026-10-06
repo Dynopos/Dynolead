@@ -10,7 +10,7 @@ Cari bisnes tempatan, AI nilai dan tulis mesej WhatsApp custom, jejak status lea
 - Keputusan reka bentuk: [docs/decisions.md](docs/decisions.md)
 - Changelog: [docs/CHANGELOG.md](docs/CHANGELOG.md)
 
-Status: Fasa 0 dan Fasa 2 (versi untuk dijual: akaun, workspace, pelan, bayaran CHIP) siap dibina dan diuji. Belum deploy.
+Status: Fasa 0 dan Fasa 2 (versi untuk dijual: akaun, workspace, bayar ikut carian dengan kredit CHIP) siap dibina dan diuji. Belum deploy.
 
 ## Jalankan secara lokal
 
@@ -26,7 +26,7 @@ php artisan queue:work          # tetingkap lain: pipeline carian berjalan dalam
 ```
 
 Isi harga dalam `config/ai_prices.php` sebelum carian pertama (app tidak panggil AI
-selagi harga kosong), dan harga jualan pelan dalam `config/plans.php`.
+selagi harga kosong), dan harga pek kredit dalam `config/credits.php`.
 
 ## Test
 

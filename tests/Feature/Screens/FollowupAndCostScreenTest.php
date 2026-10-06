@@ -100,16 +100,13 @@ it('warns the admin when prices are missing', function () {
     Livewire::test(CostsPage::class)->assertSee('Harga belum diisi');
 });
 
-it('shows customers their quota, not internal RM costs', function () {
-    $this->workspace->update(['plan' => 'asas']);
+it('shows customers their credits, not internal RM costs', function () {
+    $this->workspace->update(['plan' => 'kredit']);
     actingAsOwner();
     AiUsage::create(['model' => 'claude-sonnet-5-5', 'purpose' => 'write', 'cost_estimate' => 2.50]);
-    Lead::factory()->count(3)->create();
 
     Livewire::test(CostsPage::class)
-        ->assertSee('Kuota')
-        ->assertSee('3')
-        ->assertSee('/ 150')
+        ->assertSee('Kredit')
         ->assertDontSee('RM2.50')
         ->assertDontSee('claude-sonnet-5-5')
         ->assertDontSee('config/ai_prices.php');

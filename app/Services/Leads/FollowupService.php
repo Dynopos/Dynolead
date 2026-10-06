@@ -3,14 +3,14 @@
 namespace App\Services\Leads;
 
 use App\Enums\LeadStatus;
+use App\Exceptions\AccountLimitReached;
 use App\Exceptions\BudgetExceeded;
 use App\Exceptions\ContactRuleViolation;
-use App\Exceptions\PlanLimitReached;
 use App\Jobs\GenerateFollowupJob;
 use App\Models\Lead;
 use App\Services\Ai\AiBudget;
 use App\Services\Ai\MessageValidator;
-use App\Services\Billing\PlanService;
+use App\Services\Billing\CreditService;
 use App\Support\MalaysianPhone;
 use Illuminate\Support\Collection;
 
@@ -22,7 +22,7 @@ class FollowupService
         private ContactRules $rules,
         private AiBudget $budget,
         private MessageValidator $validator,
-        private PlanService $plans,
+        private CreditService $credits,
     ) {}
 
     /** @return Collection<int, Lead> */
@@ -44,14 +44,19 @@ class FollowupService
             throw new ContactRuleViolation('Kedai ni dalam senarai STOP.');
         }
 
-        if ($reason = $this->plans->accessBlocker()) {
-            throw new PlanLimitReached($reason);
+        if ($reason = $this->credits->accessBlocker()) {
+            throw new AccountLimitReached($reason);
+        }
+
+        if (! $this->credits->isUnlimited() && $lead->followup_count >= (int) config('credits.max_followups_per_lead', 3)) {
+            throw new AccountLimitReached('Had mesej follow-up AI untuk lead ini dah dicapai.');
         }
 
         if ($this->budget->isExhausted()) {
             throw new BudgetExceeded;
         }
 
+        $lead->increment('followup_count');
         GenerateFollowupJob::dispatch($lead->id);
     }
 

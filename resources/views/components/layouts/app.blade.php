@@ -20,11 +20,21 @@
                         <span class="block max-w-[200px] truncate text-[11px] font-medium text-slate-500">{{ app(\App\Support\Tenancy\CurrentWorkspace::class)->get()?->name }}</span>
                     </span>
                 </a>
+                @php
+                    $ws = app(\App\Support\Tenancy\CurrentWorkspace::class)->get();
+                @endphp
+                <div class="flex items-center gap-2">
+                @if ($ws && $ws->plan !== 'dalaman')
+                    <a href="{{ route('billing') }}" wire:navigate class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold tabular-nums text-emerald-700 ring-1 ring-inset ring-emerald-200" title="Baki kredit">
+                        <x-icon name="wallet" class="h-3.5 w-3.5" />{{ $ws->credits }}
+                    </a>
+                @endif
                 <a href="{{ route('account') }}" wire:navigate title="Akaun"
                    @class(['grid h-9 w-9 place-items-center rounded-full text-sm font-bold', 'bg-emerald-600 text-white' => request()->routeIs('account'), 'bg-slate-100 text-slate-600 hover:bg-slate-200' => ! request()->routeIs('account')])>
                     {{ mb_strtoupper(mb_substr(auth()->user()?->name ?? '?', 0, 1)) }}
                     <span class="sr-only">Akaun</span>
                 </a>
+                </div>
             </div>
         </header>
 
@@ -38,7 +48,7 @@
                 ['route' => 'search', 'label' => 'Cari', 'icon' => 'search'],
                 ['route' => 'leads', 'label' => 'Lead', 'icon' => 'users'],
                 ['route' => 'followups', 'label' => 'Follow-up', 'icon' => 'clock'],
-                ['route' => 'costs', 'label' => auth()->user()?->isAdmin() ? 'Kos' : 'Kuota', 'icon' => 'wallet'],
+                ['route' => 'costs', 'label' => auth()->user()?->isAdmin() ? 'Kos' : 'Kredit', 'icon' => 'wallet'],
             ];
         @endphp
 
