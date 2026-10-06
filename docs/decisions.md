@@ -136,3 +136,18 @@ Catat setiap keputusan reka bentuk di sini (tarikh, keputusan, sebab).
   `Http::fake()` akan gagal, bukan memanggil API sebenar.
 - **Queue worker `--timeout=660`, `DB_QUEUE_RETRY_AFTER=900`** (lihat `docs/DEPLOY.md`).
 - **Kotak §10.11 (deploy Forge) belum ditanda**: perlu dibuat oleh Bob di Forge.
+
+## 2026-10-06 — Fasa 2 dimulakan (arahan Bob)
+
+Bob jelaskan app ini untuk **dijual kepada SME lain**, bukan untuk kegunaan sendiri sahaja.
+Keputusan Bob:
+- Mula Fasa 2: ramai pengguna, workspace setiap pelanggan.
+- **Kunci API pusat** (Anthropic + Google milik Bob), pelanggan dicaj ikut pelan dan kuota.
+- **Bayaran melalui CHIP.**
+
+Peraturan yang **tidak berubah** walaupun dijual: mesej pertama tetap dihantar oleh manusia
+melalui wa.me (spec §8: Fasa 0–2), tiada API WhatsApp tidak rasmi.
+
+### F2.1 — Naik taraf Laravel 12
+- `laravel/framework` 11.57 → 12.69.3. `composer audit` kini bersih (3 nasihat Laravel 11
+  dalam keputusan Langkah 1 sudah tertutup). Tiada perubahan kod diperlukan.
