@@ -1,6 +1,7 @@
 <?php
 
 use App\Jobs\PurgePlaceCacheJob;
+use App\Jobs\SyncPendingPaymentsJob;
 use Illuminate\Support\Facades\Schedule;
 
 // Google Places content is temporary (spec §6): purge expired cache daily.
@@ -8,3 +9,6 @@ Schedule::job(new PurgePlaceCacheJob)->dailyAt('03:15')->name('purge-place-cache
 
 // Hourly safety net in case the server was down at 03:15.
 Schedule::job(new PurgePlaceCacheJob)->hourly()->name('purge-place-cache-hourly')->withoutOverlapping();
+
+// Billing: pick up CHIP payments whose callback did not arrive.
+Schedule::job(new SyncPendingPaymentsJob)->hourly()->name('sync-pending-payments')->withoutOverlapping();

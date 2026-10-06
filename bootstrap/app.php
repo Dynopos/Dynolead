@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
             'onboarded' => \App\Http\Middleware\EnsureOnboarded::class,
         ]);
+        $middleware->validateCsrfTokens(except: ['chip/callback']);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(fn () => route('leads'));
     })

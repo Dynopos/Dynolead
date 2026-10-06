@@ -6,6 +6,7 @@ arch('only the API clients use the HTTP client')
     ->toOnlyBeUsedIn([
         'App\Services\Places\PlacesClient',
         'App\Services\Ai\ClaudeClient',
+        'App\Services\Billing\ChipClient',
     ]);
 
 // AiGateway checks AiBudget::assertCanSpend() and records ai_usage around every call.
@@ -15,7 +16,7 @@ arch('Claude is only called through AiGateway')
 
 arch('Livewire components hold no business logic dependencies on clients')
     ->expect('App\Livewire')
-    ->not->toUse(['App\Services\Ai\ClaudeClient', 'App\Services\Places\PlacesClient', 'Illuminate\Support\Facades\Http']);
+    ->not->toUse(['App\Services\Ai\ClaudeClient', 'App\Services\Places\PlacesClient', 'App\Services\Billing\ChipClient', 'Illuminate\Support\Facades\Http']);
 
 arch('no debugging leftovers')
     ->expect(['dd', 'dump', 'ray', 'var_dump'])

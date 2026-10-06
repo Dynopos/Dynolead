@@ -42,6 +42,15 @@ return [
         'timeout' => 120,
     ],
 
+    'chip' => [
+        'key' => env('CHIP_SECRET_KEY'),
+        'brand_id' => env('CHIP_BRAND_ID'),
+        'base_url' => 'https://gate.chip-in.asia/api/v1',
+        // Optional: company public key (PEM) for success_callback. Fetched from CHIP when empty.
+        'public_key' => env('CHIP_PUBLIC_KEY'),
+        'timeout' => 30,
+    ],
+
     'google_places' => [
         'key' => env('GOOGLE_PLACES_API_KEY'),
         'base_url' => 'https://places.googleapis.com/v1',

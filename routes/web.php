@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\BillingReturnController;
+use App\Http\Controllers\ChipCallbackController;
 use App\Livewire\AccountPage;
+use App\Livewire\AdminPage;
 use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
@@ -27,6 +30,9 @@ Route::middleware('guest')->group(function () {
     Route::get('/tukar-kata-laluan/{token}', ResetPassword::class)->name('password.reset');
 });
 
+// CHIP server-to-server callback (signed, no session, no CSRF).
+Route::post('/chip/callback', ChipCallbackController::class)->name('chip.callback');
+
 Route::post('/keluar', function (Request $request) {
     auth()->logout();
     $request->session()->invalidate();
@@ -39,6 +45,7 @@ Route::middleware(['auth', 'workspace'])->group(function () {
     Route::get('/mula', OnboardingPage::class)->name('onboarding');
     Route::get('/akaun', AccountPage::class)->name('account');
     Route::get('/langganan', BillingPage::class)->name('billing');
+    Route::get('/langganan/selesai/{payment}', BillingReturnController::class)->name('billing.return');
 });
 
 Route::middleware(['auth', 'workspace', 'onboarded'])->group(function () {
@@ -47,4 +54,8 @@ Route::middleware(['auth', 'workspace', 'onboarded'])->group(function () {
     Route::get('/lead', LeadsPage::class)->name('leads');
     Route::get('/follow-up', FollowupsPage::class)->name('followups');
     Route::get('/kos', CostsPage::class)->name('costs');
+});
+
+Route::middleware(['auth', 'workspace', 'admin'])->group(function () {
+    Route::get('/admin', AdminPage::class)->name('admin');
 });

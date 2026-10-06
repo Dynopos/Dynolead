@@ -10,6 +10,17 @@
         <x-icon name="chevron-right" class="h-5 w-5 text-slate-400" />
     </a>
 
+    @if (auth()->user()->isAdmin())
+        <a href="{{ route('admin') }}" wire:navigate class="card flex items-center gap-3 p-4">
+            <span class="grid h-10 w-10 place-items-center rounded-xl bg-slate-900 text-white"><x-icon name="lock" /></span>
+            <span class="flex-1">
+                <span class="block font-semibold">Panel admin</span>
+                <span class="block text-xs text-slate-500">Semua pelanggan, hasil dan kos platform</span>
+            </span>
+            <x-icon name="chevron-right" class="h-5 w-5 text-slate-400" />
+        </a>
+    @endif
+
     <form wire:submit="save" class="card space-y-4 p-4">
         <h2 class="label">Bisnes</h2>
         <x-field label="Nama bisnes" name="business"><input type="text" wire:model="business" class="input"></x-field>

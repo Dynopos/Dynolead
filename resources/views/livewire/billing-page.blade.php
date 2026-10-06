@@ -1,6 +1,12 @@
 <div class="space-y-5">
     <x-page-header title="Langganan" subtitle="Pelan, kuota dan bayaran." />
 
+    @if (session('status'))
+        <x-alert type="success">{{ session('status') }}</x-alert>
+    @endif
+    @if (session('warning'))
+        <x-alert type="warning">{{ session('warning') }}</x-alert>
+    @endif
     @if ($blocker)
         <x-alert type="warning">{{ $blocker }}</x-alert>
     @endif
@@ -71,4 +77,21 @@
         @endforeach
         <p class="text-xs text-slate-500">Bayaran sekali untuk setiap 30 hari melalui CHIP (FPX, kad, e-wallet). Tiada caj automatik.</p>
     </section>
+
+    @if ($payments->isNotEmpty())
+        <section class="space-y-2">
+            <h2 class="label">Sejarah bayaran</h2>
+            <ul class="card divide-y divide-slate-100">
+                @foreach ($payments as $payment)
+                    <li class="flex items-center justify-between px-4 py-3 text-sm">
+                        <div>
+                            <p class="font-medium">{{ ucfirst($payment->plan) }} · {{ $payment->reference() }}</p>
+                            <p class="text-xs text-slate-500">{{ $payment->period_start?->translatedFormat('j M') }} – {{ $payment->period_end?->translatedFormat('j M Y') }}</p>
+                        </div>
+                        <p class="font-semibold tabular-nums">RM{{ number_format($payment->amountMyr(), 2) }}</p>
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
 </div>

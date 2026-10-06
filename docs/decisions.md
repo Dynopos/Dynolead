@@ -198,3 +198,22 @@ melalui wa.me (spec §8: Fasa 0–2), tiada API WhatsApp tidak rasmi.
   kepada pelanggan ditukar kepada "Perkhidmatan AI belum sedia".
 - **Wizard mula** (`/mula`) dengan templat (POS, website, pemasaran, kosong). Teks dalam
   `[kurungan]` mesti diganti sebelum simpan. Pelanggan baru dihantar ke wizard; boleh langkau.
+
+### F2.4 — Bayaran CHIP dan panel admin
+- **Prabayar 30 hari, tiada caj automatik.** Setiap bayaran ialah satu CHIP Purchase
+  (FPX, kad, e-wallet). Sebab: FPX paling biasa untuk SME dan tiada token berulang; caj kad
+  automatik (recurring token) boleh ditambah kemudian. Pembaharuan disambung selepas
+  tempoh semasa tamat, jadi tiada hari hilang. Bayar semasa percubaan: tempoh berbayar
+  bermula serta-merta.
+- **Bayaran hanya dikira selepas CHIP sahkan:** callback mesti ada `X-Signature` RSA yang
+  sah (kunci awam syarikat dari `GET /public_key/`, di-cache sehari, atau `CHIP_PUBLIC_KEY`),
+  kemudian pembelian diambil semula dari API CHIP dan jumlah (sen), mata wang dan rujukan
+  `DL-xxxxxx` mesti sepadan. Kalau tak sepadan → `failed` + log ralat. Pengendalian idempotent.
+- **Halaman pulang dari CHIP** tidak percaya URL; ia semak status dengan CHIP. Job setiap jam
+  semak bayaran `created` 48 jam terakhir sekiranya callback terlepas.
+- **`/chip/callback` dikecualikan dari CSRF** (panggilan pelayan ke pelayan, dilindungi
+  tandatangan).
+- **Panel admin** (`/admin`, `is_admin` sahaja): pelanggan, status, lead dan kos AI bulan ini,
+  hasil bulan ini, kos AI platform berbanding had, panggilan Places. Tindakan: rekod bayaran
+  manual (+30 hari), lanjut percubaan 7 hari, gantung/aktifkan.
+- **Tiada data kad disimpan.** Jadual `payments` hanya simpan jumlah, status, ID pembelian CHIP.

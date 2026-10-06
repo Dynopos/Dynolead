@@ -89,3 +89,9 @@
   platform. Akaun tamat tidak boleh cari atau guna AI.
 - Wizard produk pertama dengan templat. Halaman Langganan (pelan dan penggunaan).
 - Halaman Kuota untuk pelanggan; butiran kos RM untuk admin sahaja.
+
+### F2.4 — Bayaran CHIP dan admin
+- `ChipClient`, `BillingService`, jadual `payments`, callback bertandatangan RSA yang
+  disahkan semula dengan API CHIP, halaman pulang, job semakan setiap jam.
+- Halaman Langganan: langgan/sambung 30 hari, sejarah bayaran.
+- Panel admin untuk Bob: pelanggan, hasil, kos platform, bayaran manual, gantung.
