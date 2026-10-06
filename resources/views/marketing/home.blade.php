@@ -171,12 +171,25 @@
                         <a href="{{ route('register') }}" class="btn-primary mt-6 w-full">Daftar sekarang</a>
                     </li>
                     <li class="card p-6">
-                        <p class="text-sm font-bold text-emerald-600">3 · Bayar ikut carian</p>
-                        <p class="mt-2 text-3xl font-extrabold">Kos + {{ rtrim(rtrim(number_format($markup, 2), '0'), '.') }}%</p>
-                        <p class="mt-2 text-sm text-slate-600">Caj ikut kos sebenar AI dan Google Maps untuk carian anda, campur caj perkhidmatan kecil. Anggaran ditunjuk sebelum setiap carian.</p>
+                        <p class="text-sm font-bold text-emerald-600">3 · Bayar ikut lead</p>
+                        @if ($guide)
+                            <p class="mt-2"><span class="text-sm text-slate-500">lebih kurang</span> <span class="text-3xl font-extrabold">RM{{ number_format($guide['per_lead_sen'] / 100, 2) }}</span> <span class="text-slate-500">/ lead</span></p>
+                            <p class="mt-2 text-sm text-slate-600">Tambah baki, guna bila perlu. Satu lead = satu kedai yang sesuai, lengkap dengan mesej WhatsApp siap ditulis.</p>
+                            <table class="mt-4 w-full text-sm">
+                                <thead><tr class="text-left text-xs text-slate-500"><th class="pb-1 font-medium">Tambah baki</th><th class="pb-1 text-right font-medium">Anggaran lead</th></tr></thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    @foreach ($guide['topups'] as $myr => $leads)
+                                        <tr><td class="py-2 font-semibold">RM{{ $myr }}</td><td class="py-2 text-right">± {{ $leads }} lead</td></tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <p class="mt-2 text-3xl font-extrabold">Kos + {{ rtrim(rtrim(number_format($markup, 2), '0'), '.') }}%</p>
+                            <p class="mt-2 text-sm text-slate-600">Caj ikut kos sebenar AI dan Google Maps untuk carian anda, campur caj perkhidmatan kecil.</p>
+                        @endif
                     </li>
                 </ol>
-                <p class="mt-4 text-sm text-slate-500">Tambah baki bila perlu melalui FPX, kad atau e-wallet (CHIP). Jana semula mesej dan follow-up AI percuma.</p>
+                <p class="mt-4 text-sm text-slate-500">Harga lead ialah anggaran: caj sebenar ikut kos AI dan Google Maps untuk carian anda (+{{ rtrim(rtrim(number_format($markup, 2), '0'), '.') }}% caj perkhidmatan), dan bergantung pada kawasan dan jenis bisnes. Anggaran caj ditunjuk sebelum setiap carian. Tambah baki melalui FPX, kad atau e-wallet (CHIP). Jana semula mesej dan follow-up AI percuma.</p>
             </div>
         </section>
 

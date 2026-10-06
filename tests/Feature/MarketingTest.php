@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\Billing\PriceGuide;
 use App\Support\Tenancy\CurrentWorkspace;
 
 beforeEach(fn () => app(CurrentWorkspace::class)->clear());
@@ -30,11 +31,42 @@ it('explains the pricing: free trial, RM23.90 once, then pay per search', functi
     $html = $this->get('/')
         ->assertSee('20 lead atau 14 hari')
         ->assertSee('RM23.90')
-        ->assertSee('Kos + 20%')
+        ->assertSee('+20% caj perkhidmatan')
         ->assertSee('Tiada yuran bulanan', false)
         ->getContent();
 
     expect($html)->toContain('"price":"23.90"');
+});
+
+it('shows a price per lead and how many leads a top-up buys, once prices are set', function () {
+    withAiPrices(1.0, 5.0); // Haiku $1/$5, Sonnet $2/$10, USD→MYR 4.5
+    config([
+        'ai_prices.places' => ['text_search' => 0.035, 'details' => 0.025, 'details_display' => 0.02],
+        'billing.markup_percent' => 20,
+        'billing.topup_options' => [20, 50, 100],
+    ]);
+
+    // 20 candidates → 10 pass (1 Text Search + 10 Details + 10 scores) → 6 leads written.
+    $cost = 4.5 * (0.035 + 10 * 0.025 + 10 * (1500 * 1 + 300 * 5) / 1e6 + 6 * (1500 * 2 + 700 * 10) / 1e6);
+    $perLead = (int) ceil((int) ceil(round($cost * 1.2 * 100, 4)) / 6);
+    $guide = app(PriceGuide::class)->get();
+
+    expect($guide['per_lead_sen'])->toBe($perLead)
+        ->and($guide['topups'][50])->toBe((int) (floor(5000 / $perLead / 5) * 5))
+        ->and($guide['topups'][50] * $perLead)->toBeLessThanOrEqual(5000);
+
+    $this->get('/')
+        ->assertSee('Bayar ikut lead')
+        ->assertSee('RM'.number_format($perLead / 100, 2))
+        ->assertSee('± '.$guide['topups'][50].' lead', false)
+        ->assertDontSee('Kos + 20%');
+});
+
+it('falls back to "cost + markup" while prices are missing', function () {
+    config(['ai_prices.usd_to_myr' => null]);
+
+    expect(app(PriceGuide::class)->get())->toBeNull();
+    $this->get('/')->assertSee('Kos + 20%');
 });
 
 it('sends signed-in users to their leads', function () {
