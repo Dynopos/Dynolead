@@ -129,3 +129,5 @@
   `/daftar`, kemudian command itu jadikan akaun admin dan workspacenya pelan `dalaman`.
 - Halaman jualan: hook baru ikut Bob ("Susah cari customer? Pening sales slow? Biar Dyno
   Leads bantu anda cari lead." Kami cari lead, kami sediakan teks, anda cuma tekan hantar).
+- Halaman jualan: harga "Bayar ikut lead" (anggaran RM setiap lead dan bilangan lead untuk
+  RM20/RM50/RM100), dikira dari jadual harga oleh `PriceGuide`. FAQ harga dikemas kini.

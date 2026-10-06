@@ -283,3 +283,15 @@ contoh kos RM50 kita caj RM60." Ini **menggantikan** model kredit (commit sebelu
 - **Ketepatan harga penting:** caj dikira dari `config/ai_prices.php`. Jika harga di situ
   lebih rendah dari harga sebenar Anthropic/Google, Bob rugi.
 - Migration kredit (belum pernah dideploy) diganti terus dengan migration baki RM.
+
+## 2026-10-06 — Harga setiap lead di halaman jualan
+
+- Bob: pelanggan tak faham "Kos + 20%". Halaman jualan kini tunjuk **anggaran harga setiap
+  lead** dan **berapa lead untuk setiap pilihan tambah baki** (RM20/50/100). Token tidak
+  disebut kerana tidak bermakna bagi pelanggan.
+- Dikira oleh `PriceGuide` dari `config/ai_prices.php` + `estimate_defaults` sahaja (20 calon,
+  lulus 50%, sesuai 60%), tanpa data pelanggan, jadi semua pelawat nampak angka yang sama dan
+  tiada query merentas workspace. Harga setiap lead dibundar ke atas; bilangan lead dibundar
+  ke bawah ke gandaan 5 supaya contoh tidak berjanji lebih.
+- Masih anggaran: caj sebenar tetap ikut kos sebenar + markup (`WalletService::settle`).
+  Jika harga belum diisi, halaman kembali ke "Kos + 20%".
