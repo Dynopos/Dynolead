@@ -1,8 +1,8 @@
 <x-layouts.marketing>
     <x-slot:head>
         <x-seo.meta
-            title="Cari Prospek dengan AI untuk SME Malaysia | Dyno Leads"
-            description="Cari prospek kedai tempatan dengan AI. Dyno Leads cari bisnes di Google Maps, pilih yang sesuai dan tulis mesej WhatsApp custom. Anda tekan hantar sendiri.">
+            title="Susah Cari Customer? Kami Cari Lead untuk SME | Dyno Leads"
+            description="Susah cari customer, sales slow? Dyno Leads cari lead di kawasan anda dan sediakan teks WhatsApp custom untuk setiap satu. Anda cuma tekan hantar.">
             <script type="application/ld+json">{!! json_encode([
                 '@context' => 'https://schema.org',
                 '@graph' => array_values(array_filter([
@@ -48,14 +48,16 @@
             <div class="relative mx-auto grid max-w-5xl items-center gap-10 px-4 pb-16 pt-12 md:grid-cols-2 md:pt-20">
                 <div>
                     <p class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-200">
-                        <x-icon name="sparkles" class="h-4 w-4" /> Untuk SME yang jual kepada bisnes lain
+                        <x-icon name="sparkles" class="h-4 w-4" /> Cari prospek dengan AI untuk SME Malaysia
                     </p>
                     <h1 class="mt-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 md:text-5xl">
-                        Cari prospek dengan AI. <span class="text-emerald-600">Hantar mesej sendiri.</span>
+                        Susah cari customer? Pening sales slow? <span class="text-emerald-600">Biar Dyno Leads bantu anda cari lead.</span>
                     </h1>
-                    <p class="mt-5 text-lg leading-relaxed text-slate-600">
-                        Dyno Leads bantu anda cari prospek dengan AI: cari kedai tempatan di Google Maps, pilih yang paling sesuai untuk produk anda, dan tulis mesej WhatsApp custom ikut review setiap kedai. Anda semak, tekan hantar, dan jejak siapa yang balas.
-                    </p>
+                    <ul class="mt-6 space-y-3 text-lg text-slate-700">
+                        <li class="flex gap-3"><x-icon name="search" class="mt-1 h-5 w-5 shrink-0 text-emerald-600" /><span><b>Kami cari lead</b> di kawasan anda, yang sesuai dengan produk anda.</span></li>
+                        <li class="flex gap-3"><x-icon name="sparkles" class="mt-1 h-5 w-5 shrink-0 text-emerald-600" /><span><b>Kami sediakan teks</b> WhatsApp custom untuk setiap lead.</span></li>
+                        <li class="flex gap-3"><x-icon name="chat" class="mt-1 h-5 w-5 shrink-0 text-emerald-600" /><span><b>Anda cuma tekan hantar.</b> Itu sahaja.</span></li>
+                    </ul>
                     <div class="mt-7 flex flex-col gap-3 sm:flex-row">
                         <a href="{{ route('register') }}" class="btn-primary px-6 py-3.5 text-base">Cuba percuma</a>
                         <a href="#cara" class="btn-soft px-6 py-3.5 text-base">Tengok cara guna</a>
@@ -94,13 +96,13 @@
         {{-- How it works --}}
         <section id="cara" class="scroll-mt-16 py-16">
             <div class="mx-auto max-w-5xl px-4">
-                <h2 class="text-3xl font-bold tracking-tight">Cara Dyno Leads cari prospek</h2>
+                <h2 class="text-3xl font-bold tracking-tight">Kami cari. Kami tulis. Anda hantar.</h2>
                 <p class="mt-2 max-w-2xl text-slate-600">Empat langkah, semua dari telefon.</p>
                 <ol class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     @foreach ([
-                        ['search', 'Pilih jenis & kawasan', 'Contoh: kedai runcit di Kota Bharu. Anda nampak anggaran caj sebelum mula.'],
-                        ['funnel', 'Tapis automatik', 'Buang kedai rating rendah, yang dah ada website (jika perlu), dan yang pernah minta STOP.'],
-                        ['sparkles', 'AI nilai & tulis', 'AI baca review, beri skor kesesuaian dan tulis mesej custom ikut profil produk anda.'],
+                        ['search', 'Anda pilih jenis & kawasan', 'Contoh: kedai runcit di Kota Bharu. Anda nampak anggaran caj sebelum mula.'],
+                        ['funnel', 'Kami cari & tapis lead', 'Kami cari di Google Maps dan buang kedai rating rendah, yang dah ada website (jika perlu), dan yang pernah minta STOP.'],
+                        ['sparkles', 'Kami sediakan teks', 'AI baca review, beri skor kesesuaian dan tulis mesej custom ikut profil produk anda.'],
                         ['chat', 'Anda tekan hantar', 'Buka WhatsApp dengan mesej siap. Tanda status, dapat peringatan follow-up.'],
                     ] as $i => [$icon, $title, $text])
                         <li class="card p-5">
@@ -200,8 +202,8 @@
         <section class="py-16">
             <div class="mx-auto max-w-5xl px-4">
                 <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-700 px-6 py-12 text-center text-white">
-                    <h2 class="text-3xl font-bold tracking-tight">Prospek pertama anda, hari ni</h2>
-                    <p class="mx-auto mt-3 max-w-xl text-emerald-50/90">Daftar dalam satu minit, isi profil produk, dan buat carian pertama.</p>
+                    <h2 class="text-3xl font-bold tracking-tight">Biar kami cari lead. Anda fokus closing.</h2>
+                    <p class="mx-auto mt-3 max-w-xl text-emerald-50/90">Daftar dalam satu minit, isi profil produk, dan dapat lead pertama hari ni.</p>
                     <a href="{{ route('register') }}" class="btn mt-7 bg-white px-7 py-3.5 text-base text-emerald-700 hover:bg-emerald-50">Cuba percuma</a>
                 </div>
             </div>

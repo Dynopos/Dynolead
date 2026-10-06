@@ -150,6 +150,21 @@ it('gives the admin the workspace that holds migrated Fasa 0 data', function () 
     expect(User::where('email', 'bob@dynopos.my')->value('workspace_id'))->toBe($legacy->id);
 });
 
+it('promotes a user who signed up first, without asking for a password', function () {
+    Livewire::test(Register::class)
+        ->set('name', 'Bob')->set('business', 'DynoPOS Technologies')->set('email', 'bob@dynopos.my')
+        ->set('password', 'rahsiabob1')->set('agree', true)
+        ->call('register');
+
+    $this->artisan('dynoleads:admin', ['email' => 'bob@dynopos.my', '--demo-products' => true])
+        ->assertSuccessful();
+
+    $bob = User::where('email', 'bob@dynopos.my')->firstOrFail();
+    expect($bob->isAdmin())->toBeTrue()
+        ->and($bob->workspace->plan)->toBe('dalaman')
+        ->and(Product::withoutGlobalScope('workspace')->where('workspace_id', $bob->workspace_id)->count())->toBe(2);
+});
+
 it('sends new sign-ups to onboarding', function () {
     Livewire::test(Register::class)
         ->set('name', 'Siti')->set('business', 'Siti Web')->set('email', 'siti@contoh.my')

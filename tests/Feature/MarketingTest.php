@@ -8,7 +8,7 @@ it('shows the public sales page with one h1, meta tags and schema', function () 
     $html = $this->get('/')->assertOk()->getContent();
 
     expect(substr_count($html, '<h1'))->toBe(1)
-        ->and($html)->toContain('<title>Cari Prospek dengan AI untuk SME Malaysia | Dyno Leads</title>')
+        ->and($html)->toContain('<title>Susah Cari Customer? Kami Cari Lead untuk SME | Dyno Leads</title>')
         ->and($html)->toMatch('/<meta name="description" content="[^"]{120,160}">/')
         ->and($html)->toContain('<link rel="canonical" href="'.url('/').'">')
         ->and($html)->toContain('property="og:image"')
@@ -23,7 +23,7 @@ it('shows the public sales page with one h1, meta tags and schema', function () 
 });
 
 it('says clearly that messages are sent by the user, not automatically', function () {
-    $this->get('/')->assertSee('Anda tekan hantar')->assertSee('Tiada blast');
+    $this->get('/')->assertSee('Susah cari customer?')->assertSee('Kami sediakan teks')->assertSee('Anda tekan hantar')->assertSee('Tiada blast');
 });
 
 it('explains the pricing: free trial, RM23.90 once, then pay per search', function () {
