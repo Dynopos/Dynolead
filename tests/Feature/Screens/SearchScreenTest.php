@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Search;
 use App\Services\Ai\AiBudget;
 use App\Services\Costs\CostEstimator;
+use App\Services\Search\SearchService;
 use Database\Seeders\ProductSeeder;
 use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
@@ -126,4 +127,9 @@ it('falls back to default rates with too little data', function () {
     $e = app(CostEstimator::class)->forSearch(20);
 
     expect($e->passRate)->toBe(0.5)->and($e->fitRate)->toBe(0.6)->and($e->usedDefaults)->toBeTrue();
+});
+
+it('keeps "Pasir Mas, Kelantan" as one area and splits areas by line', function () {
+    expect(SearchService::parseAreas("Pasir Mas, Kelantan\nTumpat, Kelantan; Kota Bharu"))
+        ->toBe(['Pasir Mas, Kelantan', 'Tumpat, Kelantan', 'Kota Bharu']);
 });

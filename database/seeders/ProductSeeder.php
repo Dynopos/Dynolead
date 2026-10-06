@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\Product;
 use Illuminate\Database\Seeder;
 
-/** Seed products from spec §7. Safe to run more than once. */
+/** Seed products from spec §7. Only creates missing products, so edits made on the Produk screen survive re-seeding. */
 class ProductSeeder extends Seeder
 {
     public function run(): void
@@ -14,7 +14,7 @@ class ProductSeeder extends Seeder
         $butik = 'DynoPOS ni sistem POS untuk kedai kecil & sederhana: sekali bayar je, takde yuran bulanan atau tahunan. Rekod jualan dan stok setiap item, laporan harian boleh tengok dalam telefon.';
         $restoran = 'DynoPOS ni sistem POS untuk kedai makan: sekali bayar je, takde yuran bulanan atau tahunan. Setiap order dan bil direkod dengan tepat, laporan jualan harian boleh tengok dalam telefon.';
 
-        Product::query()->updateOrCreate(['slug' => 'dynopos'], [
+        Product::query()->firstOrCreate(['slug' => 'dynopos'], [
             'name' => 'DynoPOS',
             'sender_name' => 'Bob',
             'company' => 'DynoPOS Technologies, Pasir Mas',
@@ -49,7 +49,7 @@ class ProductSeeder extends Seeder
             'active' => true,
         ]);
 
-        Product::query()->updateOrCreate(['slug' => 'murahwebsite'], [
+        Product::query()->firstOrCreate(['slug' => 'murahwebsite'], [
             'name' => 'murahwebsite.my',
             'sender_name' => 'Bob',
             'company' => 'murahwebsite.my (DynoPOS Technologies, Pasir Mas)',

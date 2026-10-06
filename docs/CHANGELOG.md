@@ -47,3 +47,14 @@
   50 panggilan AI terakhir.
 - Tolak → `suppressions`; Dah hantar → `contacts_log`.
 - Semua skrin diuji pada lebar 400px (tiada skrol mendatar).
+
+### Langkah 5 — Semakan §10 dan deploy
+- `tests/Feature/Phase0AcceptanceTest.php`: satu test untuk setiap kotak §10.
+- `tests/Feature/HardRulesTest.php`: peraturan 1 (tiada hantar automatik), 4 (data Google),
+  7 (tiada rahsia, model dari `.env`).
+- Betulkan: kawasan "Pasir Mas, Kelantan" tidak lagi dipecah dua.
+- `ProductSeeder` tidak menimpa suntingan produk.
+- `docs/DEPLOY.md`: langkah deploy ke Laravel Forge (env, harga, migrate --seed, queue
+  worker, cron scheduler, semakan selepas deploy).
+- `docs/fasa0-semakan.md`: pemetaan kotak §10 ke test.
+- 129 test lulus tanpa panggilan API sebenar.

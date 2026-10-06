@@ -121,3 +121,18 @@ Catat setiap keputusan reka bentuk di sini (tarikh, keputusan, sebab).
 - **Atribusi "Data kedai: Google Maps"** pada setiap kad yang tunjuk data Places
   (Lead dan Follow-up), dengan pautan ke Google Maps bila ada.
 - **Bahasa app `ms`** (nama bulan dalam BM).
+
+## 2026-10-06 — Langkah 5 (semakan §10, deploy)
+
+- **Pepijat dibetulkan:** kawasan dipisah ikut koma, jadi "Pasir Mas, Kelantan" jadi dua
+  carian ("Pasir Mas" dan "Kelantan"). Kini kawasan dipisah ikut baris atau `;` sahaja.
+  Dijumpai oleh test penerimaan §10.2.
+- **`ProductSeeder` hanya cipta produk yang belum ada** (`firstOrCreate` ikut `slug`), supaya
+  `db:seed` dalam skrip deploy tidak menimpa suntingan Bob di skrin Produk.
+- **Test penerimaan §10** dalam `tests/Feature/Phase0AcceptanceTest.php`, satu test setiap
+  kotak, dan `tests/Feature/HardRulesTest.php` untuk peraturan 1, 4 dan 7. Pemetaan penuh
+  dalam `docs/fasa0-semakan.md`.
+- **`Http::preventStrayRequests()`** dihidupkan dalam `tests/TestCase.php`: test yang terlupa
+  `Http::fake()` akan gagal, bukan memanggil API sebenar.
+- **Queue worker `--timeout=660`, `DB_QUEUE_RETRY_AFTER=900`** (lihat `docs/DEPLOY.md`).
+- **Kotak §10.11 (deploy Forge) belum ditanda**: perlu dibuat oleh Bob di Forge.

@@ -10,7 +10,6 @@ use App\Services\Ai\AiBudget;
 use App\Services\Costs\CostEstimate;
 use App\Services\Costs\CostEstimator;
 use App\Services\Costs\PriceTable;
-use App\Services\Products\ProductService;
 use Illuminate\Support\Collection;
 
 /** Search screen logic: estimate first, then start after the user confirms (spec §3.2). */
@@ -23,9 +22,16 @@ class SearchService
         private PriceTable $prices,
     ) {}
 
+    /** One area per line (or separated by ";"). Commas stay: "Pasir Mas, Kelantan" is one area. */
     public static function parseAreas(string $text): array
     {
-        return array_slice(ProductService::splitList(str_replace(';', "\n", $text)), 0, 5);
+        return collect(preg_split('/[\n;]+/', $text))
+            ->map(fn ($v) => trim($v))
+            ->filter(fn ($v) => $v !== '')
+            ->unique()
+            ->take(5)
+            ->values()
+            ->all();
     }
 
     public function estimate(int $max, array $areas): CostEstimate

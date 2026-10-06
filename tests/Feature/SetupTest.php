@@ -77,3 +77,12 @@ it('keeps secrets out of .env.example', function () {
         ->and($example)->toMatch('/^GOOGLE_PLACES_API_KEY=$/m')
         ->and($example)->toMatch('/^APP_LOGIN_PASSWORD=$/m');
 });
+
+it('does not overwrite product edits when seeding again', function () {
+    $this->seed(DatabaseSeeder::class);
+    Product::where('slug', 'dynopos')->update(['cta' => 'CTA baru Bob']);
+
+    $this->seed(DatabaseSeeder::class);
+
+    expect(Product::where('slug', 'dynopos')->value('cta'))->toBe('CTA baru Bob');
+});
