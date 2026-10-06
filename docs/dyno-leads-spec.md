@@ -1,7 +1,7 @@
 # Dyno Leads — Spec v0.1
 
 Pemilik: Bob (DynoPOS Technologies, Pasir Mas)
-Status: Fasa 0 belum dibina
+Status: Fasa 0 dan Fasa 2 dibina (Okt 2026), belum deploy. Fasa 1 dan 3 belum dimulakan.
 Repo: Dynopos/Dynolead (app berasingan dari Dyno Ads)
 
 ---
@@ -55,7 +55,7 @@ tunjuk (gap) → apa produk buat → CTA produk → pilihan STOP.**
 | 2 | Login berbilang pengguna, workspace, kuota ikut pelan, bayaran (CHIP / toyyibPay). | Pelanggan berbayar |
 | 3 | Balasan prospek: webhook WhatsApp Cloud API, AI draf balasan, manusia luluskan. Hanya untuk prospek yang dah reply. | Pelanggan berbayar |
 
-Claude Code bina **Fasa 0 sahaja** sehingga Bob arahkan fasa seterusnya.
+Claude Code bina ikut arahan Bob. Bob arahkan Fasa 2 selepas Fasa 0 (app untuk dijual), dengan kunci API pusat dan bayaran CHIP. Lihat `docs/decisions.md`.
 
 ---
 

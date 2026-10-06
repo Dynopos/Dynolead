@@ -95,3 +95,10 @@
   disahkan semula dengan API CHIP, halaman pulang, job semakan setiap jam.
 - Halaman Langganan: langgan/sambung 30 hari, sejarah bayaran.
 - Panel admin untuk Bob: pelanggan, hasil, kos platform, bayaran manual, gantung.
+
+### F2.5 — Halaman jualan, dokumentasi
+- Halaman utama awam (BM) dengan harga dari `config/plans.php`, soalan lazim, meta SEO,
+  JSON-LD, imej Open Graph, `sitemap.xml` dan `robots.txt` dinamik.
+- `docs/DEPLOY.md` dikemas kini untuk Fasa 2 (CHIP, SMTP, akaun admin, senarai sebelum jual).
+- `docs/fasa2-semakan.md`: pemetaan ciri ke test. CLAUDE.md dan spec dikemas kini.
+- 175 test lulus.

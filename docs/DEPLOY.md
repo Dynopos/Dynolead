@@ -1,16 +1,19 @@
 # Deploy Dyno Leads ke Laravel Forge
 
-Panduan ini untuk Fasa 0 (satu akaun, Bob sahaja). Ikut tertib dari atas ke bawah.
+Panduan ini untuk Fasa 2 (app dijual kepada ramai pelanggan, setiap pelanggan ada
+workspace sendiri). Ikut tertib dari atas ke bawah. Senarai "Sebelum mula jual" di
+bahagian 11 mesti selesai sebelum terima pelanggan berbayar.
 
 ## 0. Sebelum mula
 
-Sediakan dua kunci API dan simpan di tempat selamat (jangan masuk repo):
+Sediakan kunci berikut dan simpan di tempat selamat (jangan masuk repo). Semua pelanggan
+guna kunci pusat ini; kos dikawal oleh had pelan dan had platform.
 
 1. **Anthropic API key**
    - Buka <https://console.anthropic.com> → *API Keys* → cipta key baru.
    - *Billing*: tambah kredit.
    - *Limits*: set **had belanja bulanan** di console juga. Ini lapisan kedua selain had
-     dalam app (`AI_MONTHLY_BUDGET_MYR`).
+     platform dalam app (`AI_MONTHLY_BUDGET_MYR`).
 2. **Google Places API key**
    - Buka Google Cloud Console → cipta/pilih projek → sambung **billing**.
    - *APIs & Services → Library* → enable **Places API (New)**.
@@ -20,6 +23,16 @@ Sediakan dua kunci API dan simpan di tempat selamat (jangan masuk repo):
      - *Application restrictions*: **IP addresses**, isi IP pelayan Forge (semua panggilan
        Places dibuat dari pelayan, bukan dari telefon).
    - Pilihan: set *quota* harian dalam *Places API (New) → Quotas* sebagai brek kecemasan.
+3. **CHIP (bayaran)**
+   - Daftar akaun merchant di <https://portal.chip-in.asia> dan lengkapkan pengesahan
+     (CHIP biasanya minta pautan Terma, Privasi dan polisi bayaran balik).
+   - *Developers → API keys*: salin **secret key**. Guna kunci **ujian** dahulu; tukar ke
+     kunci **live** bila sedia (mod ditentukan oleh kunci, bukan URL).
+   - *Developers → Brands*: salin **Brand ID**.
+   - Tiada webhook perlu didaftar: setiap pembelian membawa `success_callback` sendiri
+     ke `https://domain-anda/chip/callback`.
+4. **E-mel keluar (SMTP)** untuk reset kata laluan: contoh Mailgun, Postmark, Amazon SES
+   atau SMTP domain anda.
 
 ## 1. Pelayan
 
@@ -49,7 +62,10 @@ Site → *Environment*. Mula dari `.env.example` dan isi:
 | `APP_DEBUG` | `false` |
 | `APP_URL` | `https://domain-anda` |
 | `APP_KEY` | Forge jana sendiri; jika kosong, jalankan `php artisan key:generate --force` sekali |
-| `APP_LOGIN_PASSWORD` | Kata laluan panjang untuk masuk app (Bob sahaja) |
+| `MAIL_*` | Tetapan SMTP dari langkah 0 (`MAIL_FROM_ADDRESS` mesti domain yang disahkan) |
+| `COMPANY_NAME`, `COMPANY_REGISTRATION`, `COMPANY_EMAIL`, `COMPANY_ADDRESS` | Butiran penjual (muncul di Terma, Privasi, halaman utama) |
+| `CHIP_SECRET_KEY`, `CHIP_BRAND_ID` | Dari langkah 0 (kunci ujian dahulu) |
+| `TRIAL_DAYS` | `14` |
 | `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Dari Forge |
 | `QUEUE_CONNECTION` | `database` |
 | `DB_QUEUE_RETRY_AFTER` | `900` (mesti lebih besar daripada `--timeout` worker) |
@@ -61,7 +77,7 @@ Site → *Environment*. Mula dari `.env.example` dan isi:
 | `CLAUDE_EFFORT_WRITE` | `low` |
 | `CLAUDE_USE_BATCH` | `false` |
 | `CLAUDE_WEB_SEARCH` | `false` |
-| `AI_MONTHLY_BUDGET_MYR` | `100` (boleh ubah kemudian di halaman Kos) |
+| `AI_MONTHLY_BUDGET_MYR` | Had kos AI **semua pelanggan bersama** sebulan (RM). Mula dengan jumlah `ai_budget_myr` pelan × bilangan pelanggan dijangka, dan sentiasa di bawah had di console Anthropic. |
 | `GOOGLE_PLACES_API_KEY` | Key dari langkah 0 |
 | `PLACES_CACHE_HOURS` | `24` |
 | `PRICE_TABLE_PATH` | `config/ai_prices.php` |
@@ -83,6 +99,16 @@ amaran. Ini sengaja supaya had kos bulanan sentiasa betul.
 
 Jika tukar model dalam `.env`, tambah baris harga untuk ID model baru juga.
 
+### 4b. Harga jualan dan kuota dalam `config/plans.php`
+
+- Isi `price_myr` untuk `asas` dan `pro`. Selagi kosong, pelan itu dipapar "Belum dibuka"
+  dan tidak boleh dibeli; halaman utama tunjuk "Harga akan diumumkan".
+- Semak `monthly_leads` dan `ai_budget_myr` setiap pelan. Selepas beberapa carian sebenar,
+  lihat kos AI setiap lead di halaman Kos (admin) dan pastikan
+  `monthly_leads × kos setiap lead < ai_budget_myr`, dan harga jualan jauh di atas kos
+  AI + Places + yuran CHIP.
+- Commit, push dan deploy.
+
 ## 5. Skrip deploy
 
 Site → *Deployments* → *Deploy Script*. Ganti dengan:
@@ -100,17 +126,25 @@ npm run build
     echo 'Restarting FPM...'; sudo -S service $FORGE_PHP_FPM reload ) 9>/tmp/fpmlock
 
 $FORGE_PHP artisan migrate --force
-$FORGE_PHP artisan db:seed --force
 $FORGE_PHP artisan optimize
 $FORGE_PHP artisan queue:restart
 ```
 
 Nota:
-- `db:seed` selamat dijalankan setiap kali: `ProductSeeder` hanya cipta DynoPOS dan
-  murahwebsite.my jika belum wujud (ikut `slug`). Suntingan Bob di skrin Produk tidak
-  ditimpa.
-- Deploy pertama sama dengan `php artisan migrate --seed --force`.
 - Tekan **Deploy Now**. Hidupkan *Quick Deploy* jika mahu deploy automatik bila push.
+- Migration Fasa 2 memindah data Fasa 0 (jika ada) ke workspace "DynoPOS Technologies".
+
+### 5b. Cipta akaun admin (sekali sahaja)
+
+SSH ke pelayan, dalam folder site:
+
+```bash
+php artisan dynoleads:admin bob@dynopos.my --demo-products
+```
+
+Arahan ini tanya kata laluan, cipta akaun Bob (admin platform) dengan workspace pelan
+`dalaman` (tanpa had), dan masukkan produk DynoPOS + murahwebsite.my. Jika ada data
+Fasa 0 yang dipindah, Bob terus jadi pemilik workspace itu.
 
 ## 6. Queue worker
 
@@ -134,7 +168,8 @@ php artisan queue:work database --queue=default --sleep=3 --timeout=660 --tries=
 Kenapa: job nilai/tulis memproses sehingga 60 lead dalam satu job (setiap job ada
 `$timeout = 600`). `DB_QUEUE_RETRY_AFTER=900` mesti lebih besar daripada timeout supaya
 job yang masih berjalan tidak diambil oleh worker lain (itu akan gandakan kos AI).
-Satu proses sudah cukup untuk Fasa 0.
+Mula dengan 1 proses. Bila ramai pelanggan buat carian serentak, naikkan `Processes`
+(2–4) supaya carian tidak beratur lama.
 
 ## 7. Scheduler (cron)
 
@@ -149,22 +184,29 @@ Jadual sekarang (`routes/console.php`):
 
 - `purge-place-cache` setiap hari 03:15 dan `purge-place-cache-hourly` setiap jam:
   padam data Google dalam `place_cache` yang lebih lama daripada `PLACES_CACHE_HOURS`.
+- `sync-pending-payments` setiap jam: semak bayaran CHIP yang callbacknya terlepas.
 
 Semak dengan SSH: `php artisan schedule:list`.
 
 ## 8. Semakan selepas deploy
 
-1. Buka `https://domain-anda/masuk`, masuk dengan `APP_LOGIN_PASSWORD`.
-2. **Produk**: DynoPOS dan murahwebsite.my ada.
-3. **Kos**: tiada amaran "Harga belum diisi". Had bulanan betul.
+1. Buka `https://domain-anda/`: halaman jualan keluar, harga dan Terma/Privasi betul.
+2. Buka `/masuk`, masuk dengan akaun admin (langkah 5b).
+3. **Kos** (admin): tiada amaran "Harga belum diisi". Akaun → **Panel admin** terbuka.
 4. **Cari** (test pertama, kecil): produk DynoPOS, jenis `kedai runcit`, kawasan
    `Pasir Mas, Kelantan`, maksimum calon **10**. Tekan *Cari*, baca anggaran, tekan
    *Sahkan & cari*. Tunggu status *Siap* (skrin auto-segar).
 5. **Lead**: semak skor, "Kenapa sesuai" dan mesej. Tekan *Buka WhatsApp* untuk satu
    lead dan pastikan nombor `601...` dan mesej betul. **Jangan hantar** jika belum mahu.
 6. **Kos**: lihat kos sebenar carian tadi (token, RM, panggilan Places). Bandingkan
-   dengan anggaran di skrin Cari.
-7. Jika carian tersekat di "Dalam giliran": queue worker tidak berjalan (langkah 6).
+   dengan anggaran di skrin Cari. Guna angka ini untuk tetapkan harga pelan (4b).
+7. **Pelanggan ujian**: dalam tetingkap inkognito, daftar akaun baru di `/daftar`,
+   lalui wizard, buat satu carian kecil. Pastikan ia tidak nampak lead Bob.
+8. **Lupa kata laluan**: cuba dengan akaun ujian, pastikan e-mel sampai.
+9. **Bayaran (kunci ujian CHIP)**: isi harga pelan, dari akaun ujian tekan *Langgan*,
+   bayar dengan kad ujian `4444 3333 2222 1111` (CVC `123`). Selepas kembali, Langganan
+   tunjuk "Aktif sehingga ..." dan Panel admin tunjuk hasil. Kemudian tukar ke kunci live.
+10. Jika carian tersekat di "Dalam giliran": queue worker tidak berjalan (langkah 6).
 
 ## 9. Masalah biasa
 
@@ -178,8 +220,25 @@ Semak dengan SSH: `php artisan schedule:list`.
 | Status tak bergerak dari "Dalam giliran" | Queue worker mati. Forge → Queue → restart. |
 | Ubah `.env` tapi tiada kesan | Jalankan `php artisan optimize` (atau deploy semula). |
 | Lead tiada nama ("Nama tak dapat dimuat") | Cache tamat dan Places gagal. Semak log (`storage/logs`). |
+| Pelanggan nampak "Perkhidmatan AI belum sedia" | Harga model dalam `config/ai_prices.php` kosong. |
+| "Perkhidmatan AI berehat sekejap" | Had platform `AI_MONTHLY_BUDGET_MYR` dicapai. Naikkan (dan had di console Anthropic) atau tunggu bulan depan. |
+| Bayar tapi langganan tak aktif | Semak log untuk "CHIP". Job `sync-pending-payments` akan cuba lagi setiap jam; admin boleh rekod bayaran manual di Panel admin. |
+| "Sistem bayaran tak dapat dihubungi" | `CHIP_SECRET_KEY`/`CHIP_BRAND_ID` salah atau kosong. |
+| E-mel reset tak sampai | Semak `MAIL_*` dan log; pastikan domain pengirim disahkan (SPF/DKIM). |
 
 ## 10. Kemas kini
 
 Push ke branch site. Jika Quick Deploy hidup, Forge deploy sendiri; jika tidak, tekan
 *Deploy Now*. Skrip deploy sudah jalankan migration dan `queue:restart`.
+
+## 11. Sebelum mula jual (bukan kerja kod)
+
+- [ ] **Peguam semak Terma dan Polisi Privasi** (`/terma`, `/privasi` masih bertanda DRAF).
+      Buang amaran DRAF dalam `resources/views/legal/*.blade.php` selepas disemak.
+- [ ] **Syarat Google Maps Platform** untuk perkhidmatan yang dijual semula (spec §6).
+      Catat keputusan dalam `docs/decisions.md`.
+- [ ] **Harga pelan** dalam `config/plans.php` (4b) berdasarkan kos sebenar.
+- [ ] **CHIP live**: akaun merchant disahkan, tukar ke kunci live.
+- [ ] **Polisi bayaran balik** jelas (Terma §4) dan sepadan dengan apa yang CHIP minta.
+- [ ] **Pendaftaran PDPA** jika perlu untuk kategori perniagaan anda.
+- [ ] **Google Search Console**: sahkan domain dan hantar `https://domain-anda/sitemap.xml`.

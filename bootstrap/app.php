@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\EnsureAdmin;
+use App\Http\Middleware\EnsureOnboarded;
+use App\Http\Middleware\SetCurrentWorkspace;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,9 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'workspace' => \App\Http\Middleware\SetCurrentWorkspace::class,
-            'admin' => \App\Http\Middleware\EnsureAdmin::class,
-            'onboarded' => \App\Http\Middleware\EnsureOnboarded::class,
+            'workspace' => SetCurrentWorkspace::class,
+            'admin' => EnsureAdmin::class,
+            'onboarded' => EnsureOnboarded::class,
         ]);
         $middleware->validateCsrfTokens(except: ['chip/callback']);
         $middleware->redirectGuestsTo(fn () => route('login'));
