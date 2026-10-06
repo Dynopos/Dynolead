@@ -88,9 +88,9 @@ Selagi harga model kosong, app **tidak akan panggil Claude** dan skrin Cari/Kos 
 amaran. Ini sengaja supaya had kos bulanan sentiasa betul.
 
 1. Buka `config/ai_prices.php` dalam repo.
-2. Isi harga semasa dari <https://www.anthropic.com/pricing> (USD setiap 1 juta token)
-   untuk kedua-dua model: `input`, `output`, `cache_write` (tulis cache 5 minit),
-   `cache_read`.
+2. Harga Claude **sudah diisi** (Oktober 2026): Haiku 4.5 $1/$5, Sonnet 5.5 $2/$10 setiap
+   1 juta token, dengan cache. Semak semula dengan <https://www.anthropic.com/pricing>
+   bila Anthropic ubah harga atau bila tukar model.
 3. Isi harga Places (USD setiap panggilan) dari halaman harga Google Maps Platform:
    `text_search` (Text Search Enterprise), `details` (Place Details Enterprise +
    Atmosphere, sebab ada review), `details_display` (Place Details Enterprise, tanpa review).

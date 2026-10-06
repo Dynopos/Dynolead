@@ -120,3 +120,5 @@
 - Halaman jualan, FAQ dan Terma dikemas kini. 187 test lulus.
 - Kekalkan caj Google Places (keputusan Bob). Carian berbayar disekat selagi harga Places
   belum diisi, supaya Places tidak dicaj RM0. 188 test lulus.
+- Harga Claude diisi dalam `config/ai_prices.php` (Haiku 4.5, Sonnet 5.5). Harga Places dan
+  `usd_to_myr` masih untuk Bob isi.

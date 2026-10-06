@@ -29,6 +29,10 @@ Catat setiap keputusan reka bentuk di sini (tarikh, keputusan, sebab).
   `require_no_website = true`. Bob boleh ubah di skrin Produk.
 - **Harga dalam `config/ai_prices.php` kosong (null), termasuk kadar USD→RM.** Selagi harga
   model kosong, app tidak panggil Claude (lihat Langkah 3) supaya had kos sentiasa betul.
+  Kemas kini Oktober 2026: harga Claude diisi atas arahan Bob (Haiku 4.5: $1 input, $5
+  output, $1.25 tulis cache, $0.10 baca cache; Sonnet 5.5: $2, $10, $2.50, $0.20, USD setiap
+  1 juta token). Harga Places dan `usd_to_myr` masih kosong untuk Bob isi; tanpa
+  `usd_to_myr` Claude masih tidak dipanggil.
 - **Zon masa** `Asia/Kuala_Lumpur`, bahasa `ms`.
 
 ## 2026-10-06 — Langkah 2 (Places, tapisan, cache)
