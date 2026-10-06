@@ -1,20 +1,23 @@
 <div class="space-y-5">
-    <x-page-header title="Admin" subtitle="Semua pelanggan dan kos platform bulan ini." />
+    <x-page-header title="Admin" subtitle="Semua pelanggan, hasil dan kos platform bulan ini." />
 
     @if ($flash)<x-alert type="success">{{ $flash }}</x-alert>@endif
 
+    @php
+        $margin = $totals['usage_charged'] - $totals['usage_cost'];
+    @endphp
     <dl class="grid grid-cols-2 gap-2">
         @foreach ([
-            ['Pelanggan', $totals['customers'].' · '.$totals['paying'].' pernah bayar', 'users'],
-            ['Hasil bulan ni', 'RM'.number_format($totals['revenue_month'], 2), 'wallet'],
-            ['Kredit dijual', number_format($totals['credits_sold_month']), 'plus'],
-            ['Kredit diguna', number_format($totals['credits_used_month']).' · '.$totals['searches_month'].' carian', 'search'],
+            ['Pelanggan', $totals['customers'].' · '.$totals['activated'].' aktif · '.$totals['in_trial'].' percubaan', 'users'],
+            ['Yuran aktif', 'RM'.number_format($totals['activation_revenue'], 2), 'check-circle'],
+            ['Tambah baki', 'RM'.number_format($totals['topup_revenue'], 2), 'wallet'],
+            ['Caj guna / untung', 'RM'.number_format($totals['usage_charged'], 2).' · +RM'.number_format($margin, 2), 'plus'],
             ['Kos AI platform', 'RM'.number_format($totals['ai_cost_month'], 2).' / '.number_format($totals['ai_limit'], 0), 'sparkles'],
-            ['Panggilan Places', number_format($totals['places_calls_month']).' · RM'.number_format($totals['places_cost_month'], 2), 'map-pin'],
+            ['Places', number_format($totals['places_calls_month']).' · RM'.number_format($totals['places_cost_month'], 2), 'map-pin'],
         ] as [$label, $value, $icon])
             <div class="card p-3.5">
                 <dt class="flex items-center gap-1.5 text-xs font-medium text-slate-500"><x-icon :name="$icon" class="h-4 w-4 text-slate-400" />{{ $label }}</dt>
-                <dd class="mt-1.5 text-base font-bold tabular-nums">{{ $value }}</dd>
+                <dd class="mt-1.5 text-sm font-bold tabular-nums">{{ $value }}</dd>
             </div>
         @endforeach
     </dl>
@@ -26,46 +29,52 @@
 
     <ul class="space-y-3">
         @foreach ($rows as $row)
-            @php($w = $row['workspace'])
+            @php
+                $w = $row['workspace'];
+                $tone = match ($row['status']) {
+                    'Aktif', 'Dalaman' => 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+                    'Percubaan' => 'bg-sky-50 text-sky-700 ring-sky-200',
+                    default => 'bg-rose-50 text-rose-700 ring-rose-200',
+                };
+            @endphp
             <li wire:key="ws-{{ $w->id }}" class="card p-4">
                 <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0">
                         <p class="truncate font-semibold">{{ $w->name }}</p>
                         <p class="truncate text-xs text-slate-500">{{ $row['owner']?->email }}</p>
                     </div>
-                    @if ($row['unlimited'])
-                        <span class="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">Dalaman</span>
-                    @elseif ($w->suspended_at)
-                        <span class="shrink-0 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 ring-1 ring-inset ring-rose-200">Digantung</span>
-                    @else
-                        <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-700">{{ $w->credits }} kredit</span>
-                    @endif
+                    <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset {{ $tone }}">{{ $row['status'] }}</span>
                 </div>
-                <p class="mt-2 text-xs text-slate-600">{{ $row['searches_month'] }} carian bulan ni · AI RM{{ number_format($row['ai_month'], 2) }} · daftar {{ $w->created_at->translatedFormat('j M Y') }}</p>
-                @unless ($row['unlimited'])
+                <p class="mt-2 text-xs text-slate-600">
+                    @if ($row['status'] === 'Percubaan') lead {{ $row['trial_leads_used'] }}/{{ $trialLeads }} · tamat {{ $w->trial_ends_at?->translatedFormat('j M') }} ·
+                    @elseif ($row['status'] !== 'Dalaman') baki <strong>{{ \App\Services\Billing\WalletService::rm($w->balance_sen) }}</strong> ·
+                    @endif
+                    {{ $row['searches_month'] }} carian bulan ni · kos AI RM{{ number_format($row['ai_month'], 2) }}
+                </p>
+                @if ($row['status'] !== 'Dalaman')
                     <div class="mt-3 flex flex-wrap gap-2">
-                        <button type="button" wire:click="manage({{ $w->id }})" class="btn-soft px-3 py-1.5 text-xs"><x-icon name="plus" class="h-3.5 w-3.5" />Kredit / bayaran</button>
-                        <button type="button" wire:click="toggleSuspend({{ $w->id }})" wire:confirm="Pasti?" class="btn-soft px-3 py-1.5 text-xs {{ $w->suspended_at ? 'text-emerald-700' : 'text-rose-600' }}">{{ $w->suspended_at ? 'Aktifkan' : 'Gantung' }}</button>
+                        <button type="button" wire:click="manage({{ $w->id }})" class="btn-soft px-3 py-1.5 text-xs"><x-icon name="plus" class="h-3.5 w-3.5" />Baki / bayaran</button>
+                        @unless ($w->activated_at)
+                            <button type="button" wire:click="extendTrial({{ $w->id }})" class="btn-soft px-3 py-1.5 text-xs">Percubaan +7 hari</button>
+                        @endunless
+                        <button type="button" wire:click="toggleSuspend({{ $w->id }})" wire:confirm="Pasti?" class="btn-soft px-3 py-1.5 text-xs {{ $w->suspended_at ? 'text-emerald-700' : 'text-rose-600' }}">{{ $w->suspended_at ? 'Aktifkan semula' : 'Gantung' }}</button>
                     </div>
                     @if ($managing === $w->id)
                         <div class="mt-3 space-y-2 rounded-xl bg-slate-50 p-3">
-                            <div class="grid grid-cols-2 gap-1 rounded-lg bg-white p-1 text-xs font-semibold ring-1 ring-slate-200">
-                                <button type="button" wire:click="$set('mode', 'grant')" @class(['rounded-md py-1.5', 'bg-slate-900 text-white' => $mode === 'grant'])>Beri kredit</button>
-                                <button type="button" wire:click="$set('mode', 'payment')" @class(['rounded-md py-1.5', 'bg-slate-900 text-white' => $mode === 'payment'])>Bayaran manual</button>
-                            </div>
-                            @if ($mode === 'grant')
-                                <input type="number" min="1" wire:model="amount" class="input py-2 text-sm" placeholder="Bilangan kredit">
-                            @else
-                                <select wire:model="pack" class="input py-2 text-sm">
-                                    @foreach ($packs as $p)<option value="{{ $p->key }}">{{ $p->name }} ({{ $p->credits }} kredit)</option>@endforeach
-                                </select>
+                            <select wire:model.live="mode" class="input py-2 text-sm">
+                                <option value="balance">Beri baki percuma (RM)</option>
+                                <option value="topup">Rekod bayaran tambah baki (RM)</option>
+                                @unless ($w->activated_at)<option value="activation">Rekod bayaran yuran aktif</option>@endunless
+                            </select>
+                            @if ($mode !== 'activation')
+                                <input type="number" step="0.01" min="1" wire:model="amount" class="input py-2 text-sm" placeholder="Jumlah RM">
                             @endif
                             <input type="text" wire:model="note" class="input py-2 text-sm" placeholder="Nota (cth: pindahan bank 7/10)">
                             @error('amount')<p class="text-xs text-rose-600">{{ $message }}</p>@enderror
-                            <button type="button" wire:click="{{ $mode === 'grant' ? 'grant' : 'recordPayment' }}({{ $w->id }})" class="btn-primary w-full">Simpan</button>
+                            <button type="button" wire:click="save({{ $w->id }})" class="btn-primary w-full">Simpan</button>
                         </div>
                     @endif
-                @endunless
+                @endif
             </li>
         @endforeach
     </ul>

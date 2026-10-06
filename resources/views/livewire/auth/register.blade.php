@@ -1,4 +1,4 @@
-<x-auth-card title="Dapat {{ config('credits.signup_bonus') }} carian percuma" subtitle="Tiada yuran bulanan. Bayar ikut carian bila perlu.">
+<x-auth-card title="Cuba percuma" :subtitle="config('billing.trial_leads').' lead atau '.config('billing.trial_days').' hari, mana dulu. Tanpa kad kredit.'">
     <form wire:submit="register" class="space-y-4">
         <x-field label="Nama anda" name="name" hint="Nama ni muncul dalam mesej, cth: “Saya Ali dari ...”">
             <input type="text" wire:model="name" autocomplete="name" class="input" placeholder="Ali">

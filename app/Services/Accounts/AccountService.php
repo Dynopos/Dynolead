@@ -4,14 +4,11 @@ namespace App\Services\Accounts;
 
 use App\Models\User;
 use App\Models\Workspace;
-use App\Services\Billing\CreditService;
 use Illuminate\Support\Facades\DB;
 
-/** Sign-up: one user owns one new workspace, with free starter credits. */
+/** Sign-up: one user owns one new workspace, on the free trial. */
 class AccountService
 {
-    public function __construct(private CreditService $credits) {}
-
     public function register(string $name, string $business, string $email, string $password): User
     {
         return DB::transaction(function () use ($name, $business, $email, $password) {
@@ -19,7 +16,8 @@ class AccountService
                 'name' => trim($business),
                 'slug' => Workspace::uniqueSlug($business),
                 'sender_name' => trim($name),
-                'plan' => 'kredit',
+                'plan' => 'pelanggan',
+                'trial_ends_at' => now()->addDays((int) config('billing.trial_days', 14)),
             ]);
 
             $user = User::query()->create([
@@ -29,11 +27,6 @@ class AccountService
                 'email' => mb_strtolower(trim($email)),
                 'password' => $password,
             ]);
-
-            $bonus = (int) config('credits.signup_bonus', 0);
-            if ($bonus > 0) {
-                $this->credits->grant($workspace, $bonus, 'signup_bonus', 'Kredit percuma pendaftaran', userId: $user->id);
-            }
 
             return $user;
         });

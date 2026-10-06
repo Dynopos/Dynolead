@@ -11,7 +11,7 @@ class Payment extends Model
     use BelongsToWorkspace;
 
     protected $fillable = [
-        'workspace_id', 'user_id', 'pack', 'credits', 'amount_sen', 'currency', 'status', 'chip_purchase_id',
+        'workspace_id', 'user_id', 'kind', 'amount_sen', 'currency', 'status', 'chip_purchase_id',
         'checkout_url', 'is_test', 'paid_at', 'period_start', 'period_end', 'note',
     ];
 
@@ -19,7 +19,6 @@ class Payment extends Model
     {
         return [
             'is_test' => 'boolean',
-            'credits' => 'integer',
             'paid_at' => 'datetime',
             'period_start' => 'datetime',
             'period_end' => 'datetime',

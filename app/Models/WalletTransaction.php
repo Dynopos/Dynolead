@@ -6,13 +6,18 @@ use App\Models\Concerns\BelongsToWorkspace;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class CreditTransaction extends Model
+class WalletTransaction extends Model
 {
     use BelongsToWorkspace;
 
     public const UPDATED_AT = null;
 
-    protected $fillable = ['workspace_id', 'amount', 'balance_after', 'reason', 'search_id', 'payment_id', 'user_id', 'note'];
+    protected $fillable = ['workspace_id', 'amount_sen', 'balance_after_sen', 'reason', 'cost_sen', 'search_id', 'payment_id', 'user_id', 'note'];
+
+    protected function casts(): array
+    {
+        return ['amount_sen' => 'integer', 'balance_after_sen' => 'integer', 'cost_sen' => 'integer'];
+    }
 
     public function search(): BelongsTo
     {
@@ -22,10 +27,8 @@ class CreditTransaction extends Model
     public function label(): string
     {
         return match ($this->reason) {
-            'signup_bonus' => 'Kredit percuma',
-            'purchase' => 'Beli kredit',
-            'search' => 'Carian',
-            'refund' => 'Dipulangkan',
+            'topup' => 'Tambah baki',
+            'usage' => 'Carian',
             'admin' => 'Pelarasan',
             default => $this->reason,
         };

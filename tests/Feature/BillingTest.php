@@ -3,11 +3,11 @@
 use App\Jobs\SyncPendingPaymentsJob;
 use App\Livewire\AdminPage;
 use App\Livewire\BillingPage;
-use App\Models\CreditTransaction;
 use App\Models\Payment;
+use App\Models\WalletTransaction;
 use App\Models\Workspace;
 use App\Services\Billing\BillingService;
-use App\Services\Billing\CreditService;
+use App\Services\Billing\WalletService;
 use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -17,14 +17,14 @@ beforeEach(function () {
     config([
         'services.chip.key' => 'test-chip-key',
         'services.chip.brand_id' => 'brand-uuid',
-        'credits.packs.pek30.price_myr' => 99,
+        'billing.activation_fee_myr' => 23.90,
     ]);
 
     // A real RSA key pair so signatures are checked for real.
     $this->key = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
     config(['services.chip.public_key' => openssl_pkey_get_details($this->key)['key']]);
 
-    $this->workspace->update(['plan' => 'kredit']);
+    $this->workspace->forceFill(['plan' => 'pelanggan', 'activated_at' => null, 'balance_sen' => 0])->save();
     app(CurrentWorkspace::class)->set($this->workspace->refresh());
     actingAsOwner();
 });
@@ -47,20 +47,28 @@ function signed(string $body, $key): string
     return base64_encode($signature);
 }
 
-function startCheckout(): Payment
+function startCheckout(string $kind = 'activation', int $amount = 50): Payment
 {
     Http::fake(['gate.chip-in.asia/api/v1/purchases/' => Http::response(['id' => 'pur_123', 'checkout_url' => 'https://gate.chip-in.asia/p/pur_123/', 'status' => 'created', 'is_test' => true], 201)]);
 
-    Livewire::test(BillingPage::class)->call('buy', 'pek30')->assertRedirect('https://gate.chip-in.asia/p/pur_123/');
+    $component = Livewire::test(BillingPage::class);
+    $kind === 'activation' ? $component->call('activate') : $component->call('topup', $amount);
+    $component->assertRedirect('https://gate.chip-in.asia/p/pur_123/');
 
-    return Payment::firstOrFail();
+    return Payment::latest('id')->firstOrFail();
 }
 
-it('creates a CHIP purchase in sen with callback and redirects', function () {
+function activatedWorkspace(): void
+{
+    test()->workspace->forceFill(['activated_at' => now()])->save();
+    app(CurrentWorkspace::class)->set(test()->workspace->refresh());
+}
+
+it('creates a CHIP purchase for the RM23.90 activation fee, in sen, with callback', function () {
     $payment = startCheckout();
 
-    expect($payment->amount_sen)->toBe(9900)
-        ->and($payment->credits)->toBe(30)
+    expect($payment->amount_sen)->toBe(2390)
+        ->and($payment->kind)->toBe('activation')
         ->and($payment->status)->toBe('created')
         ->and($payment->chip_purchase_id)->toBe('pur_123')
         ->and($payment->workspace_id)->toBe($this->workspace->id);
@@ -68,23 +76,35 @@ it('creates a CHIP purchase in sen with callback and redirects', function () {
     Http::assertSent(fn (Request $r) => $r->url() === 'https://gate.chip-in.asia/api/v1/purchases/'
         && $r->header('Authorization')[0] === 'Bearer test-chip-key'
         && $r['brand_id'] === 'brand-uuid'
-        && $r['purchase']['products'][0]['price'] === 9900
+        && $r['purchase']['products'][0]['price'] === 2390
         && $r['purchase']['currency'] === 'MYR'
         && $r['reference'] === $payment->reference()
         && $r['client']['email'] === $this->user->email
         && $r['success_callback'] === route('chip.callback'));
 });
 
-it('refuses packs without a price', function () {
-    Http::fake();
-
-    Livewire::test(BillingPage::class)->call('buy', 'pek100');
-
+it('only allows top-ups after activation, and only the listed amounts', function () {
+    // No fake yet: any CHIP call here would fail the test (stray request).
+    Livewire::test(BillingPage::class)->call('topup', 50)->assertSee('Aktifkan akaun dahulu');
     expect(Payment::count())->toBe(0);
-    Http::assertNothingSent();
+
+    activatedWorkspace();
+    Livewire::test(BillingPage::class)->call('topup', 37);
+    expect(Payment::count())->toBe(0);
+
+    $payment = startCheckout('topup', 50);
+    expect($payment->kind)->toBe('topup')->and($payment->amount_sen)->toBe(5000);
 });
 
-it('adds the credits after a verified callback confirmed with CHIP', function () {
+it('does not charge activation twice', function () {
+    activatedWorkspace();
+
+    Livewire::test(BillingPage::class)->call('activate')->assertSee('dah aktif');
+
+    expect(Payment::count())->toBe(0);
+});
+
+it('activates the account after a verified callback confirmed with CHIP', function () {
     $payment = startCheckout();
     Http::fake(['gate.chip-in.asia/api/v1/purchases/pur_123/' => Http::response(chipPurchase($payment))]);
 
@@ -94,8 +114,9 @@ it('adds the credits after a verified callback confirmed with CHIP', function ()
 
     $payment->refresh();
     expect($payment->status)->toBe('paid')
-        ->and($this->workspace->refresh()->credits)->toBe(30)
-        ->and(CreditTransaction::where('reason', 'purchase')->value('payment_id'))->toBe($payment->id);
+        ->and($this->workspace->refresh()->activated_at)->not->toBeNull()
+        ->and(app(WalletService::class)->inTrial($this->workspace))->toBeFalse()
+        ->and($this->workspace->balance_sen)->toBe(0);
 });
 
 it('rejects a callback with a bad signature and changes nothing', function () {
@@ -106,7 +127,7 @@ it('rejects a callback with a bad signature and changes nothing', function () {
         ->assertStatus(400);
 
     expect($payment->refresh()->status)->toBe('created')
-        ->and($this->workspace->refresh()->credits)->toBe(0);
+        ->and($this->workspace->refresh()->activated_at)->toBeNull();
 });
 
 it('does not trust a signed payload that CHIP itself says is unpaid', function () {
@@ -126,7 +147,7 @@ it('refuses a paid purchase whose amount does not match', function () {
     app(BillingService::class)->sync($payment);
 
     expect($payment->refresh()->status)->toBe('failed')
-        ->and($this->workspace->refresh()->credits)->toBe(0);
+        ->and($this->workspace->refresh()->activated_at)->toBeNull();
 });
 
 it('handles duplicate callbacks once', function () {
@@ -138,18 +159,21 @@ it('handles duplicate callbacks once', function () {
         $this->call('POST', '/chip/callback', [], [], [], ['HTTP_X_SIGNATURE' => signed($body, $this->key)], $body)->assertOk();
     }
 
-    expect($this->workspace->refresh()->credits)->toBe(30)
+    expect($this->workspace->refresh()->activated_at)->not->toBeNull()
         ->and(Payment::where('status', 'paid')->count())->toBe(1);
 });
 
-it('adds a second pack on top of the current balance', function () {
-    app(CreditService::class)->grant($this->workspace, 4, 'admin');
-    $payment = startCheckout();
+it('adds a paid top-up to the balance, once', function () {
+    activatedWorkspace();
+    app(WalletService::class)->credit($this->workspace, 400, 'admin');
+    $payment = startCheckout('topup', 20);
     Http::fake(['gate.chip-in.asia/api/v1/purchases/pur_123/' => Http::response(chipPurchase($payment))]);
 
     app(BillingService::class)->sync($payment);
+    app(BillingService::class)->sync($payment->refresh());
 
-    expect($this->workspace->refresh()->credits)->toBe(34);
+    expect($this->workspace->refresh()->balance_sen)->toBe(2400)
+        ->and(WalletTransaction::where('reason', 'topup')->value('payment_id'))->toBe($payment->id);
 });
 
 it('confirms payment when the customer returns, and the hourly job catches missed callbacks', function () {
@@ -169,35 +193,47 @@ it('confirms payment when the customer returns, and the hourly job catches misse
 
 it('never shows or syncs another customer’s payment', function () {
     [$other] = otherWorkspace();
-    $theirs = app(CurrentWorkspace::class)->runAs($other, fn () => Payment::create(['pack' => 'pek30', 'credits' => 30, 'amount_sen' => 9900, 'chip_purchase_id' => 'pur_x']));
+    $theirs = app(CurrentWorkspace::class)->runAs($other, fn () => Payment::create(['kind' => 'topup', 'amount_sen' => 5000, 'chip_purchase_id' => 'pur_x']));
     Http::fake();
 
     $this->get(route('billing.return', $theirs))->assertNotFound();
     Http::assertNothingSent();
 });
 
-it('lets the admin grant credits, record a manual payment and suspend', function () {
+it('lets the admin give balance, record payments, extend trials and suspend', function () {
     actingAsAdmin();
-    $customer = Workspace::factory()->create(['plan' => 'kredit']);
+    $customer = Workspace::factory()->create(['plan' => 'pelanggan']);
 
     Livewire::test(AdminPage::class)
         ->assertSee($customer->name)
+        ->assertSee('Percubaan')
         ->call('manage', $customer->id)
-        ->set('amount', '5')
-        ->set('note', 'Pampasan')
-        ->call('grant', $customer->id)
-        ->assertSee('+5 kredit');
+        ->set('mode', 'activation')
+        ->set('note', 'Bayar tunai')
+        ->call('save', $customer->id)
+        ->assertSee('akaun diaktifkan');
 
     Livewire::test(AdminPage::class)
         ->call('manage', $customer->id)
-        ->set('mode', 'payment')
-        ->set('pack', 'pek30')
-        ->set('note', 'Pindahan bank')
-        ->call('recordPayment', $customer->id)
-        ->assertSee('bayaran Pek 30 direkod');
+        ->set('mode', 'balance')
+        ->set('amount', '5')
+        ->call('save', $customer->id)
+        ->assertSee('+RM5.00 baki');
 
-    expect($customer->refresh()->credits)->toBe(35)
-        ->and(Payment::withoutGlobalScope('workspace')->where('workspace_id', $customer->id)->value('status'))->toBe('manual');
+    Livewire::test(AdminPage::class)
+        ->call('manage', $customer->id)
+        ->set('mode', 'topup')
+        ->set('amount', '50')
+        ->call('save', $customer->id);
+
+    $customer->refresh();
+    expect($customer->activated_at)->not->toBeNull()
+        ->and($customer->balance_sen)->toBe(5500)
+        ->and(Payment::withoutGlobalScope('workspace')->where('workspace_id', $customer->id)->pluck('kind')->sort()->values()->all())->toBe(['activation', 'topup']);
+
+    $trialist = Workspace::factory()->create(['plan' => 'pelanggan', 'trial_ends_at' => now()->addDay()]);
+    Livewire::test(AdminPage::class)->call('extendTrial', $trialist->id);
+    expect($trialist->refresh()->trial_ends_at->isSameDay(now()->addDays(8)))->toBeTrue();
 
     Livewire::test(AdminPage::class)->call('toggleSuspend', $customer->id);
     expect($customer->refresh()->suspended_at)->not->toBeNull();

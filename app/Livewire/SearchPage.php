@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use App\Exceptions\BudgetExceeded;
 use App\Models\Product;
-use App\Services\Billing\CreditService;
+use App\Services\Billing\WalletService;
 use App\Services\Search\SearchService;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -86,7 +86,7 @@ class SearchPage extends Component
             'places_prices' => $e->placesPricesConfigured,
             'defaults' => $e->usedDefaults,
             'areas' => $areas,
-            'credits' => $service->creditCost($this->max_candidates),
+            'charge_sen' => $service->chargeEstimateSen($this->max_candidates, count($areas)),
         ];
     }
 
@@ -117,7 +117,7 @@ class SearchPage extends Component
         $this->estimate = null;
     }
 
-    public function render(SearchService $service, CreditService $credits)
+    public function render(SearchService $service, WalletService $wallet)
     {
         $searches = $service->recent();
         $product = $this->product_id ? Product::query()->find($this->product_id) : null;
@@ -127,11 +127,13 @@ class SearchPage extends Component
             'suggestedTypes' => $product?->default_place_types ?? [],
             'searches' => $searches,
             'running' => $searches->contains(fn ($s) => ! $s->status->isFinished()),
-            'blocker' => $service->blocker($this->max_candidates),
+            'blocker' => $service->blocker($this->max_candidates, max(1, count(SearchService::parseAreas($this->areas)))),
             'maxCandidates' => (int) config('dynoleads.search.hard_max', 60),
-            'creditCost' => $service->creditCost($this->max_candidates),
-            'balance' => $credits->balance(),
-            'unlimited' => $credits->isUnlimited(),
+            'chargeSen' => $service->chargeEstimateSen($this->max_candidates, max(1, count(SearchService::parseAreas($this->areas)))),
+            'balance' => $wallet->balanceSen(),
+            'unlimited' => $wallet->isUnlimited(),
+            'inTrial' => $wallet->inTrial(),
+            'trialLeadsLeft' => $wallet->trialLeadsRemaining(),
             'isAdmin' => (bool) auth()->user()?->isAdmin(),
         ]);
     }

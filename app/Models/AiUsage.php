@@ -15,7 +15,7 @@ class AiUsage extends Model
 
     protected $fillable = [
         'model', 'purpose', 'input_tokens', 'output_tokens', 'cache_read_tokens',
-        'cache_write_tokens', 'cost_estimate', 'lead_id', 'search_id',
+        'cache_write_tokens', 'cost_estimate', 'lead_id', 'search_id', 'billable_search_id',
     ];
 
     protected function casts(): array

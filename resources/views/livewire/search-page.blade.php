@@ -4,7 +4,7 @@
     @if ($blocker)
         <x-alert type="warning">
             {{ $blocker }}
-            <a href="{{ route('billing') }}" wire:navigate class="mt-1 block font-semibold underline">Tambah kredit</a>
+            <a href="{{ route('billing') }}" wire:navigate class="mt-1 block font-semibold underline">Pergi ke Bayaran</a>
         </x-alert>
     @endif
 
@@ -59,9 +59,11 @@
             </div>
             <input type="range" min="1" max="{{ $maxCandidates }}" step="1" wire:model.live.debounce.250ms="max_candidates" class="w-full accent-emerald-600" aria-label="Bilangan maksimum calon">
             <div class="flex justify-between text-[11px] text-slate-400"><span>1</span><span>Had {{ $maxCandidates }} setiap carian</span><span>{{ $maxCandidates }}</span></div>
-            @unless ($unlimited)
-                <p class="mt-2 flex items-center gap-1.5 text-xs text-slate-600"><x-icon name="wallet" class="h-4 w-4 text-emerald-600" />Carian ini guna <strong>{{ $creditCost }} kredit</strong> · baki {{ $balance }}</p>
-            @endunless
+            @if ($inTrial)
+                <p class="mt-2 flex items-center gap-1.5 text-xs text-slate-600"><x-icon name="sparkles" class="h-4 w-4 text-sky-600" />Percuma semasa percubaan · baki <strong>{{ $trialLeadsLeft }} lead</strong></p>
+            @elseif (! $unlimited)
+                <p class="mt-2 flex items-center gap-1.5 text-xs text-slate-600"><x-icon name="wallet" class="h-4 w-4 text-emerald-600" />Anggaran caj <strong>{{ \App\Services\Billing\WalletService::rm($chargeSen) }}</strong> · baki {{ \App\Services\Billing\WalletService::rm($balance) }}</p>
+            @endif
             @error('max_candidates')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
         </div>
 
@@ -80,7 +82,7 @@
                     <p class="mt-1 text-3xl font-bold tabular-nums">RM{{ number_format($estimate['total'], 2) }}</p>
                 @else
                     <p class="text-xs font-semibold uppercase tracking-wide text-emerald-50/90">Sahkan carian</p>
-                    <p class="mt-1 text-3xl font-bold tabular-nums">{{ $estimate['credits'] }} kredit</p>
+                    <p class="mt-1 text-3xl font-bold tabular-nums">{{ $inTrial ? 'Percuma' : ($unlimited ? 'Tiada caj' : '≈ '.\App\Services\Billing\WalletService::rm($estimate['charge_sen'])) }}</p>
                 @endif
                 <p class="text-xs text-emerald-50/90">{{ $estimate['candidates'] }} calon · {{ implode(' · ', $estimate['areas']) }}</p>
             </div>
@@ -91,17 +93,19 @@
                     <div class="flex justify-between py-2.5"><dt class="text-slate-500">Kos AI</dt><dd class="font-medium tabular-nums">RM{{ number_format($estimate['ai'], 2) }}</dd></div>
                     <div class="flex justify-between py-2.5"><dt class="text-slate-500">Google Places ({{ $estimate['text_search_calls'] + $estimate['details_calls'] }} panggilan)</dt>
                         <dd class="font-medium tabular-nums">@if($estimate['places_prices']) RM{{ number_format($estimate['places'], 2) }} @else <span class="text-amber-700">harga belum diisi</span> @endif</dd></div>
+                @elseif ($inTrial)
+                    <div class="flex justify-between py-2.5"><dt class="text-slate-500">Baki lead percubaan</dt><dd class="font-medium tabular-nums">{{ $trialLeadsLeft }} lead</dd></div>
                 @elseif (! $unlimited)
-                    <div class="flex justify-between py-2.5"><dt class="text-slate-500">Baki selepas carian</dt><dd class="font-medium tabular-nums">{{ max(0, $balance - $estimate['credits']) }} kredit</dd></div>
+                    <div class="flex justify-between py-2.5"><dt class="text-slate-500">Baki anda</dt><dd class="font-medium tabular-nums">{{ \App\Services\Billing\WalletService::rm($balance) }}</dd></div>
                 @endif
             </dl>
             <div class="space-y-3 p-4 pt-1">
                 @if ($estimate['defaults'])
                     <p class="flex gap-1.5 text-xs text-slate-500"><x-icon name="info" class="h-4 w-4 text-slate-400" />Belum cukup data 30 hari, jadi sebahagian anggaran guna nilai default (lulus 50%, sesuai 60%).</p>
                 @endif
-                @unless ($unlimited)
-                    <p class="flex gap-1.5 text-xs text-slate-500"><x-icon name="check-circle" class="h-4 w-4 text-emerald-500" />Kredit dipulangkan jika carian tak jumpa satu lead pun.</p>
-                @endunless
+                @if (! $unlimited && ! $inTrial)
+                    <p class="flex gap-1.5 text-xs text-slate-500"><x-icon name="info" class="h-4 w-4 text-slate-400" />Caj sebenar ikut penggunaan (kos AI{{ config('billing.include_places_cost') ? ' dan Google Maps' : '' }} + {{ rtrim(rtrim(number_format((float) config('billing.markup_percent'), 2), '0'), '.') }}%). Carian berhenti sendiri jika baki habis.</p>
+                @endif
                 <div class="flex gap-2">
                     <button type="button" wire:click="confirm" wire:loading.attr="disabled" class="btn-primary flex-1 py-3">
                         <x-icon name="bolt" class="h-5 w-5" /> Sahkan &amp; cari
@@ -170,8 +174,10 @@
                             @if ($isAdmin)
                             Anggaran RM{{ number_format((float) $search->estimate_myr, 2) }}
                             @if ($search->status->isFinished()) · <span class="font-semibold text-slate-700">kos sebenar RM{{ number_format($search->actual_cost_myr, 2) }}</span> @endif
-                        @elseif ($search->credits_charged > 0)
-                            {{ $search->credits_charged }} kredit @if ($search->credits_refunded_at) · <span class="font-semibold text-emerald-700">dipulangkan</span> @endif
+                        @elseif ($search->is_trial)
+                            Percubaan (percuma)
+                        @elseif ($search->charged_sen > 0)
+                            Caj {{ \App\Services\Billing\WalletService::rm($search->charged_sen) }}
                         @endif
                     </span>
                     @if ($done)

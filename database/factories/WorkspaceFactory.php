@@ -19,8 +19,9 @@ class WorkspaceFactory extends Factory
             'name' => $name,
             'slug' => Str::slug($name),
             'sender_name' => 'Ali',
-            'plan' => 'kredit',
-            'credits' => 0,
+            'plan' => 'pelanggan',
+            'balance_sen' => 0,
+            'trial_ends_at' => now()->addDays(14),
             'onboarded_at' => now(),
         ];
     }

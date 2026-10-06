@@ -5,7 +5,6 @@ use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\ResetPassword;
-use App\Models\CreditTransaction;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Workspace;
@@ -18,7 +17,7 @@ use Livewire\Livewire;
 
 beforeEach(fn () => app(CurrentWorkspace::class)->clear());
 
-it('registers a new business with its own workspace and free starter credits', function () {
+it('registers a new business with its own workspace on the free trial', function () {
     Livewire::test(Register::class)
         ->set('name', 'Ali')
         ->set('business', 'Ali Digital')
@@ -31,9 +30,10 @@ it('registers a new business with its own workspace and free starter credits', f
     $user = User::where('email', 'ali@contoh.my')->firstOrFail();
     expect($user->workspace->name)->toBe('Ali Digital')
         ->and($user->workspace->sender_name)->toBe('Ali')
-        ->and($user->workspace->plan)->toBe('kredit')
-        ->and($user->workspace->credits)->toBe(3)
-        ->and(CreditTransaction::withoutGlobalScope('workspace')->where('workspace_id', $user->workspace_id)->value('reason'))->toBe('signup_bonus')
+        ->and($user->workspace->plan)->toBe('pelanggan')
+        ->and($user->workspace->trial_ends_at->isSameDay(now()->addDays(14)))->toBeTrue()
+        ->and($user->workspace->activated_at)->toBeNull()
+        ->and($user->workspace->balance_sen)->toBe(0)
         ->and($user->isAdmin())->toBeFalse()
         ->and(Hash::check('rahsia123', $user->password))->toBeTrue();
 

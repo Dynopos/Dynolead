@@ -4,8 +4,8 @@
     <a href="{{ route('billing') }}" wire:navigate class="card flex items-center gap-3 p-4">
         <span class="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><x-icon name="wallet" /></span>
         <span class="flex-1">
-            <span class="block font-semibold">Tambah kredit</span>
-            <span class="block text-xs text-slate-500">Beli pek kredit dan sejarah pembelian</span>
+            <span class="block font-semibold">Bayaran</span>
+            <span class="block text-xs text-slate-500">Aktifkan akaun, tambah baki, sejarah bayaran</span>
         </span>
         <x-icon name="chevron-right" class="h-5 w-5 text-slate-400" />
     </a>

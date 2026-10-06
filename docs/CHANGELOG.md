@@ -110,3 +110,11 @@
 - Jana semula / follow-up percuma dengan had setiap lead.
 - Admin: beri kredit, rekod bayaran manual pek, statistik kredit dijual/diguna.
 - Halaman jualan, Terma dan FAQ dikemas kini untuk model kredit.
+
+### F2.7 — Percubaan, aktif sekali, bayar ikut guna
+- Ganti model kredit: percubaan 20 lead / 14 hari, yuran aktif RM23.90 sekali bayar,
+  baki RM prabayar yang ditolak ikut kos sebenar (AI + Google Places) + 20%.
+- `UsageMeter` dan `WalletService`; caj berperingkat, carian berhenti bila baki habis.
+- Halaman Bayaran (status percubaan, aktifkan, tambah baki), Baki (sejarah), anggaran RM
+  di skrin Cari, admin (yuran aktif, tambah baki, untung guna, lanjut percubaan).
+- Halaman jualan, FAQ dan Terma dikemas kini. 187 test lulus.

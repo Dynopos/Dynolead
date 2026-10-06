@@ -28,16 +28,15 @@
         <h2>3. Akaun</h2>
         <p>Anda bertanggungjawab menjaga kerahsiaan kata laluan. Satu akaun untuk satu bisnes. Kami boleh menggantung akaun yang melanggar terma ini.</p>
 
-        <h2>4. Kredit dan bayaran</h2>
+        <h2>4. Percubaan, pengaktifan dan bayaran</h2>
         <ul>
-            <li>Perkhidmatan dibayar ikut carian menggunakan kredit prabayar. Tiada yuran bulanan atau caj automatik.</li>
-            <li>Kos setiap carian (dalam kredit) dipaparkan sebelum anda mengesahkan carian.</li>
-            <li>Akaun baru mungkin menerima kredit percuma. Kredit percuma tiada nilai tunai.</li>
-            <li>Pek kredit dibayar melalui CHIP. Kami tidak menyimpan maklumat kad atau akaun bank anda.</li>
-            <li>Kredit tidak luput selagi akaun aktif, dan tidak boleh ditukar kepada wang tunai atau dipindah ke akaun lain.</li>
-            <li>Kredit dipulangkan secara automatik jika carian gagal atau tidak menghasilkan sebarang lead. Kredit yang telah digunakan untuk carian yang berjaya tidak dipulangkan.</li>
+            <li>Akaun baru mendapat percubaan percuma yang tamat apabila had lead atau had hari percubaan dicapai, mana yang dahulu.</li>
+            <li>Untuk terus menggunakan Perkhidmatan selepas percubaan, anda membayar yuran pengaktifan sekali sahaja.</li>
+            <li>Selepas diaktifkan, setiap carian dicaj daripada baki prabayar anda mengikut kos penggunaan sebenar (AI dan Google Maps) bagi carian itu, campur caj perkhidmatan. Anggaran caj dipaparkan sebelum anda mengesahkan carian; caj sebenar mungkin berbeza sedikit.</li>
+            <li>Carian berhenti apabila baki habis. Penggunaan sehingga saat itu tetap dicaj; baki boleh menjadi negatif sedikit dan akan ditolak daripada tambahan baki seterusnya.</li>
             <li>Jana semula mesej dan follow-up AI disediakan percuma dengan had penggunaan munasabah bagi setiap lead.</li>
-            <li>Bayaran pek kredit tidak dikembalikan, kecuali dikehendaki undang-undang.</li>
+            <li>Bayaran diproses oleh CHIP. Kami tidak menyimpan maklumat kad atau akaun bank anda. Tiada caj automatik.</li>
+            <li>Baki tidak luput selagi akaun aktif dan tidak boleh ditukar kepada wang tunai. Yuran pengaktifan dan tambahan baki tidak dikembalikan, kecuali dikehendaki undang-undang.</li>
         </ul>
 
         <h2>5. Data Google Maps</h2>

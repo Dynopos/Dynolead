@@ -3,14 +3,14 @@
 namespace App\Services\Admin;
 
 use App\Models\AiUsage;
-use App\Models\CreditTransaction;
 use App\Models\Payment;
 use App\Models\PlacesUsage;
 use App\Models\Search;
+use App\Models\WalletTransaction;
 use App\Models\Workspace;
 use App\Services\Ai\AiBudget;
 use App\Services\Billing\BillingService;
-use App\Services\Billing\CreditService;
+use App\Services\Billing\WalletService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -18,7 +18,7 @@ use Illuminate\Support\Collection;
 class AdminService
 {
     public function __construct(
-        private CreditService $credits,
+        private WalletService $wallet,
         private BillingService $billing,
         private AiBudget $budget,
     ) {}
@@ -26,14 +26,18 @@ class AdminService
     public function totals(): array
     {
         $start = now()->startOfMonth();
-        $txns = CreditTransaction::query()->withoutGlobalScope('workspace')->where('created_at', '>=', $start);
+        $payments = Payment::query()->withoutGlobalScope('workspace')->whereIn('status', ['paid', 'manual'])->where('paid_at', '>=', $start);
+        $usage = WalletTransaction::query()->withoutGlobalScope('workspace')->where('reason', 'usage')->where('created_at', '>=', $start);
+        $customers = Workspace::query()->where('plan', '!=', 'dalaman')->get();
 
         return [
-            'customers' => Workspace::query()->where('plan', '!=', 'dalaman')->count(),
-            'paying' => Payment::query()->withoutGlobalScope('workspace')->whereIn('status', ['paid', 'manual'])->distinct()->count('workspace_id'),
-            'revenue_month' => Payment::query()->withoutGlobalScope('workspace')->whereIn('status', ['paid', 'manual'])->where('paid_at', '>=', $start)->sum('amount_sen') / 100,
-            'credits_sold_month' => (int) (clone $txns)->where('reason', 'purchase')->sum('amount'),
-            'credits_used_month' => (int) -(clone $txns)->whereIn('reason', ['search', 'refund'])->sum('amount'),
+            'customers' => $customers->count(),
+            'activated' => $customers->whereNotNull('activated_at')->count(),
+            'in_trial' => $customers->filter(fn ($w) => $this->wallet->inTrial($w))->count(),
+            'activation_revenue' => (clone $payments)->where('kind', 'activation')->sum('amount_sen') / 100,
+            'topup_revenue' => (clone $payments)->where('kind', 'topup')->sum('amount_sen') / 100,
+            'usage_charged' => -(int) (clone $usage)->sum('amount_sen') / 100,
+            'usage_cost' => (int) (clone $usage)->sum('cost_sen') / 100,
             'searches_month' => Search::query()->withoutGlobalScope('workspace')->where('created_at', '>=', $start)->count(),
             'ai_cost_month' => $this->budget->platformSpentThisMonth(),
             'ai_limit' => $this->budget->platformLimit(),
@@ -65,20 +69,39 @@ class AdminService
         return $workspaces->map(fn (Workspace $w) => [
             'workspace' => $w,
             'owner' => $w->users->first(),
-            'unlimited' => $w->plan === 'dalaman',
+            'status' => $this->status($w),
+            'trial_leads_used' => $this->wallet->trialLeadsUsed($w),
             'searches_month' => (int) ($searches[$w->id] ?? 0),
             'ai_month' => round((float) ($ai[$w->id] ?? 0), 2),
         ]);
     }
 
-    public function grantCredits(Workspace $workspace, int $amount, ?string $note, ?int $adminId): void
+    public function status(Workspace $w): string
     {
-        $this->credits->grant($workspace, $amount, 'admin', $note ?: 'Kredit dari admin', userId: $adminId);
+        return match (true) {
+            $this->wallet->isUnlimited($w) => 'Dalaman',
+            $w->suspended_at !== null => 'Digantung',
+            $this->wallet->isActivated($w) => 'Aktif',
+            $this->wallet->inTrial($w) => 'Percubaan',
+            default => 'Percubaan tamat',
+        };
     }
 
-    public function recordPackPayment(Workspace $workspace, string $pack, ?string $note): void
+    public function addBalance(Workspace $workspace, float $myr, ?string $note, ?int $adminId): void
     {
-        $this->billing->recordManual($workspace, $pack, $note ?: 'Bayaran manual (admin)');
+        $this->wallet->credit($workspace, (int) round($myr * 100), 'admin', $note ?: 'Baki dari admin', userId: $adminId);
+    }
+
+    public function recordPayment(Workspace $workspace, string $kind, float $myr, ?string $note): void
+    {
+        $amount = $kind === 'activation' ? $this->wallet->activationFeeSen() : (int) round($myr * 100);
+        $this->billing->recordManual($workspace, $kind, $amount, $note ?: 'Bayaran manual (admin)');
+    }
+
+    public function extendTrial(Workspace $workspace, int $days = 7): void
+    {
+        $base = $workspace->trial_ends_at !== null && $workspace->trial_ends_at->isFuture() ? $workspace->trial_ends_at : now();
+        $workspace->forceFill(['trial_ends_at' => $base->copy()->addDays($days)])->save();
     }
 
     public function setSuspended(Workspace $workspace, bool $suspended): void

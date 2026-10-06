@@ -8,12 +8,11 @@ use App\Exceptions\PricesNotConfigured;
 use App\Models\Product;
 use App\Models\Search;
 use App\Services\Ai\AiBudget;
-use App\Services\Billing\CreditService;
+use App\Services\Billing\WalletService;
 use App\Services\Costs\CostEstimate;
 use App\Services\Costs\CostEstimator;
 use App\Services\Costs\PriceTable;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 /** Search screen logic: estimate first, then start after the user confirms (spec §3.2). */
 class SearchService
@@ -23,7 +22,7 @@ class SearchService
         private SearchPipeline $pipeline,
         private AiBudget $budget,
         private PriceTable $prices,
-        private CreditService $credits,
+        private WalletService $wallet,
     ) {}
 
     /** One area per line (or separated by ";"). Commas stay: "Pasir Mas, Kelantan" is one area. */
@@ -44,9 +43,9 @@ class SearchService
     }
 
     /** Why a search of $candidates cannot start right now, or null. */
-    public function blocker(int $candidates = 1): ?string
+    public function blocker(int $candidates = 1, int $areas = 1): ?string
     {
-        if ($reason = $this->credits->searchBlocker($candidates)) {
+        if ($reason = $this->wallet->accessBlocker()) {
             return $reason;
         }
 
@@ -58,6 +57,10 @@ class SearchService
             }
         }
 
+        if ($reason = $this->wallet->searchBlocker($this->estimate($candidates, array_fill(0, max(1, $areas), ''))->total())) {
+            return $reason;
+        }
+
         if ($this->budget->isExhausted()) {
             return BudgetExceeded::MESSAGE;
         }
@@ -65,35 +68,31 @@ class SearchService
         return null;
     }
 
-    /** Credits for a search of $max candidates (0 for the internal workspace). */
-    public function creditCost(int $max): int
+    /** Estimated customer charge in sen (0 in a trial or for the internal workspace). */
+    public function chargeEstimateSen(int $max, int $areas = 1): int
     {
-        return $this->credits->isUnlimited() ? 0 : $this->credits->costFor(SearchPipeline::clampMax($max));
+        if ($this->wallet->isUnlimited() || $this->wallet->inTrial()) {
+            return 0;
+        }
+
+        return $this->wallet->priceSen($this->estimate($max, array_fill(0, max(1, $areas), ''))->total());
     }
 
     /**
-     * Charge credits, then start the pipeline. Credits come back automatically
-     * if the search ends with no leads (CreditService::settleSearch).
+     * Start the pipeline. Nothing is charged up front: a paid search is billed
+     * for what it actually uses (WalletService::settle), and stops if the balance runs out.
      */
     public function start(Product $product, string $businessType, array $areas, int $max): Search
     {
         $max = SearchPipeline::clampMax($max);
 
-        if ($reason = $this->blocker($max)) {
+        if ($reason = $this->blocker($max, count($areas))) {
             throw new AccountLimitReached($reason);
         }
 
-        $workspace = $this->credits->workspace();
         $estimate = $this->estimate($max, $areas);
 
-        return DB::transaction(function () use ($workspace, $product, $businessType, $areas, $max, $estimate) {
-            $charged = $this->credits->chargeForSearch($workspace, $max, auth()->id());
-
-            $search = $this->pipeline->start($product, $businessType, $areas, $max, $estimate->total(), $charged);
-            $this->credits->attachSearch($workspace, $search);
-
-            return $search->refresh();
-        });
+        return $this->pipeline->start($product, $businessType, $areas, $max, $estimate->total(), $this->wallet->inTrial())->refresh();
     }
 
     /** @return Collection<int, Search> */

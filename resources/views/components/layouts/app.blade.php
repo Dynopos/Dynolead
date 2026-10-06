@@ -25,8 +25,8 @@
                 @endphp
                 <div class="flex items-center gap-2">
                 @if ($ws && $ws->plan !== 'dalaman')
-                    <a href="{{ route('billing') }}" wire:navigate class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold tabular-nums text-emerald-700 ring-1 ring-inset ring-emerald-200" title="Baki kredit">
-                        <x-icon name="wallet" class="h-3.5 w-3.5" />{{ $ws->credits }}
+                    <a href="{{ route('billing') }}" wire:navigate class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold tabular-nums text-emerald-700 ring-1 ring-inset ring-emerald-200" title="Baki">
+                        <x-icon name="wallet" class="h-3.5 w-3.5" />{{ $ws->activated_at ? \App\Services\Billing\WalletService::rm($ws->balance_sen) : 'Percubaan' }}
                     </a>
                 @endif
                 <a href="{{ route('account') }}" wire:navigate title="Akaun"
@@ -48,7 +48,7 @@
                 ['route' => 'search', 'label' => 'Cari', 'icon' => 'search'],
                 ['route' => 'leads', 'label' => 'Lead', 'icon' => 'users'],
                 ['route' => 'followups', 'label' => 'Follow-up', 'icon' => 'clock'],
-                ['route' => 'costs', 'label' => auth()->user()?->isAdmin() ? 'Kos' : 'Kredit', 'icon' => 'wallet'],
+                ['route' => 'costs', 'label' => auth()->user()?->isAdmin() ? 'Kos' : 'Baki', 'icon' => 'wallet'],
             ];
         @endphp
 

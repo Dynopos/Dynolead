@@ -63,8 +63,8 @@ Route::post('/keluar', function (Request $request) {
 Route::middleware(['auth', 'workspace'])->group(function () {
     Route::get('/mula', OnboardingPage::class)->name('onboarding');
     Route::get('/akaun', AccountPage::class)->name('account');
-    Route::get('/tambah-kredit', BillingPage::class)->name('billing');
-    Route::get('/tambah-kredit/selesai/{payment}', BillingReturnController::class)->name('billing.return');
+    Route::get('/bayaran', BillingPage::class)->name('billing');
+    Route::get('/bayaran/selesai/{payment}', BillingReturnController::class)->name('billing.return');
 });
 
 Route::middleware(['auth', 'workspace', 'onboarded'])->group(function () {

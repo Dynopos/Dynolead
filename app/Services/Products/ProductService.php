@@ -26,7 +26,7 @@ class ProductService
     /** @throws AccountLimitReached when a new product would exceed the limit */
     public function save(?Product $product, array $data): Product
     {
-        $max = (int) config('credits.max_products', 20);
+        $max = (int) config('billing.max_products', 20);
         if ($product === null && Product::query()->count() >= $max) {
             throw new AccountLimitReached("Had {$max} produk setiap akaun dah dicapai. Edit produk sedia ada atau hubungi kami.");
         }

@@ -25,8 +25,8 @@ class BillingReturnController
         return redirect()->route('billing')->with(
             $payment->isPaid() ? 'status' : 'warning',
             $payment->isPaid()
-                ? 'Terima kasih! Bayaran diterima. '.$payment->credits.' kredit dah ditambah.'
-                : 'Bayaran belum disahkan. Kalau anda dah bayar, kredit akan masuk dalam beberapa minit.',
+                ? ($payment->kind === 'activation' ? 'Terima kasih! Akaun anda dah aktif.' : 'Terima kasih! Baki RM'.number_format($payment->amountMyr(), 2).' dah ditambah.')
+                : 'Bayaran belum disahkan. Kalau anda dah bayar, status akan dikemas kini dalam beberapa minit.',
         );
     }
 }

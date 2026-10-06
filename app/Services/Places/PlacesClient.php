@@ -5,6 +5,7 @@ namespace App\Services\Places;
 use App\Exceptions\PlacesException;
 use App\Models\PlacesUsage;
 use App\Services\Costs\PriceTable;
+use App\Support\Billing\UsageMeter;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
@@ -62,7 +63,10 @@ class PlacesClient
         'googleMapsUri',
     ];
 
-    public function __construct(private PriceTable $prices) {}
+    public function __construct(
+        private PriceTable $prices,
+        private UsageMeter $meter,
+    ) {}
 
     /**
      * @return array{places: array<int, array>, next_page_token: ?string}
@@ -140,6 +144,7 @@ class PlacesClient
             'sku' => $sku,
             'place_id' => $placeId,
             'search_id' => $searchId,
+            'billable_search_id' => $this->meter->searchId(),
             'cost_estimate' => $this->prices->placesCostMyr($sku),
         ]);
     }

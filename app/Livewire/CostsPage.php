@@ -2,10 +2,10 @@
 
 namespace App\Livewire;
 
-use App\Models\CreditTransaction;
 use App\Models\Search;
+use App\Models\WalletTransaction;
 use App\Services\Ai\AiBudget;
-use App\Services\Billing\CreditService;
+use App\Services\Billing\WalletService;
 use App\Services\Costs\CostReport;
 use App\Services\Costs\PriceTable;
 use Livewire\Attributes\Title;
@@ -37,7 +37,7 @@ class CostsPage extends Component
         $this->saved = 'Had bulanan dikemas kini.';
     }
 
-    public function render(CostReport $report, PriceTable $prices, CreditService $credits, AiBudget $budget)
+    public function render(CostReport $report, PriceTable $prices, WalletService $wallet, AiBudget $budget)
     {
         $models = array_filter([config('dynoleads.ai.model_score'), config('dynoleads.ai.model_write')]);
 
@@ -45,11 +45,14 @@ class CostsPage extends Component
             'month' => $report->thisMonth(),
             'calls' => $report->lastCalls(50),
             'isAdmin' => (bool) auth()->user()?->isAdmin(),
-            'balance' => $credits->balance(),
-            'unlimited' => $credits->isUnlimited(),
+            'balance' => $wallet->balanceSen(),
+            'unlimited' => $wallet->isUnlimited(),
+            'activated' => $wallet->isActivated(),
+            'inTrial' => $wallet->inTrial(),
+            'trialLeadsUsed' => $wallet->trialLeadsUsed(),
             'searchesThisMonth' => Search::query()->where('created_at', '>=', now()->startOfMonth())->count(),
-            'creditsUsedThisMonth' => (int) -CreditTransaction::query()->where('created_at', '>=', now()->startOfMonth())->whereIn('reason', ['search', 'refund'])->sum('amount'),
-            'ledger' => CreditTransaction::query()->with('search')->latest('id')->limit(30)->get(),
+            'chargedThisMonth' => (int) -WalletTransaction::query()->where('reason', 'usage')->where('created_at', '>=', now()->startOfMonth())->sum('amount_sen'),
+            'ledger' => WalletTransaction::query()->with('search')->latest('id')->limit(30)->get(),
             'missingPrices' => array_values(array_filter($models, fn ($m) => ! $prices->isModelConfigured((string) $m))),
         ]);
     }

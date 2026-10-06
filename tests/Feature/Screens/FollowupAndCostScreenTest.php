@@ -100,13 +100,13 @@ it('warns the admin when prices are missing', function () {
     Livewire::test(CostsPage::class)->assertSee('Harga belum diisi');
 });
 
-it('shows customers their credits, not internal RM costs', function () {
-    $this->workspace->update(['plan' => 'kredit']);
+it('shows customers their balance, not internal costs', function () {
+    $this->workspace->forceFill(['plan' => 'pelanggan', 'activated_at' => now()])->save();
     actingAsOwner();
     AiUsage::create(['model' => 'claude-sonnet-5-5', 'purpose' => 'write', 'cost_estimate' => 2.50]);
 
     Livewire::test(CostsPage::class)
-        ->assertSee('Kredit')
+        ->assertSee('Baki')
         ->assertDontSee('RM2.50')
         ->assertDontSee('claude-sonnet-5-5')
         ->assertDontSee('config/ai_prices.php');

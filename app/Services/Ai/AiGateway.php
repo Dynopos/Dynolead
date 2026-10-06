@@ -4,6 +4,7 @@ namespace App\Services\Ai;
 
 use App\Models\AiUsage;
 use App\Services\Costs\PriceTable;
+use App\Support\Billing\UsageMeter;
 
 /**
  * Every Claude call goes through here:
@@ -18,6 +19,7 @@ class AiGateway
         private ClaudeClient $client,
         private AiBudget $budget,
         private PriceTable $prices,
+        private UsageMeter $meter,
     ) {}
 
     public function call(
@@ -55,6 +57,7 @@ class AiGateway
             ),
             'lead_id' => $leadId,
             'search_id' => $searchId,
+            'billable_search_id' => $this->meter->searchId(),
         ]);
 
         return $response;

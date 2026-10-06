@@ -1,17 +1,24 @@
 <div class="space-y-5">
 @if (! $isAdmin)
-    <x-page-header title="Kredit" subtitle="Baki dan sejarah penggunaan." />
+    <x-page-header title="Baki" subtitle="Baki dan sejarah caj carian." />
 
     <section class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 p-5 text-white shadow-lg shadow-emerald-700/20">
         <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10"></div>
-        <p class="relative text-xs font-semibold uppercase tracking-wide text-white/80">Baki kredit</p>
-        <p class="relative mt-1 text-5xl font-bold tabular-nums">{{ $unlimited ? '∞' : $balance }}</p>
-        <p class="relative text-sm text-white/80">{{ $creditsUsedThisMonth }} kredit diguna bulan ni · {{ $searchesThisMonth }} carian</p>
-        <a href="{{ route('billing') }}" wire:navigate class="btn relative mt-4 bg-white px-4 py-2.5 text-emerald-700 hover:bg-emerald-50"><x-icon name="plus" class="h-4 w-4" />Tambah kredit</a>
+        @if (! $activated && ! $unlimited)
+            <p class="relative text-xs font-semibold uppercase tracking-wide text-white/80">Percubaan percuma</p>
+            <p class="relative mt-1 text-5xl font-bold tabular-nums">{{ min($trialLeadsUsed, config('billing.trial_leads')) }}<span class="text-2xl text-white/70"> / {{ config('billing.trial_leads') }} lead</span></p>
+            <p class="relative text-sm text-white/80">{{ $inTrial ? 'Percubaan sedang berjalan' : 'Percubaan dah tamat' }}</p>
+            <a href="{{ route('billing') }}" wire:navigate class="btn relative mt-4 bg-white px-4 py-2.5 text-emerald-700 hover:bg-emerald-50">Aktifkan akaun</a>
+        @else
+            <p class="relative text-xs font-semibold uppercase tracking-wide text-white/80">Baki</p>
+            <p class="relative mt-1 text-5xl font-bold tabular-nums">{{ $unlimited ? '∞' : \App\Services\Billing\WalletService::rm($balance) }}</p>
+            <p class="relative text-sm text-white/80">Caj bulan ni {{ \App\Services\Billing\WalletService::rm($chargedThisMonth) }} · {{ $searchesThisMonth }} carian</p>
+            <a href="{{ route('billing') }}" wire:navigate class="btn relative mt-4 bg-white px-4 py-2.5 text-emerald-700 hover:bg-emerald-50"><x-icon name="plus" class="h-4 w-4" />Tambah baki</a>
+        @endif
     </section>
 
     <section class="space-y-2">
-        <h2 class="label">Sejarah kredit</h2>
+        <h2 class="label">Sejarah</h2>
         <ul class="card divide-y divide-slate-100">
             @forelse ($ledger as $t)
                 <li class="flex items-center justify-between gap-3 px-4 py-3">
@@ -22,8 +29,8 @@
                         </p>
                     </div>
                     <div class="shrink-0 text-right">
-                        <p @class(['text-sm font-bold tabular-nums', 'text-emerald-600' => $t->amount > 0, 'text-slate-700' => $t->amount < 0])>{{ $t->amount > 0 ? '+' : '' }}{{ $t->amount }}</p>
-                        <p class="text-[11px] text-slate-400">baki {{ $t->balance_after }}</p>
+                        <p @class(['text-sm font-bold tabular-nums', 'text-emerald-600' => $t->amount_sen > 0, 'text-slate-700' => $t->amount_sen < 0])>{{ $t->amount_sen > 0 ? '+' : '' }}{{ \App\Services\Billing\WalletService::rm($t->amount_sen) }}</p>
+                        <p class="text-[11px] text-slate-400">baki {{ \App\Services\Billing\WalletService::rm($t->balance_after_sen) }}</p>
                     </div>
                 </li>
             @empty

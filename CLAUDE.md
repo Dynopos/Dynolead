@@ -16,8 +16,10 @@ DYNOPRO (DynoPOS Technologies, Pasir Mas). App ini:
    follow-up.
 
 Pemilik produk: Bob (Borhan Sidqy). App ini **dijual kepada SME lain** (Fasa 2): setiap
-pelanggan ada workspace sendiri dan **bayar ikut carian** dengan kredit prabayar (pek
-dibeli melalui CHIP). Tiada langganan bulanan; carian hanya bila pelanggan minta. Bob ialah admin
+pelanggan ada workspace sendiri: **percubaan percuma 20 lead / 14 hari**, kemudian
+**yuran aktif sekali** (RM23.90), kemudian **bayar ikut guna** dari baki prabayar (kos sebenar
+AI + Places + markup, `config/billing.php`). Tiada langganan bulanan; carian hanya bila
+pelanggan minta. Bob ialah admin
 platform dan juga pengguna (workspace pelan `dalaman`). Kunci API Claude dan Google
 ialah kunci pusat milik Bob.
 
@@ -81,9 +83,10 @@ Kos utama app ini ialah token Claude dan panggilan Places. Ikut susunan ini:
 - Web search tool Claude: OFF secara default.
 - Setiap panggilan direkod dalam jadual `ai_usage` (token masuk, token keluar,
   anggaran kos).
-- Carian dibayar dengan kredit (`config/credits.php`), dipotong sebelum carian berjalan dan
-  dipulangkan jika tiada lead. Jana semula/follow-up percuma tetapi dihadkan setiap lead.
-  Had platform `AI_MONTHLY_BUDGET_MYR` melindungi kunci pusat.
+- Carian berbayar dimeter (`UsageMeter`, `billable_search_id`) dan dicaj berperingkat
+  (`WalletService::settle`); carian berhenti bila baki habis. Hanya kerja dalam meter
+  dicaj. Jana semula/follow-up percuma tetapi dihadkan setiap lead. Had platform
+  `AI_MONTHLY_BUDGET_MYR` melindungi kunci pusat.
 - Pelanggan tidak nampak kos RM dalaman, model atau amaran harga; itu untuk admin sahaja.
 
 ## Konvensyen

@@ -19,7 +19,8 @@ class Workspace extends Model
     protected function casts(): array
     {
         return [
-            'credits' => 'integer',
+            'balance_sen' => 'integer',
+            'activated_at' => 'datetime',
             'trial_ends_at' => 'datetime',
             'paid_until' => 'datetime',
             'suspended_at' => 'datetime',
@@ -45,9 +46,9 @@ class Workspace extends Model
         return $this->hasMany(User::class);
     }
 
-    public function creditTransactions(): HasMany
+    public function walletTransactions(): HasMany
     {
-        return $this->hasMany(CreditTransaction::class);
+        return $this->hasMany(WalletTransaction::class);
     }
 
     public function products(): HasMany

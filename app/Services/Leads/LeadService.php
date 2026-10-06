@@ -12,7 +12,7 @@ use App\Models\Lead;
 use App\Models\Suppression;
 use App\Services\Ai\AiBudget;
 use App\Services\Ai\MessageValidator;
-use App\Services\Billing\CreditService;
+use App\Services\Billing\WalletService;
 use App\Services\Costs\PriceTable;
 use App\Services\Places\PlaceRepository;
 use App\Support\MalaysianPhone;
@@ -33,7 +33,7 @@ class LeadService
         private MessageValidator $validator,
         private AiBudget $budget,
         private PriceTable $prices,
-        private CreditService $credits,
+        private WalletService $wallet,
     ) {}
 
     /** Leads that may be shown: never suppressed, never contacted for another product < 30 days. */
@@ -255,7 +255,7 @@ class LeadService
             throw new ContactRuleViolation('Kedai ni dalam senarai STOP. Mesej tak boleh dijana.');
         }
 
-        if ($reason = $this->credits->accessBlocker()) {
+        if ($reason = $this->wallet->accessBlocker()) {
             throw new AccountLimitReached($reason);
         }
 
@@ -276,11 +276,11 @@ class LeadService
     /** Free regenerations left for this lead (unlimited for the internal workspace). */
     public function regenerationsLeft(Lead $lead): int
     {
-        if ($this->credits->isUnlimited()) {
+        if ($this->wallet->isUnlimited()) {
             return PHP_INT_MAX;
         }
 
-        return max(0, (int) config('credits.max_regenerations_per_lead', 3) - (int) $lead->regenerate_count);
+        return max(0, (int) config('billing.max_regenerations_per_lead', 3) - (int) $lead->regenerate_count);
     }
 
     /** Leads marked "Dah hantar" today, for the 10–15 per day guidance. */

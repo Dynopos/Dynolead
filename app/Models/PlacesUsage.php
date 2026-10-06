@@ -13,7 +13,7 @@ class PlacesUsage extends Model
 
     public const UPDATED_AT = null;
 
-    protected $fillable = ['sku', 'place_id', 'cost_estimate', 'search_id'];
+    protected $fillable = ['sku', 'place_id', 'cost_estimate', 'search_id', 'billable_search_id'];
 
     protected function casts(): array
     {

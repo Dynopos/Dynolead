@@ -10,7 +10,7 @@ use App\Jobs\GenerateFollowupJob;
 use App\Models\Lead;
 use App\Services\Ai\AiBudget;
 use App\Services\Ai\MessageValidator;
-use App\Services\Billing\CreditService;
+use App\Services\Billing\WalletService;
 use App\Support\MalaysianPhone;
 use Illuminate\Support\Collection;
 
@@ -22,7 +22,7 @@ class FollowupService
         private ContactRules $rules,
         private AiBudget $budget,
         private MessageValidator $validator,
-        private CreditService $credits,
+        private WalletService $wallet,
     ) {}
 
     /** @return Collection<int, Lead> */
@@ -44,11 +44,11 @@ class FollowupService
             throw new ContactRuleViolation('Kedai ni dalam senarai STOP.');
         }
 
-        if ($reason = $this->credits->accessBlocker()) {
+        if ($reason = $this->wallet->accessBlocker()) {
             throw new AccountLimitReached($reason);
         }
 
-        if (! $this->credits->isUnlimited() && $lead->followup_count >= (int) config('credits.max_followups_per_lead', 3)) {
+        if (! $this->wallet->isUnlimited() && $lead->followup_count >= (int) config('billing.max_followups_per_lead', 3)) {
             throw new AccountLimitReached('Had mesej follow-up AI untuk lead ini dah dicapai.');
         }
 

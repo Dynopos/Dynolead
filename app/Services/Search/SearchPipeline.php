@@ -6,6 +6,7 @@ use App\Enums\LeadStatus;
 use App\Enums\SearchStatus;
 use App\Exceptions\BudgetExceeded;
 use App\Exceptions\PricesNotConfigured;
+use App\Exceptions\WalletEmpty;
 use App\Jobs\FetchDetailsJob;
 use App\Jobs\FilterCandidatesJob;
 use App\Jobs\ScoreLeadsJob;
@@ -18,7 +19,7 @@ use App\Models\Product;
 use App\Models\Search;
 use App\Services\Ai\LeadScorer;
 use App\Services\Ai\MessageWriter;
-use App\Services\Billing\CreditService;
+use App\Services\Billing\WalletService;
 use App\Services\Leads\RuleFilter;
 use App\Services\Places\PlaceRepository;
 use App\Services\Places\PlacesClient;
@@ -38,11 +39,11 @@ class SearchPipeline
         private RuleFilter $filter,
         private LeadScorer $scorer,
         private MessageWriter $writer,
-        private CreditService $credits,
+        private WalletService $wallet,
     ) {}
 
     /** @param  array<int, string>  $areas */
-    public function start(Product $product, string $businessType, array $areas, int $max, ?float $estimateMyr = null, int $creditsCharged = 0): Search
+    public function start(Product $product, string $businessType, array $areas, int $max, ?float $estimateMyr = null, bool $isTrial = false): Search
     {
         $areas = array_values(array_filter(array_map('trim', $areas), 'strlen'));
         $businessType = trim($businessType);
@@ -56,7 +57,7 @@ class SearchPipeline
             'business_type' => $businessType,
             'areas' => $areas,
             'max_candidates' => self::clampMax($max),
-            'credits_charged' => $creditsCharged,
+            'is_trial' => $isTrial,
             'status' => SearchStatus::Pending,
             'estimate_myr' => $estimateMyr,
         ]);
@@ -172,6 +173,23 @@ class SearchPipeline
                 continue;
             }
 
+            // Trial: stop at the lead limit. Paid: charge usage so far, stop when the balance is gone.
+            // Both checks run before paying for Place Details or AI.
+            if ($search->is_trial && $this->wallet->trialLeadsRemaining() === 0) {
+                $search->addRejection($placeId, 'Had lead percubaan dicapai');
+                $search->save();
+
+                continue;
+            }
+
+            try {
+                $this->wallet->ensureFunds($search);
+            } catch (WalletEmpty $e) {
+                $this->stop($search, SearchStatus::BudgetExceeded, $e->getMessage());
+
+                return;
+            }
+
             $place = $this->repository->details($placeId, $search->id);
             $search->increment('places_calls');
 
@@ -221,6 +239,7 @@ class SearchPipeline
 
         if (! $this->guardAi($search, function () use ($leads, $search) {
             foreach ($leads as $lead) {
+                $this->wallet->ensureFunds($search);
                 $this->scorer->score($lead);
                 $search->increment('scored_count');
             }
@@ -248,6 +267,7 @@ class SearchPipeline
 
         if (! $this->guardAi($search, function () use ($leads, $search) {
             foreach ($leads as $lead) {
+                $this->wallet->ensureFunds($search);
                 $this->writer->write($lead);
                 $search->increment('written_count');
             }
@@ -278,8 +298,8 @@ class SearchPipeline
     {
         $search->refresh();
         $search->forceFill(['actual_cost_myr' => $this->actualCost($search)])->save();
+        $this->wallet->settle($search);
         $search->markStatus($status, $message);
-        $this->credits->settleSearch($search);
     }
 
     public function finish(Search $search): void
@@ -288,8 +308,8 @@ class SearchPipeline
         $search->forceFill([
             'actual_cost_myr' => $this->actualCost($search),
         ])->save();
+        $this->wallet->settle($search);
         $search->markStatus(SearchStatus::Done);
-        $this->credits->settleSearch($search);
     }
 
     public function actualCost(Search $search): float

@@ -26,12 +26,15 @@ it('says clearly that messages are sent by the user, not automatically', functio
     $this->get('/')->assertSee('Anda tekan hantar')->assertSee('Tiada blast');
 });
 
-it('sells credit packs and shows prices only once Bob sets them', function () {
-    $this->get('/')->assertSee('Harga akan diumumkan')->assertSee('bayar ikut carian')->assertSee('3 carian percuma');
+it('explains the pricing: free trial, RM23.90 once, then pay per search', function () {
+    $html = $this->get('/')
+        ->assertSee('20 lead atau 14 hari')
+        ->assertSee('RM23.90')
+        ->assertSee('Kos + 20%')
+        ->assertSee('Tiada yuran bulanan', false)
+        ->getContent();
 
-    config(['credits.packs.pek30.price_myr' => 90]);
-    $html = $this->get('/')->assertSee('RM90')->assertSee('RM3.00 setiap carian')->getContent();
-    expect($html)->toContain('"price":"90.00"');
+    expect($html)->toContain('"price":"23.90"');
 });
 
 it('sends signed-in users to their leads', function () {

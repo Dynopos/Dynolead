@@ -244,3 +244,34 @@ Bob: "Lead dicari semasa perlu sahaja. Caj pun berdasarkan carian sahaja."
 - **Fasa 1 (agen harian) tidak dibina**: carian hanya bila pelanggan minta.
 - Kolum lama (`trial_ends_at`, `paid_until`, `payments.period_*`) dibiarkan tetapi tidak
   digunakan; boleh dibuang dalam migration kemudian.
+
+## 2026-10-08 — Model bayaran akhir: percubaan, aktif sekali, caj ikut guna (arahan Bob)
+
+Bob: "Demo 20 lead atau 14 hari. Daftar RM23.90 sekali bayar. Caj ikut token Claude,
+contoh kos RM50 kita caj RM60." Ini **menggantikan** model kredit (commit sebelum ini).
+
+- **Percubaan:** `trial_leads` (20) lead atau `trial_days` (14) hari, mana dulu. Carian
+  percubaan percuma. Had lead disemak sebelum Place Details, jadi tiada kos melebihi had.
+- **Aktifkan akaun:** `activation_fee_myr` (RM23.90) sekali bayar melalui CHIP. **Tidak**
+  dimasukkan ke baki (yuran sahaja). Boleh dibayar semasa percubaan.
+- **Bayar ikut guna:** pelanggan tambah baki RM (`topup_options`: 20/50/100). Setiap carian
+  berbayar ditolak `kos sebenar × (1 + markup_percent/100)`, dibundarkan ke atas ke sen.
+- **Kos Google Places dimasukkan dalam caj** (`include_places_cost = true`). Sebab: satu
+  Place Details (dengan review) ~USD0.025 setiap kedai, selalunya lebih mahal daripada token
+  AI untuk kedai yang sama. Caj ikut token Claude sahaja akan rugi. Bob boleh tukar ke
+  `false` (`BILL_PLACES_COST=false`).
+- **Meter penggunaan:** setiap peringkat pipeline berjalan dalam `UsageMeter::runFor()`;
+  `AiGateway` dan `PlacesClient` tanda baris `ai_usage`/`places_usage` dengan
+  `billable_search_id`. Jana semula, follow-up dan paparan kad lead berlaku di luar meter,
+  jadi tidak dicaj (percuma, dengan had 3 kali setiap lead).
+- **Caj diselesaikan berperingkat** (`WalletService::settle`): sebelum setiap kedai/lead,
+  caj penggunaan setakat ini; jika baki ≤ 0, carian berhenti ("Baki habis"). Baki boleh
+  jadi negatif sedikit (satu langkah terakhir); tambahan baki seterusnya menampung.
+  Tiada caj di depan, tiada pulangan diperlukan.
+- **Sebelum carian:** baki mesti ≥ anggaran caj (§9.3 × markup). Pelanggan nampak anggaran
+  dalam RM ("≈ RM1.98") dan bahawa caj sebenar ikut penggunaan.
+- **`wallet_transactions.cost_sen`** simpan kos mentah di sebalik setiap caj (untuk admin
+  kira untung). Pelanggan tidak nampak kos mentah.
+- **Ketepatan harga penting:** caj dikira dari `config/ai_prices.php`. Jika harga di situ
+  lebih rendah dari harga sebenar Anthropic/Google, Bob rugi.
+- Migration kredit (belum pernah dideploy) diganti terus dengan migration baki RM.

@@ -12,7 +12,7 @@ use App\Models\Setting;
  *  - Platform limit (AI_MONTHLY_BUDGET_MYR): all customers together, protecting the
  *    central Anthropic key. Always applies.
  *  - Workspace limit: only when one is set (the admin's own workspace on the Kos page).
- *    Customers pay per search with credits, and free extras are capped per lead, so they
+ *    Customers pay for their searches from a prepaid balance, and free extras are capped per lead, so they
  *    have no separate RM limit.
  */
 class AiBudget

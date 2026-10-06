@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Http\Middleware\SetCurrentWorkspace;
+use App\Support\Billing\UsageMeter;
 use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -15,6 +16,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(CurrentWorkspace::class);
+        $this->app->singleton(UsageMeter::class);
     }
 
     public function boot(): void

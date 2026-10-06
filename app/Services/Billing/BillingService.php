@@ -8,9 +8,12 @@ use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 
 /**
- * Credit packs paid through CHIP (one-off purchases, no recurring charge).
+ * Payments through CHIP (one-off purchases, no recurring charge):
+ *  - 'activation': the one-time fee that turns a trial into a paying account;
+ *  - 'topup': adds RM to the prepaid balance that paid searches draw from.
  *
  * A payment only counts after CHIP confirms it: the signed callback is verified,
  * then the purchase is fetched again from CHIP and its amount, currency and
@@ -20,24 +23,38 @@ class BillingService
 {
     public function __construct(
         private ChipClient $chip,
-        private CreditService $credits,
+        private WalletService $wallet,
     ) {}
 
-    /** Create a CHIP purchase for a credit pack and return the checkout URL. */
-    public function startCheckout(Workspace $workspace, User $user, string $packKey): string
+    public function startActivation(Workspace $workspace, User $user): string
     {
-        $pack = $this->credits->pack($packKey);
-
-        if (! $pack->isForSale()) {
-            throw new AccountLimitReached('Pek ini belum dibuka untuk dibeli.');
+        if ($this->wallet->isActivated($workspace) || $this->wallet->isUnlimited($workspace)) {
+            throw new AccountLimitReached('Akaun ini dah aktif.');
         }
 
+        return $this->checkout($workspace, $user, 'activation', $this->wallet->activationFeeSen(), 'Dyno Leads: aktifkan akaun (sekali bayar)');
+    }
+
+    public function startTopup(Workspace $workspace, User $user, int $amountMyr): string
+    {
+        if (! in_array($amountMyr, array_map('intval', (array) config('billing.topup_options', [])), true)) {
+            throw new InvalidArgumentException('Jumlah tambah baki tidak sah.');
+        }
+
+        if (! $this->wallet->isActivated($workspace)) {
+            throw new AccountLimitReached('Aktifkan akaun dahulu sebelum tambah baki.');
+        }
+
+        return $this->checkout($workspace, $user, 'topup', $amountMyr * 100, 'Dyno Leads: tambah baki RM'.$amountMyr);
+    }
+
+    private function checkout(Workspace $workspace, User $user, string $kind, int $amountSen, string $label): string
+    {
         $payment = Payment::query()->create([
             'workspace_id' => $workspace->id,
             'user_id' => $user->id,
-            'pack' => $pack->key,
-            'credits' => $pack->credits,
-            'amount_sen' => $pack->priceSen(),
+            'kind' => $kind,
+            'amount_sen' => $amountSen,
             'currency' => 'MYR',
             'status' => 'created',
         ]);
@@ -46,11 +63,7 @@ class BillingService
             'client' => ['email' => $user->email, 'full_name' => $user->name],
             'purchase' => [
                 'currency' => 'MYR',
-                'products' => [[
-                    'name' => 'Dyno Leads '.$pack->name.' ('.$pack->credits.' kredit)',
-                    'price' => $pack->priceSen(),
-                    'quantity' => '1',
-                ]],
+                'products' => [['name' => $label, 'price' => $amountSen, 'quantity' => '1']],
             ],
             'reference' => $payment->reference(),
             'send_receipt' => true,
@@ -132,37 +145,37 @@ class BillingService
             }
 
             $payment->forceFill(['status' => 'paid', 'paid_at' => now()])->save();
-
-            $this->credits->grant(
-                Workspace::query()->findOrFail($payment->workspace_id),
-                $payment->credits,
-                'purchase',
-                $payment->reference(),
-                paymentId: $payment->id,
-                userId: $payment->user_id,
-            );
+            $this->apply($payment);
         });
     }
 
     /** Bob records a payment made outside CHIP (bank transfer, cash). */
-    public function recordManual(Workspace $workspace, string $packKey, ?string $note = null): Payment
+    public function recordManual(Workspace $workspace, string $kind, int $amountSen, ?string $note = null): Payment
     {
-        return DB::transaction(function () use ($workspace, $packKey, $note) {
-            $pack = $this->credits->pack($packKey);
-
+        return DB::transaction(function () use ($workspace, $kind, $amountSen, $note) {
             $payment = Payment::query()->create([
                 'workspace_id' => $workspace->id,
-                'pack' => $pack->key,
-                'credits' => $pack->credits,
-                'amount_sen' => $pack->priceSen(),
+                'kind' => $kind,
+                'amount_sen' => $amountSen,
                 'status' => 'manual',
                 'paid_at' => now(),
                 'note' => $note,
             ]);
 
-            $this->credits->grant($workspace, $pack->credits, 'purchase', $note ?: $payment->reference(), paymentId: $payment->id);
+            $this->apply($payment);
 
             return $payment;
         });
+    }
+
+    private function apply(Payment $payment): void
+    {
+        $workspace = Workspace::query()->lockForUpdate()->findOrFail($payment->workspace_id);
+
+        match ($payment->kind) {
+            'activation' => $workspace->activated_at ?? $workspace->forceFill(['activated_at' => now()])->save(),
+            'topup' => $this->wallet->credit($workspace, $payment->amount_sen, 'topup', $payment->note ?: $payment->reference(), $payment->id, $payment->user_id),
+            default => throw new InvalidArgumentException("Jenis bayaran {$payment->kind} tidak dikenali."),
+        };
     }
 }
