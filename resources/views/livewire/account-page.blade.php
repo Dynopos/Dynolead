@@ -1,6 +1,15 @@
 <div class="space-y-5">
     <x-page-header title="Akaun" subtitle="Maklumat bisnes dan log masuk." />
 
+    <a href="{{ route('billing') }}" wire:navigate class="card flex items-center gap-3 p-4">
+        <span class="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><x-icon name="wallet" /></span>
+        <span class="flex-1">
+            <span class="block font-semibold">Langganan</span>
+            <span class="block text-xs text-slate-500">Pelan, kuota dan bayaran</span>
+        </span>
+        <x-icon name="chevron-right" class="h-5 w-5 text-slate-400" />
+    </a>
+
     <form wire:submit="save" class="card space-y-4 p-4">
         <h2 class="label">Bisnes</h2>
         <x-field label="Nama bisnes" name="business"><input type="text" wire:model="business" class="input"></x-field>

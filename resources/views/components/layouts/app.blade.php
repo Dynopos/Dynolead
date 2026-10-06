@@ -38,7 +38,7 @@
                 ['route' => 'search', 'label' => 'Cari', 'icon' => 'search'],
                 ['route' => 'leads', 'label' => 'Lead', 'icon' => 'users'],
                 ['route' => 'followups', 'label' => 'Follow-up', 'icon' => 'clock'],
-                ['route' => 'costs', 'label' => 'Kos', 'icon' => 'wallet'],
+                ['route' => 'costs', 'label' => auth()->user()?->isAdmin() ? 'Kos' : 'Kuota', 'icon' => 'wallet'],
             ];
         @endphp
 

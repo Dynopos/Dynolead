@@ -2,7 +2,12 @@
     <x-page-header title="Cari kedai" subtitle="Pilih produk, jenis bisnes dan kawasan." />
 
     @if ($blocker)
-        <x-alert type="warning">{{ $blocker }}</x-alert>
+        <x-alert type="warning">
+            {{ $blocker }}
+            <a href="{{ route('billing') }}" wire:navigate class="mt-1 block font-semibold underline">Lihat pelan</a>
+        </x-alert>
+    @elseif ($leadsRemaining !== null)
+        <p class="flex items-center gap-1.5 text-xs text-slate-500"><x-icon name="info" class="h-4 w-4 text-slate-400" />Baki kuota bulan ni: <strong class="text-slate-700">{{ $leadsRemaining }} lead</strong></p>
     @endif
 
     <form wire:submit="calculate" class="card space-y-5 p-4">
@@ -54,8 +59,8 @@
                 <span class="text-sm font-medium text-slate-700">Bilangan maksimum calon</span>
                 <span class="rounded-lg bg-slate-900 px-2 py-0.5 text-sm font-bold tabular-nums text-white">{{ $max_candidates }}</span>
             </div>
-            <input type="range" min="1" max="60" step="1" wire:model.live.debounce.250ms="max_candidates" class="w-full accent-emerald-600" aria-label="Bilangan maksimum calon">
-            <div class="flex justify-between text-[11px] text-slate-400"><span>1</span><span>Default 20, had 60 setiap carian.</span><span>60</span></div>
+            <input type="range" min="1" max="{{ $maxCandidates }}" step="1" wire:model.live.debounce.250ms="max_candidates" class="w-full accent-emerald-600" aria-label="Bilangan maksimum calon">
+            <div class="flex justify-between text-[11px] text-slate-400"><span>1</span><span>Had pelan anda: {{ $maxCandidates }} setiap carian.</span><span>{{ $maxCandidates }}</span></div>
             @error('max_candidates')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
         </div>
 

@@ -45,6 +45,7 @@ it('never shows another customer’s products, leads or costs', function () {
 
     Livewire::test(ProductsPage::class)->assertDontSee('Produk Rahsia Orang Lain');
     Livewire::test(LeadsPage::class)->assertDontSee('Kedai kedai-lain');
+    actingAsAdmin();
     Livewire::test(CostsPage::class)->assertDontSee('9.99')->assertSee('RM0.00');
 });
 

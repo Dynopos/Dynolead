@@ -2,7 +2,9 @@
 
 namespace App\Services\Products;
 
+use App\Exceptions\PlanLimitReached;
 use App\Models\Product;
+use App\Services\Billing\PlanService;
 use Illuminate\Support\Str;
 
 /** Create and update product profiles (spec §3.1). */
@@ -22,8 +24,17 @@ class ProductService
     /**
      * @param  array  $data  validated form data
      */
+    public function __construct(private PlanService $plans) {}
+
+    /** @throws PlanLimitReached when a new product would exceed the plan */
     public function save(?Product $product, array $data): Product
     {
+        if ($product === null && ! $this->plans->canAddProduct()) {
+            $max = $this->plans->planOf()->maxProducts;
+
+            throw new PlanLimitReached("Pelan anda benarkan {$max} produk sahaja. Naik taraf pelan untuk tambah lagi.");
+        }
+
         $product ??= new Product;
 
         $variants = collect($data['pitch_variants'] ?? [])

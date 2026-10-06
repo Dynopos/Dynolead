@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Exceptions\PlanLimitReached;
 use App\Models\Product;
 use App\Services\Products\ProductService;
 use App\Support\Tenancy\CurrentWorkspace;
@@ -129,7 +130,13 @@ class ProductsPage extends Component
     {
         $data = $this->validate();
 
-        $product = $service->save($this->editingId ? Product::query()->findOrFail($this->editingId) : null, $data);
+        try {
+            $product = $service->save($this->editingId ? Product::query()->findOrFail($this->editingId) : null, $data);
+        } catch (PlanLimitReached $e) {
+            $this->addError('name', $e->getMessage());
+
+            return;
+        }
 
         session()->flash('status', "Produk {$product->name} disimpan.");
         $this->resetForm();

@@ -5,12 +5,14 @@ namespace App\Services\Leads;
 use App\Enums\LeadStatus;
 use App\Exceptions\BudgetExceeded;
 use App\Exceptions\ContactRuleViolation;
+use App\Exceptions\PlanLimitReached;
 use App\Jobs\RegenerateLeadJob;
 use App\Models\ContactLog;
 use App\Models\Lead;
 use App\Models\Suppression;
 use App\Services\Ai\AiBudget;
 use App\Services\Ai\MessageValidator;
+use App\Services\Billing\PlanService;
 use App\Services\Costs\PriceTable;
 use App\Services\Places\PlaceRepository;
 use App\Support\MalaysianPhone;
@@ -31,6 +33,7 @@ class LeadService
         private MessageValidator $validator,
         private AiBudget $budget,
         private PriceTable $prices,
+        private PlanService $plans,
     ) {}
 
     /** Leads that may be shown: never suppressed, never contacted for another product < 30 days. */
@@ -250,6 +253,10 @@ class LeadService
     {
         if ($this->rules->isSuppressed($lead->place_id) || $lead->status === LeadStatus::Tolak) {
             throw new ContactRuleViolation('Kedai ni dalam senarai STOP. Mesej tak boleh dijana.');
+        }
+
+        if ($reason = $this->plans->accessBlocker()) {
+            throw new PlanLimitReached($reason);
         }
 
         if ($this->budget->isExhausted()) {

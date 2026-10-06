@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'workspace' => \App\Http\Middleware\SetCurrentWorkspace::class,
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
+            'onboarded' => \App\Http\Middleware\EnsureOnboarded::class,
         ]);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(fn () => route('leads'));

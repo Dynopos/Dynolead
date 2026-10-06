@@ -19,6 +19,8 @@ return [
         'effort_write' => env('CLAUDE_EFFORT_WRITE', 'low'),
         'use_batch' => (bool) env('CLAUDE_USE_BATCH', false),
         'web_search' => (bool) env('CLAUDE_WEB_SEARCH', false),
+        // Platform-wide AI cost cap per month, all customers together (central key).
+        // Each customer is also capped by their plan (config/plans.php ai_budget_myr).
         'monthly_budget_myr' => (float) env('AI_MONTHLY_BUDGET_MYR', 100),
         'max_tokens_score' => 600,
         'max_tokens_write' => 2000,

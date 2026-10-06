@@ -177,3 +177,24 @@ melalui wa.me (spec §8: Fasa 0–2), tiada API WhatsApp tidak rasmi.
 - **Terma dan Polisi Privasi dalam bentuk DRAF** dengan amaran jelas. Mesti disemak peguam
   sebelum jual (PDPA, Google Maps, WhatsApp).
 - Data Fasa 0 sedia ada (jika ada) dipindah ke workspace "DynoPOS Technologies" oleh migration.
+
+### F2.3 — Pelan, kuota, onboarding
+- **`config/plans.php`**: `percubaan` (14 hari, 20 lead, 1 produk, 20 calon, had AI RM5),
+  `asas`, `pro`, `dalaman` (akaun Bob, tanpa had). **Harga `asas`/`pro` sengaja kosong**
+  (spec §11 soalan 4): pelan tanpa harga dipapar "Belum dibuka" dan tidak boleh dibeli.
+  Kuota dan had AI ialah cadangan awal; Bob laraskan selepas lihat kos sebenar setiap lead.
+- **Kuota lead ikut bulan kalendar** (sama seperti had AI), bukan tempoh bayaran 30 hari.
+  Lebih mudah difahami dan diaudit.
+- **Kuota disemak sebelum Place Details**, jadi lead yang melebihi kuota tidak menelan kos
+  Google atau AI.
+- **Dua had AI:** had pelanggan (tetapan sendiri, tidak boleh melebihi `ai_budget_myr` pelan)
+  dan had platform `AI_MONTHLY_BUDGET_MYR` (semua pelanggan, melindungi kunci pusat).
+  `AI_MONTHLY_BUDGET_MYR` kini bermaksud had **keseluruhan platform**, jadi nilainya perlu
+  dinaikkan bila pelanggan bertambah.
+- **Akses tamat** (percubaan/langganan tamat atau digantung): tiada carian, jana semula atau
+  follow-up AI. Lead sedia ada kekal boleh dilihat dan dibuka dalam WhatsApp (tiada kos).
+- **Halaman Kos dipecah:** pelanggan nampak "Kuota" (lead x/y, % AI, bilangan carian).
+  Butiran RM, model, token dan amaran harga hanya untuk admin. Mesej "harga belum diisi"
+  kepada pelanggan ditukar kepada "Perkhidmatan AI belum sedia".
+- **Wizard mula** (`/mula`) dengan templat (POS, website, pemasaran, kosong). Teks dalam
+  `[kurungan]` mesti diganti sebelum simpan. Pelanggan baru dihantar ke wizard; boleh langkau.

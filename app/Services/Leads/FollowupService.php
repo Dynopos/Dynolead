@@ -5,10 +5,12 @@ namespace App\Services\Leads;
 use App\Enums\LeadStatus;
 use App\Exceptions\BudgetExceeded;
 use App\Exceptions\ContactRuleViolation;
+use App\Exceptions\PlanLimitReached;
 use App\Jobs\GenerateFollowupJob;
 use App\Models\Lead;
 use App\Services\Ai\AiBudget;
 use App\Services\Ai\MessageValidator;
+use App\Services\Billing\PlanService;
 use App\Support\MalaysianPhone;
 use Illuminate\Support\Collection;
 
@@ -20,6 +22,7 @@ class FollowupService
         private ContactRules $rules,
         private AiBudget $budget,
         private MessageValidator $validator,
+        private PlanService $plans,
     ) {}
 
     /** @return Collection<int, Lead> */
@@ -39,6 +42,10 @@ class FollowupService
     {
         if ($this->rules->isSuppressed($lead->place_id)) {
             throw new ContactRuleViolation('Kedai ni dalam senarai STOP.');
+        }
+
+        if ($reason = $this->plans->accessBlocker()) {
+            throw new PlanLimitReached($reason);
         }
 
         if ($this->budget->isExhausted()) {

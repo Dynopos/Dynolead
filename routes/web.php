@@ -5,9 +5,11 @@ use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\ResetPassword;
+use App\Livewire\BillingPage;
 use App\Livewire\CostsPage;
 use App\Livewire\FollowupsPage;
 use App\Livewire\LeadsPage;
+use App\Livewire\OnboardingPage;
 use App\Livewire\ProductsPage;
 use App\Livewire\SearchPage;
 use Illuminate\Http\Request;
@@ -34,10 +36,15 @@ Route::post('/keluar', function (Request $request) {
 })->name('logout');
 
 Route::middleware(['auth', 'workspace'])->group(function () {
+    Route::get('/mula', OnboardingPage::class)->name('onboarding');
+    Route::get('/akaun', AccountPage::class)->name('account');
+    Route::get('/langganan', BillingPage::class)->name('billing');
+});
+
+Route::middleware(['auth', 'workspace', 'onboarded'])->group(function () {
     Route::get('/produk', ProductsPage::class)->name('products');
     Route::get('/cari', SearchPage::class)->name('search');
     Route::get('/lead', LeadsPage::class)->name('leads');
     Route::get('/follow-up', FollowupsPage::class)->name('followups');
     Route::get('/kos', CostsPage::class)->name('costs');
-    Route::get('/akaun', AccountPage::class)->name('account');
 });

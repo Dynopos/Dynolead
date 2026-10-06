@@ -82,3 +82,10 @@
 - Workspace setiap pelanggan; semua data lead, produk, STOP, kos diasingkan.
 - Arahan `dynoleads:admin` untuk akaun Bob dan produk demo.
 - Terma dan Polisi Privasi (draf). Jenama DynoPOS dibuang dari antara muka.
+
+### F2.3 — Pelan, kuota, onboarding
+- `config/plans.php` (percubaan, asas, pro, dalaman) dan `PlanService`.
+- Had lead sebulan, bilangan produk, calon setiap carian, had AI setiap pelanggan + had
+  platform. Akaun tamat tidak boleh cari atau guna AI.
+- Wizard produk pertama dengan templat. Halaman Langganan (pelan dan penggunaan).
+- Halaman Kuota untuk pelanggan; butiran kos RM untuk admin sahaja.

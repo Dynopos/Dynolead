@@ -3,10 +3,12 @@
 namespace App\Services\Search;
 
 use App\Exceptions\BudgetExceeded;
+use App\Exceptions\PlanLimitReached;
 use App\Exceptions\PricesNotConfigured;
 use App\Models\Product;
 use App\Models\Search;
 use App\Services\Ai\AiBudget;
+use App\Services\Billing\PlanService;
 use App\Services\Costs\CostEstimate;
 use App\Services\Costs\CostEstimator;
 use App\Services\Costs\PriceTable;
@@ -20,6 +22,7 @@ class SearchService
         private SearchPipeline $pipeline,
         private AiBudget $budget,
         private PriceTable $prices,
+        private PlanService $plans,
     ) {}
 
     /** One area per line (or separated by ";"). Commas stay: "Pasir Mas, Kelantan" is one area. */
@@ -42,9 +45,19 @@ class SearchService
     /** Why a search cannot start right now, or null. */
     public function blocker(): ?string
     {
+        if ($reason = $this->plans->accessBlocker()) {
+            return $reason;
+        }
+
+        if ($this->plans->leadsRemaining() === 0) {
+            return 'Kuota lead bulan ini dah habis. Naik taraf pelan atau tunggu bulan depan.';
+        }
+
         foreach ([config('dynoleads.ai.model_score'), config('dynoleads.ai.model_write')] as $model) {
             if (! $this->prices->isModelConfigured((string) $model)) {
-                return PricesNotConfigured::forModel((string) $model)->getMessage();
+                return auth()->user()?->isAdmin()
+                    ? PricesNotConfigured::forModel((string) $model)->getMessage()
+                    : 'Perkhidmatan AI belum sedia. Sila cuba sebentar lagi atau hubungi kami.';
             }
         }
 
@@ -58,9 +71,10 @@ class SearchService
     public function start(Product $product, string $businessType, array $areas, int $max): Search
     {
         if ($reason = $this->blocker()) {
-            throw new BudgetExceeded($reason);
+            throw new PlanLimitReached($reason);
         }
 
+        $max = min($max, $this->plans->maxCandidates());
         $estimate = $this->estimate($max, $areas);
 
         return $this->pipeline->start($product, $businessType, $areas, $max, $estimate->total());

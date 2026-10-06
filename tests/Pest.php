@@ -167,3 +167,11 @@ function cachePlace(string $placeId, array $overrides = []): void
         'fetched_at' => now(),
     ]);
 }
+
+/** Make the test user the platform admin (Bob) and sign in. */
+function actingAsAdmin(): TestCase
+{
+    test()->user->forceFill(['is_admin' => true])->save();
+
+    return test()->actingAs(test()->user);
+}

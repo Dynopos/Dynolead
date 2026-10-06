@@ -7,6 +7,7 @@ use App\Models\AiUsage;
 use App\Models\Lead;
 use App\Models\PlacesUsage;
 use App\Models\Product;
+use App\Models\Setting;
 use App\Services\Ai\AiBudget;
 use Database\Seeders\ProductSeeder;
 use Livewire\Livewire;
@@ -66,7 +67,8 @@ it('does not offer WhatsApp for a follow-up containing a banned word', function 
     expect($html)->not->toContain('wa.me');
 });
 
-it('shows this month cost, Places calls and the last AI calls', function () {
+it('shows this month cost, Places calls and the last AI calls to the admin', function () {
+    actingAsAdmin();
     AiUsage::create(['model' => 'claude-haiku-4-5-20251001', 'purpose' => 'score', 'input_tokens' => 1200, 'output_tokens' => 300, 'cost_estimate' => 1.25]);
     AiUsage::create(['model' => 'claude-sonnet-5-5', 'purpose' => 'write', 'input_tokens' => 1500, 'output_tokens' => 700, 'cost_estimate' => 2.50]);
     PlacesUsage::create(['sku' => 'text_search', 'cost_estimate' => 0.15]);
@@ -81,7 +83,8 @@ it('shows this month cost, Places calls and the last AI calls', function () {
         ->assertSee('claude-sonnet-5-5');
 });
 
-it('changes the monthly limit', function () {
+it('lets the admin change the monthly limit', function () {
+    actingAsAdmin();
     Livewire::test(CostsPage::class)
         ->set('limit', '250')
         ->call('saveLimit')
@@ -90,8 +93,27 @@ it('changes the monthly limit', function () {
     expect(app(AiBudget::class)->limit())->toBe(250.0);
 });
 
-it('warns when prices are missing', function () {
+it('warns the admin when prices are missing', function () {
+    actingAsAdmin();
     config(['ai_prices.models' => []]);
 
     Livewire::test(CostsPage::class)->assertSee('Harga belum diisi');
+});
+
+it('shows customers their quota, not internal RM costs', function () {
+    $this->workspace->update(['plan' => 'asas']);
+    actingAsOwner();
+    AiUsage::create(['model' => 'claude-sonnet-5-5', 'purpose' => 'write', 'cost_estimate' => 2.50]);
+    Lead::factory()->count(3)->create();
+
+    Livewire::test(CostsPage::class)
+        ->assertSee('Kuota')
+        ->assertSee('3')
+        ->assertSee('/ 150')
+        ->assertDontSee('RM2.50')
+        ->assertDontSee('claude-sonnet-5-5')
+        ->assertDontSee('config/ai_prices.php');
+
+    Livewire::test(CostsPage::class)->set('limit', '999')->call('saveLimit')->assertForbidden();
+    expect(Setting::get(AiBudget::SETTING_KEY))->toBeNull();
 });

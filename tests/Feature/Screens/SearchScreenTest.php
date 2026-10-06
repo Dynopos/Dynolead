@@ -95,8 +95,13 @@ it('blocks searching when the monthly AI limit is reached', function () {
     expect(Search::count())->toBe(0);
 });
 
-it('warns when AI prices are not filled in', function () {
+it('warns the admin when AI prices are not filled in, and shows customers a plain message', function () {
     config(['ai_prices.models' => []]);
+
+    actingAsOwner();
+    Livewire::test(SearchPage::class)->assertSee('Perkhidmatan AI belum sedia')->assertDontSee('ai_prices.php');
+
+    actingAsAdmin();
 
     Livewire::test(SearchPage::class)->assertSee('belum diisi dalam config/ai_prices.php');
 });

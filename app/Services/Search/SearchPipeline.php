@@ -18,6 +18,7 @@ use App\Models\Product;
 use App\Models\Search;
 use App\Services\Ai\LeadScorer;
 use App\Services\Ai\MessageWriter;
+use App\Services\Billing\PlanService;
 use App\Services\Leads\RuleFilter;
 use App\Services\Places\PlaceRepository;
 use App\Services\Places\PlacesClient;
@@ -37,6 +38,7 @@ class SearchPipeline
         private RuleFilter $filter,
         private LeadScorer $scorer,
         private MessageWriter $writer,
+        private PlanService $plans,
     ) {}
 
     /** @param  array<int, string>  $areas */
@@ -166,6 +168,14 @@ class SearchPipeline
         foreach ($search->passed_place_ids ?? [] as $placeId) {
             if (isset(($search->rejections ?? [])[$placeId])
                 || Lead::query()->where('place_id', $placeId)->where('product_id', $product->id)->exists()) {
+                continue;
+            }
+
+            // Plan quota: stop before paying for Place Details or AI.
+            if ($this->plans->leadsRemaining() === 0) {
+                $search->addRejection($placeId, 'Kuota lead bulan ini habis');
+                $search->save();
+
                 continue;
             }
 

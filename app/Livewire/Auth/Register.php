@@ -54,7 +54,7 @@ class Register extends Component
         Auth::login($user, remember: true);
         session()->regenerate();
 
-        return $this->redirectRoute('leads');
+        return $this->redirectRoute('onboarding');
     }
 
     public function render()

@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Exceptions\BudgetExceeded;
 use App\Models\Product;
+use App\Services\Billing\PlanService;
 use App\Services\Search\SearchService;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -27,7 +28,7 @@ class SearchPage extends Component
     public function mount(): void
     {
         $this->product_id = Product::query()->where('active', true)->orderBy('id')->value('id');
-        $this->max_candidates = (int) config('dynoleads.search.default_max', 20);
+        $this->max_candidates = min((int) config('dynoleads.search.default_max', 20), app(PlanService::class)->maxCandidates());
     }
 
     protected function rules(): array
@@ -36,7 +37,7 @@ class SearchPage extends Component
             'product_id' => 'required|exists:products,id',
             'business_type' => 'required|string|max:80',
             'areas' => 'required|string|max:300',
-            'max_candidates' => 'required|integer|min:1|max:'.config('dynoleads.search.hard_max', 60),
+            'max_candidates' => 'required|integer|min:1|max:'.app(PlanService::class)->maxCandidates(),
         ];
     }
 
@@ -44,7 +45,7 @@ class SearchPage extends Component
     {
         return [
             'required' => 'Medan ini wajib diisi.',
-            'max_candidates.max' => 'Had maksimum :max calon setiap carian.',
+            'max_candidates.max' => 'Pelan anda benarkan maksimum :max calon setiap carian.',
             'max_candidates.min' => 'Sekurang-kurangnya 1 calon.',
         ];
     }
@@ -115,7 +116,7 @@ class SearchPage extends Component
         $this->estimate = null;
     }
 
-    public function render(SearchService $service)
+    public function render(SearchService $service, PlanService $plans)
     {
         $searches = $service->recent();
         $product = $this->product_id ? Product::query()->find($this->product_id) : null;
@@ -126,6 +127,8 @@ class SearchPage extends Component
             'searches' => $searches,
             'running' => $searches->contains(fn ($s) => ! $s->status->isFinished()),
             'blocker' => $service->blocker(),
+            'maxCandidates' => $plans->maxCandidates(),
+            'leadsRemaining' => $plans->leadsRemaining(),
         ]);
     }
 }

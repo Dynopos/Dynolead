@@ -48,7 +48,7 @@ it('redirects guests to the login page', function () {
 it('shows the mobile menu with all five sections', function () {
     actingAsOwner()->get('/lead')
         ->assertOk()
-        ->assertSeeInOrder(['Produk', 'Cari', 'Lead', 'Follow-up', 'Kos']);
+        ->assertSeeInOrder(['Produk', 'Cari', 'Lead', 'Follow-up', 'Kuota']);
 });
 
 it('keeps secrets out of .env.example', function () {
