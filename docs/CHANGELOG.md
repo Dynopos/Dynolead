@@ -127,3 +127,5 @@
   Place Details Enterprise + Atmosphere $0.025, Place Details Enterprise $0.020 setiap panggilan.
 - `dynoleads:admin` boleh dijalankan dari Forge Commands (tanpa SSH): daftar dahulu di
   `/daftar`, kemudian command itu jadikan akaun admin dan workspacenya pelan `dalaman`.
+- Halaman jualan: hook baru ikut Bob ("Susah cari customer? Pening sales slow? Biar Dyno
+  Leads bantu anda cari lead." Kami cari lead, kami sediakan teks, anda cuma tekan hantar).
