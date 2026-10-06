@@ -4,6 +4,7 @@ use App\Enums\LeadStatus;
 use App\Enums\SearchStatus;
 use App\Jobs\FetchDetailsJob;
 use App\Jobs\FilterCandidatesJob;
+use App\Jobs\ScoreLeadsJob;
 use App\Jobs\SearchPlacesJob;
 use App\Models\ContactLog;
 use App\Models\Lead;
@@ -26,6 +27,8 @@ beforeEach(function () {
 /** Run the pipeline without the AI steps (those have their own tests). */
 function runPlacesSteps(Product $product, int $max = 20): Search
 {
+    Queue::fake([ScoreLeadsJob::class]);
+
     return app(SearchPipeline::class)->start($product, 'kedai runcit', ['Pasir Mas, Kelantan'], $max)->refresh();
 }
 
@@ -56,7 +59,9 @@ it('turns a search into leads and only fetches details for candidates that passe
 
     $search = runPlacesSteps($this->dynopos);
 
-    expect($search->status)->toBe(SearchStatus::Done)
+    Queue::assertPushed(ScoreLeadsJob::class, fn ($job) => $job->searchId === $search->id);
+
+    expect($search->status)->toBe(SearchStatus::Details)
         ->and($search->found_count)->toBe(4)
         ->and($search->passed_count)->toBe(2)
         ->and($search->lead_count)->toBe(2)

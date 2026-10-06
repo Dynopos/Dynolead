@@ -22,3 +22,14 @@
 - `MalaysianPhone`: 01x → 601x untuk wa.me, talian tetap 03–09 tiada WhatsApp.
 - Pipeline sebagai job berasingan: `SearchPlacesJob`, `FilterCandidatesJob`, `FetchDetailsJob`.
 - Rekod setiap panggilan Places dalam `places_usage`.
+
+### Langkah 3 — AI (nilai dan tulis)
+- `ClaudeClient` (Messages API, model dari `.env`, prompt caching pada system prompt,
+  output JSON berstruktur). Tiada tool web search.
+- `AiGateway` + `AiBudget::assertCanSpend()` sebelum setiap panggilan; `BudgetExceeded`
+  hentikan job dan carian ditanda "Had kos AI dicapai".
+- Setiap panggilan direkod dalam `ai_usage` (token masuk/keluar, cache read/write, kos RM).
+- `resources/prompts/score.md` dan `write.md` dengan `prompt_version`.
+- `MessageValidator`: tiada `banned_words`, ≤ 900 aksara, ada STOP, tiada harga rekaan.
+  Gagal → jana semula sekali → "Semak manual".
+- Job `ScoreLeadsJob`, `WriteMessagesJob`, `RegenerateLeadJob`.

@@ -14,13 +14,21 @@ use App\Support\MalaysianPhone;
 class RuleFilter
 {
     public const SUPPRESSED = 'Dalam senarai STOP';
+
     public const CONTACTED = 'Dah dihubungi kurang 30 hari';
+
     public const EXISTING_LEAD = 'Dah ada dalam senarai lead';
+
     public const CLOSED = 'Kedai dah tutup';
+
     public const LOW_RATING = 'Rating bawah minimum';
+
     public const FEW_REVIEWS = 'Review bawah minimum';
+
     public const TYPE_EXCLUDED = 'Jenis tak padan';
+
     public const HAS_WEBSITE = 'Dah ada website';
+
     public const NO_PHONE = 'Tiada nombor telefon';
 
     public function __construct(private ContactRules $rules) {}

@@ -4,12 +4,20 @@ namespace App\Services\Search;
 
 use App\Enums\LeadStatus;
 use App\Enums\SearchStatus;
+use App\Exceptions\BudgetExceeded;
+use App\Exceptions\PricesNotConfigured;
 use App\Jobs\FetchDetailsJob;
 use App\Jobs\FilterCandidatesJob;
+use App\Jobs\ScoreLeadsJob;
 use App\Jobs\SearchPlacesJob;
+use App\Jobs\WriteMessagesJob;
+use App\Models\AiUsage;
 use App\Models\Lead;
+use App\Models\PlacesUsage;
 use App\Models\Product;
 use App\Models\Search;
+use App\Services\Ai\LeadScorer;
+use App\Services\Ai\MessageWriter;
 use App\Services\Leads\RuleFilter;
 use App\Services\Places\PlaceRepository;
 use App\Services\Places\PlacesClient;
@@ -19,7 +27,7 @@ use InvalidArgumentException;
  * Search pipeline (spec §4). Each step runs in its own queue job and is
  * idempotent, so a failed step can be retried without repeating finished work.
  *
- *   SearchPlacesJob → FilterCandidatesJob → FetchDetailsJob → (AI steps)
+ *   SearchPlacesJob → FilterCandidatesJob → FetchDetailsJob → ScoreLeadsJob → WriteMessagesJob
  */
 class SearchPipeline
 {
@@ -27,6 +35,8 @@ class SearchPipeline
         private PlacesClient $places,
         private PlaceRepository $repository,
         private RuleFilter $filter,
+        private LeadScorer $scorer,
+        private MessageWriter $writer,
     ) {}
 
     /** @param  array<int, string>  $areas */
@@ -190,7 +200,82 @@ class SearchPipeline
 
     protected function afterDetails(Search $search): void
     {
+        ScoreLeadsJob::dispatch($search->id);
+    }
+
+    /** Step 4: AI scoring with the cheap model, for leads without a saved score. */
+    public function scoreLeads(Search $search): void
+    {
+        $search->markStatus(SearchStatus::Scoring);
+
+        $leads = Lead::query()
+            ->where('search_id', $search->id)
+            ->whereNull('fit')
+            ->where('needs_review', false)
+            ->where('status', LeadStatus::Baru)
+            ->orderBy('id')
+            ->get();
+
+        if (! $this->guardAi($search, function () use ($leads, $search) {
+            foreach ($leads as $lead) {
+                $this->scorer->score($lead);
+                $search->increment('scored_count');
+            }
+        })) {
+            return;
+        }
+
+        WriteMessagesJob::dispatch($search->id);
+    }
+
+    /** Step 5: write messages with the strong model, for fit leads without a message. */
+    public function writeMessages(Search $search): void
+    {
+        $search->markStatus(SearchStatus::Writing);
+        $threshold = (int) config('dynoleads.ai.fit_threshold');
+
+        $leads = Lead::query()
+            ->where('search_id', $search->id)
+            ->where('fit', '>=', $threshold)
+            ->whereNull('message')
+            ->where('needs_review', false)
+            ->where('status', LeadStatus::Baru)
+            ->orderBy('id')
+            ->get();
+
+        if (! $this->guardAi($search, function () use ($leads, $search) {
+            foreach ($leads as $lead) {
+                $this->writer->write($lead);
+                $search->increment('written_count');
+            }
+        })) {
+            return;
+        }
+
         $this->finish($search);
+    }
+
+    /** Run AI work; stop the search cleanly when the budget or prices block it. */
+    private function guardAi(Search $search, callable $work): bool
+    {
+        try {
+            $work();
+
+            return true;
+        } catch (BudgetExceeded $e) {
+            $this->stop($search, SearchStatus::BudgetExceeded, $e->getMessage());
+        } catch (PricesNotConfigured $e) {
+            $this->stop($search, SearchStatus::Failed, $e->getMessage());
+        }
+
+        return false;
+    }
+
+    private function stop(Search $search, SearchStatus $status, string $message): void
+    {
+        $search->refresh();
+        $search->forceFill(['actual_cost_myr' => $this->actualCost($search)])->save();
+        $search->markStatus($status, $message);
     }
 
     public function finish(Search $search): void
@@ -204,8 +289,8 @@ class SearchPipeline
 
     public function actualCost(Search $search): float
     {
-        $places = (float) \App\Models\PlacesUsage::query()->where('search_id', $search->id)->sum('cost_estimate');
-        $ai = (float) \App\Models\AiUsage::query()->where('search_id', $search->id)->sum('cost_estimate');
+        $places = (float) PlacesUsage::query()->where('search_id', $search->id)->sum('cost_estimate');
+        $ai = (float) AiUsage::query()->where('search_id', $search->id)->sum('cost_estimate');
 
         return round($places + $ai, 4);
     }

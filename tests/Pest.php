@@ -1,6 +1,11 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
+use Tests\TestCase;
 
 /*
 |--------------------------------------------------------------------------
@@ -10,15 +15,15 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 | real external API: every HTTP call must be faked with Http::fake().
 */
 
-pest()->extend(Tests\TestCase::class)
+pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature');
 
-pest()->extend(Tests\TestCase::class)
+pest()->extend(TestCase::class)
     ->in('Unit');
 
 /** Log in as the single Fasa 0 owner. */
-function actingAsOwner(): Tests\TestCase
+function actingAsOwner(): TestCase
 {
     return test()->withSession(['owner' => true]);
 }
@@ -58,12 +63,78 @@ function apiDetails(string $id, array $overrides = []): array
  */
 function fakePlaces(array $places, array $details = []): void
 {
-    Illuminate\Support\Facades\Http::fake([
-        'places.googleapis.com/v1/places:searchText' => Illuminate\Support\Facades\Http::response(['places' => $places]),
-        'places.googleapis.com/v1/places/*' => function (Illuminate\Http\Client\Request $request) use ($details) {
-            $id = rawurldecode(Illuminate\Support\Str::of(parse_url($request->url(), PHP_URL_PATH))->afterLast('/')->toString());
+    Http::fake([
+        'places.googleapis.com/v1/places:searchText' => Http::response(['places' => $places]),
+        'places.googleapis.com/v1/places/*' => function (Request $request) use ($details) {
+            $id = rawurldecode(Str::of(parse_url($request->url(), PHP_URL_PATH))->afterLast('/')->toString());
 
-            return Illuminate\Support\Facades\Http::response($details[$id] ?? apiDetails($id));
+            return Http::response($details[$id] ?? apiDetails($id));
         },
     ]);
+}
+
+/** Fill in test prices so the AI budget can be calculated (real prices live in config/ai_prices.php). */
+function withAiPrices(float $input = 1.0, float $output = 5.0): void
+{
+    config([
+        'ai_prices.usd_to_myr' => 4.5,
+        'ai_prices.models' => [
+            'claude-haiku-4-5-20251001' => ['input' => $input, 'output' => $output, 'cache_write' => $input * 1.25, 'cache_read' => $input / 10],
+            'claude-sonnet-5-5' => ['input' => $input * 2, 'output' => $output * 2, 'cache_write' => $input * 2.5, 'cache_read' => $input / 5],
+        ],
+    ]);
+}
+
+/** A Messages API response whose text block is $data as JSON. */
+function claudeReply(array|string $data, array $usage = []): array
+{
+    return [
+        'id' => 'msg_test',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'test-model',
+        'content' => [['type' => 'text', 'text' => is_string($data) ? $data : json_encode($data, JSON_UNESCAPED_UNICODE)]],
+        'stop_reason' => 'end_turn',
+        'usage' => array_replace([
+            'input_tokens' => 1000,
+            'output_tokens' => 200,
+            'cache_read_input_tokens' => 0,
+            'cache_creation_input_tokens' => 0,
+        ], $usage),
+    ];
+}
+
+function goodMessage(string $shop = 'Kedai Contoh'): string
+{
+    return "Salam {$shop} 👋\n\nSaya Bob dari DynoPOS Technologies, Pasir Mas. Ramai puji layanan mesra.\n\nKaunter selalu panjang waktu petang, POS boleh percepatkan.\n\nKalau nak info lanjut, balas je mesej ni atau tengok dynopos.my\n\nKalau tak berminat, balas STOP, saya tak ganggu lagi 🙏";
+}
+
+/**
+ * Fake Claude: score calls (CLAUDE_MODEL_SCORE) and write calls (CLAUDE_MODEL_WRITE)
+ * get their own reply queues. The last reply repeats when a queue runs out.
+ */
+function fakeClaude(array $scoreReplies = [], array $writeReplies = [], array $extra = []): void
+{
+    $queues = ['score' => $scoreReplies, 'write' => $writeReplies];
+
+    Http::fake(array_merge($extra, [
+        'api.anthropic.com/v1/messages' => function (Request $request) use (&$queues) {
+            $key = $request['model'] === config('dynoleads.ai.model_score') ? 'score' : 'write';
+            $reply = count($queues[$key]) > 1 ? array_shift($queues[$key]) : ($queues[$key][0] ?? null);
+            $reply ??= $key === 'score'
+                ? claudeReply(['fit' => 80, 'reason' => 'Kedai sibuk.', 'hook' => 'Layanan mesra.', 'gap' => 'Kaunter lambat.', 'flag' => null])
+                : claudeReply(['message' => goodMessage()]);
+
+            return Http::response($reply);
+        },
+    ]));
+}
+
+/** Requests sent to Claude for one purpose ("score" or "write"). */
+function claudeRequests(string $purpose): Collection
+{
+    $model = config($purpose === 'score' ? 'dynoleads.ai.model_score' : 'dynoleads.ai.model_write');
+
+    return Http::recorded(fn ($request) => str_contains($request->url(), 'api.anthropic.com') && $request['model'] === $model)
+        ->map(fn ($pair) => $pair[0]);
 }

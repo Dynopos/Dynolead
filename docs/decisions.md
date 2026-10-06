@@ -56,3 +56,37 @@ Catat setiap keputusan reka bentuk di sini (tarikh, keputusan, sebab).
   idempotent: jika diulang, langkah yang dah siap dilangkau (contoh: Text Search tidak
   dipanggil lagi jika `candidate_place_ids` sudah ada). Hanya `place_id` disimpan dalam
   `searches`.
+
+## 2026-10-06 — Langkah 3 (AI)
+
+- **HTTP client Laravel, bukan SDK PHP rasmi.** CLAUDE.md benarkan kedua-dua; HTTP client
+  dipilih supaya semua test boleh guna `Http::fake()` seperti diarah.
+- **Satu pintu untuk Claude: `AiGateway`.** Setiap panggilan: semak harga → 
+  `AiBudget::assertCanSpend(anggaran_terburuk)` → panggil → rekod `ai_usage`. Anggaran
+  terburuk = (aksara prompt ÷ 3) token masuk + `max_tokens` keluar. Test arkitektur
+  pastikan `ClaudeClient` hanya digunakan oleh `AiGateway`.
+- **Harga kosong = tiada panggilan AI** (`PricesNotConfigured`). Carian berhenti dengan
+  status "Gagal" dan mesej jelas supaya Bob isi `config/ai_prices.php`.
+- **Output JSON guna structured outputs** (`output_config.format` dengan JSON schema),
+  disokong oleh Haiku 4.5 dan Sonnet 5.5. Kod tetap semak JSON sendiri (`fit` diapit 0–100).
+- **`effort`:** `CLAUDE_EFFORT_WRITE=low` untuk model tulis (kurangkan token "thinking" yang
+  dibilkan sebagai output). Kosong untuk model nilai sebab Haiku 4.5 tidak sokong `effort`.
+- **Prompt caching:** system prompt (profil produk + peraturan) ditanda
+  `cache_control: ephemeral` dan tidak mengandungi data kedai, jadi ia sama untuk setiap
+  kedai bagi produk yang sama. *Nota:* had minimum cache ialah 4096 token untuk Haiku 4.5
+  dan 512 untuk Sonnet 5.5. System prompt nilai (~600 token) terlalu pendek untuk cache
+  pada Haiku, jadi `cache_read_tokens` untuk `score` mungkin 0. Ini tidak menambah kos.
+- **Semakan selepas jana** (§5.3) + satu semakan tambahan: jumlah `RMxxx` dalam mesej mesti
+  wujud dalam `pitch_core`/varian/`cta` (peraturan 6, AI tidak boleh reka harga). Percubaan
+  kedua diberi senarai masalah percubaan pertama. Gagal lagi → disimpan dengan
+  `needs_review` ("Semak manual") dan butang WhatsApp/Salin disembunyikan sehingga Bob
+  betulkan mesej (Langkah 4).
+- **Hasil AI tidak dijana semula tanpa diminta.** Lead sedia ada untuk `place_id + product_id`
+  tidak diproses semula oleh carian baru; skor/mesej yang ada tidak ditimpa melainkan
+  `force` (butang Jana semula). `score_prompt_version` dan `prompt_version` direkod.
+- **Fit < 50 → status `tak_sesuai`, tiada mesej.** Jika dinilai semula dan fit ≥ 50, status
+  kembali `baru`.
+- **`DB_QUEUE_RETRY_AFTER=900`.** Default Laravel 90 saat lebih pendek daripada job AI;
+  job panjang akan diambil oleh worker lain dan menyebabkan panggilan AI berganda.
+- **`CLAUDE_USE_BATCH`** dibaca dalam config tetapi Message Batches untuk agen malam ialah
+  kerja Fasa 1, belum dibina.

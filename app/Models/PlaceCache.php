@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /** Short-lived copy of Google Places content (spec §6). */
 class PlaceCache extends Model
@@ -23,7 +24,7 @@ class PlaceCache extends Model
         ];
     }
 
-    public static function cutoff(): \Illuminate\Support\Carbon
+    public static function cutoff(): Carbon
     {
         return now()->subHours((int) config('dynoleads.places.cache_hours'));
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\PlacesException;
 use App\Models\PlacesUsage;
 use App\Services\Places\PlacesClient;
 use Illuminate\Http\Client\Request;
@@ -74,4 +75,4 @@ it('throws a clear error when Google fails', function () {
     Http::fake(['places.googleapis.com/*' => Http::response(['error' => ['message' => 'API key not valid']], 400)]);
 
     app(PlacesClient::class)->textSearch('kedai');
-})->throws(App\Exceptions\PlacesException::class, 'API key not valid');
+})->throws(PlacesException::class, 'API key not valid');

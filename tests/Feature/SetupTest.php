@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Login;
 use App\Models\Product;
 use Database\Seeders\DatabaseSeeder;
 
@@ -52,12 +53,12 @@ it('shows the mobile menu with all five sections', function () {
 });
 
 it('logs in with the password from .env', function () {
-    Livewire\Livewire::test(App\Livewire\Login::class)
+    Livewire\Livewire::test(Login::class)
         ->set('password', 'salah')
         ->call('login')
         ->assertHasErrors('password');
 
-    Livewire\Livewire::test(App\Livewire\Login::class)
+    Livewire\Livewire::test(Login::class)
         ->set('password', 'rahsia-test')
         ->call('login')
         ->assertRedirect(route('leads'));

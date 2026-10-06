@@ -3,6 +3,7 @@
 use App\Jobs\PurgePlaceCacheJob;
 use App\Models\PlaceCache;
 use App\Services\Places\PlaceRepository;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Http;
 
 it('purges cached place data after PLACES_CACHE_HOURS', function () {
@@ -47,7 +48,7 @@ it('serves the lead card from cache, and fetches again once the cache expires', 
 });
 
 it('schedules the cache purge job', function () {
-    $events = collect(app(Illuminate\Console\Scheduling\Schedule::class)->events());
+    $events = collect(app(Schedule::class)->events());
 
     expect($events->contains(fn ($e) => str_contains((string) $e->description, 'purge-place-cache')))->toBeTrue();
 });
