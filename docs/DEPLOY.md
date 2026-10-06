@@ -141,7 +141,17 @@ Nota:
 
 ### 5b. Cipta akaun admin (sekali sahaja)
 
-SSH ke pelayan, dalam folder site:
+**Tanpa SSH (paling mudah):** daftar dahulu di `https://domain-anda/daftar` dengan e-mel
+Bob, kemudian dalam Forge → site → *Commands* jalankan:
+
+```bash
+php artisan dynoleads:admin bob@dynopos.my --demo-products
+```
+
+Akaun itu jadi admin, workspacenya jadi pelan `dalaman` (tanpa had dan tanpa caj), dan
+produk DynoPOS + murahwebsite.my dimasukkan. Log keluar dan masuk semula.
+
+**Dengan SSH:** dalam folder site:
 
 ```bash
 php artisan dynoleads:admin bob@dynopos.my --demo-products

@@ -56,6 +56,11 @@ class MakeAdmin extends Command
 
         $user->forceFill(['is_admin' => true])->save();
 
+        // An admin who signed up at /daftar first (no SSH needed): their own workspace becomes internal.
+        if ($user->workspace && $user->workspace->plan !== 'dalaman') {
+            $user->workspace->forceFill(['plan' => 'dalaman'])->save();
+        }
+
         if ($this->option('demo-products') && $user->workspace_id) {
             $current->runAs($user->workspace_id, fn () => (new ProductSeeder)->run());
             $user->workspace->forceFill(['onboarded_at' => now()])->save();

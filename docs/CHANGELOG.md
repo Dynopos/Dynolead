@@ -125,3 +125,5 @@
 - `usd_to_myr` = 4.70 (Bob). Harga Google Places masih untuk Bob isi.
 - Harga Google Places diisi ikut harga senarai Google: Text Search Enterprise $0.035,
   Place Details Enterprise + Atmosphere $0.025, Place Details Enterprise $0.020 setiap panggilan.
+- `dynoleads:admin` boleh dijalankan dari Forge Commands (tanpa SSH): daftar dahulu di
+  `/daftar`, kemudian command itu jadikan akaun admin dan workspacenya pelan `dalaman`.
