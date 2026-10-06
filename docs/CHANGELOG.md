@@ -58,3 +58,16 @@
   worker, cron scheduler, semakan selepas deploy).
 - `docs/fasa0-semakan.md`: pemetaan kotak §10 ke test.
 - 129 test lulus tanpa panggilan API sebenar.
+
+### Reka bentuk semula antara muka
+- Font Inter (dipasang melalui npm, tiada CDN luar), ikon SVG dalam talian, logo dan favicon.
+- Header dengan logo, menu bawah dengan penanda aktif dan ruang selamat iPhone.
+- Lead: kad dengan avatar, rating, cip kawasan/telefon/produk, kotak "Kenapa sesuai",
+  pratonton mesej gaya WhatsApp (dengan "Baca penuh"), butang WhatsApp utama, butang
+  Salin/Edit/Jana semula padat, status dengan titik warna, nota boleh dilipat, rentak
+  "Hantar hari ni" (x / 15).
+- Cari: pilih produk sebagai kad, cip jenis bisnes, gelangsar bilangan calon, anggaran
+  gaya resit, kemajuan carian sebagai langkah (Dicari → Ditapis → Dinilai → Siap).
+- Kos: kad utama kos vs had (warna ikut peratus), jubin statistik, senarai panggilan.
+- Produk: kad produk, borang berseksyen dengan suis togol. Follow-up: kad selaras Lead.
+- Skrin masuk baru. Semua skrin disemak pada 400px tanpa skrol mendatar.

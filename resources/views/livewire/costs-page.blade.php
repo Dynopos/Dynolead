@@ -1,72 +1,91 @@
-<div class="space-y-4">
-    <h1 class="text-xl font-bold">Kos</h1>
+<div class="space-y-5">
+    <x-page-header title="Kos" subtitle="Penggunaan AI dan Google Places bulan ini." />
 
     @if ($missingPrices)
-        <p class="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
-            Harga belum diisi dalam <code>config/ai_prices.php</code> untuk: {{ implode(', ', $missingPrices) }}.
+        <x-alert type="warning">
+            Harga belum diisi dalam <code class="rounded bg-amber-100 px-1">config/ai_prices.php</code> untuk: {{ implode(', ', $missingPrices) }}.
             AI tak akan dipanggil selagi harga kosong.
-        </p>
+        </x-alert>
     @endif
 
     @if ($month['exhausted'])
-        <p class="rounded-lg bg-red-50 p-3 text-sm text-red-800">{{ \App\Exceptions\BudgetExceeded::MESSAGE }}</p>
+        <x-alert type="danger">{{ \App\Exceptions\BudgetExceeded::MESSAGE }}</x-alert>
     @endif
 
-    <section class="space-y-3 rounded-xl border border-slate-200 bg-white p-4" aria-label="Bulan ini">
-        <h2 class="font-semibold">Bulan ini ({{ now()->translatedFormat('F Y') }})</h2>
-        <div>
-            <div class="flex justify-between text-sm">
-                <span>Kos AI</span>
-                <span><strong>RM{{ number_format($month['ai_cost'], 2) }}</strong> / RM{{ number_format($month['limit'], 2) }}</span>
-            </div>
-            <div class="mt-1 h-3 w-full overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-valuenow="{{ $month['percent'] }}" aria-valuemin="0" aria-valuemax="100">
-                <div @class(['h-full rounded-full', 'bg-emerald-500' => $month['percent'] < 80, 'bg-amber-500' => $month['percent'] >= 80 && $month['percent'] < 100, 'bg-red-500' => $month['percent'] >= 100]) style="width: {{ $month['percent'] }}%"></div>
-            </div>
-            <p class="mt-1 text-xs text-slate-500">{{ $month['percent'] }}% digunakan</p>
+    {{-- Hero: AI spend vs limit --}}
+    <section @class([
+        'relative overflow-hidden rounded-2xl p-5 text-white shadow-lg',
+        'bg-gradient-to-br from-emerald-500 to-teal-700 shadow-emerald-700/20' => $month['percent'] < 80,
+        'bg-gradient-to-br from-amber-500 to-orange-600 shadow-orange-700/20' => $month['percent'] >= 80 && $month['percent'] < 100,
+        'bg-gradient-to-br from-rose-500 to-red-700 shadow-red-700/20' => $month['percent'] >= 100,
+    ]) aria-label="Bulan ini">
+        <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10"></div>
+        <p class="relative text-xs font-semibold uppercase tracking-wide text-white/80">Kos AI · {{ now()->translatedFormat('F Y') }}</p>
+        <p class="relative mt-1 text-4xl font-bold tabular-nums">RM{{ number_format($month['ai_cost'], 2) }}</p>
+        <p class="relative text-sm text-white/80">daripada had RM{{ number_format($month['limit'], 2) }}</p>
+        <div class="relative mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/25" role="progressbar" aria-valuenow="{{ $month['percent'] }}" aria-valuemin="0" aria-valuemax="100">
+            <div class="h-full rounded-full bg-white" style="width: {{ max(2, $month['percent']) }}%"></div>
         </div>
-        <dl class="grid grid-cols-2 gap-y-1 text-sm">
-            <dt class="text-slate-600">Panggilan AI</dt><dd class="text-right">{{ number_format($month['ai_calls']) }}</dd>
-            <dt class="text-slate-600">Token masuk</dt><dd class="text-right">{{ number_format($month['input_tokens']) }}</dd>
-            <dt class="text-slate-600">Token keluar</dt><dd class="text-right">{{ number_format($month['output_tokens']) }}</dd>
-            <dt class="text-slate-600">Token dari cache</dt><dd class="text-right">{{ number_format($month['cache_read_tokens']) }}</dd>
-            <dt class="text-slate-600">Panggilan Places</dt><dd class="text-right">{{ number_format($month['places_calls']) }}</dd>
-            <dt class="text-slate-600">Kos Places</dt><dd class="text-right">RM{{ number_format($month['places_cost'], 2) }}</dd>
-        </dl>
+        <p class="relative mt-1.5 text-xs text-white/80">{{ $month['percent'] }}% digunakan · baki RM{{ number_format(max(0, $month['limit'] - $month['ai_cost']), 2) }}</p>
     </section>
 
-    <form wire:submit="saveLimit" class="space-y-2 rounded-xl border border-slate-200 bg-white p-4">
-        <x-field label="Had kos AI bulanan (RM)" name="limit">
-            <input type="number" step="1" min="0" wire:model="limit" class="input">
-        </x-field>
-        <button type="submit" class="w-full rounded-lg bg-slate-800 py-2.5 font-semibold text-white">Simpan had</button>
-        @if ($saved)<p class="text-xs text-emerald-800" role="status">{{ $saved }}</p>@endif
+    {{-- Stat tiles --}}
+    <dl class="grid grid-cols-2 gap-2">
+        @foreach ([
+            ['Panggilan AI', number_format($month['ai_calls']), 'sparkles', 'text-violet-600 bg-violet-50'],
+            ['Token masuk', number_format($month['input_tokens']), 'note', 'text-sky-600 bg-sky-50'],
+            ['Token keluar', number_format($month['output_tokens']), 'chat', 'text-emerald-600 bg-emerald-50'],
+            ['Token dari cache', number_format($month['cache_read_tokens']), 'bolt', 'text-amber-600 bg-amber-50'],
+            ['Panggilan Places', number_format($month['places_calls']), 'map-pin', 'text-rose-600 bg-rose-50'],
+            ['Kos Places', 'RM'.number_format($month['places_cost'], 2), 'wallet', 'text-teal-600 bg-teal-50'],
+        ] as [$label, $value, $icon, $tone])
+            <div class="card p-3.5">
+                <dt class="flex items-center gap-2 text-xs font-medium text-slate-500">
+                    <span class="grid h-7 w-7 place-items-center rounded-lg {{ $tone }}"><x-icon :name="$icon" class="h-4 w-4" /></span>{{ $label }}
+                </dt>
+                <dd class="mt-2 text-lg font-bold tabular-nums text-slate-900">{{ $value }}</dd>
+            </div>
+        @endforeach
+    </dl>
+
+    {{-- Limit --}}
+    <form wire:submit="saveLimit" class="card space-y-2 p-4">
+        <label for="limit" class="block text-sm font-medium text-slate-700">Had kos AI bulanan</label>
+        <div class="flex gap-2">
+            <div class="relative flex-1">
+                <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">RM</span>
+                <input id="limit" type="number" step="1" min="0" wire:model="limit" class="input pl-11 tabular-nums">
+            </div>
+            <button type="submit" class="btn-dark">Simpan had</button>
+        </div>
+        @error('limit')<p class="text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+        @if ($saved)<p class="flex items-center gap-1 text-xs font-medium text-emerald-700" role="status"><x-icon name="check-circle" class="h-4 w-4" />{{ $saved }}</p>@endif
     </form>
 
+    {{-- Last calls --}}
     <section class="space-y-2">
-        <h2 class="font-semibold">50 panggilan AI terakhir</h2>
-        <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-            <table class="w-full text-left text-xs">
-                <thead class="bg-slate-50 text-slate-500">
-                    <tr>
-                        <th class="px-2 py-2">Masa</th>
-                        <th class="px-2 py-2">Tujuan</th>
-                        <th class="px-2 py-2 text-right">Token</th>
-                        <th class="px-2 py-2 text-right">RM</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($calls as $call)
-                        <tr class="border-t border-slate-100">
-                            <td class="px-2 py-1.5 whitespace-nowrap">{{ $call->created_at?->format('d/m H:i') }}</td>
-                            <td class="px-2 py-1.5">{{ $call->purpose }}<span class="block text-[10px] text-slate-400">{{ $call->model }}</span></td>
-                            <td class="px-2 py-1.5 text-right whitespace-nowrap">{{ number_format($call->input_tokens) }} / {{ number_format($call->output_tokens) }}@if($call->cache_read_tokens)<span class="block text-[10px] text-slate-400">cache {{ number_format($call->cache_read_tokens) }}</span>@endif</td>
-                            <td class="px-2 py-1.5 text-right">{{ number_format($call->cost_estimate, 4) }}</td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="4" class="px-2 py-4 text-center text-slate-500">Belum ada panggilan AI.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+        <h2 class="label">50 panggilan AI terakhir</h2>
+        <ul class="card divide-y divide-slate-100">
+            @forelse ($calls as $call)
+                @php($tone = ['score' => 'bg-sky-50 text-sky-700', 'write' => 'bg-emerald-50 text-emerald-700', 'followup' => 'bg-violet-50 text-violet-700'][$call->purpose] ?? 'bg-slate-100 text-slate-600')
+                @php($label = ['score' => 'Nilai', 'write' => 'Tulis', 'followup' => 'Follow-up'][$call->purpose] ?? $call->purpose)
+                <li class="flex items-center gap-3 px-3.5 py-2.5">
+                    <span class="w-[72px] shrink-0 rounded-lg px-2 py-1 text-center text-[11px] font-semibold {{ $tone }}">{{ $label }}</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="truncate text-[11px] text-slate-400">{{ $call->model }}</p>
+                        <p class="text-xs tabular-nums text-slate-600">
+                            {{ number_format($call->input_tokens) }} masuk · {{ number_format($call->output_tokens) }} keluar
+                            @if ($call->cache_read_tokens) · {{ number_format($call->cache_read_tokens) }} cache @endif
+                        </p>
+                    </div>
+                    <div class="shrink-0 text-right">
+                        <p class="text-sm font-semibold tabular-nums">RM{{ number_format($call->cost_estimate, 4) }}</p>
+                        <p class="text-[11px] text-slate-400">{{ $call->created_at?->format('d/m H:i') }}</p>
+                    </div>
+                </li>
+            @empty
+                <li class="px-4 py-8 text-center text-sm text-slate-500">Belum ada panggilan AI.</li>
+            @endforelse
+        </ul>
     </section>
 </div>
