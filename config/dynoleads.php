@@ -8,6 +8,8 @@ return [
         'registration' => env('COMPANY_REGISTRATION'),
         'email' => env('COMPANY_EMAIL'),
         'address' => env('COMPANY_ADDRESS', 'Pasir Mas, Kelantan'),
+        // Public WhatsApp for prospects (sales page, terms, privacy).
+        'whatsapp' => env('COMPANY_WHATSAPP', '0182889932'),
     ],
 
     'ai' => [

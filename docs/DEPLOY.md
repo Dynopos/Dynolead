@@ -1,4 +1,4 @@
-# Deploy Dyno Leads ke Laravel Forge
+# Deploy Dyno Lead ke Laravel Forge
 
 Panduan ini untuk Fasa 2 (app dijual kepada ramai pelanggan, setiap pelanggan ada
 workspace sendiri). Ikut tertib dari atas ke bawah. Senarai "Sebelum mula jual" di

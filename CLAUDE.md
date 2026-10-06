@@ -1,11 +1,11 @@
-# CLAUDE.md — Dyno Leads
+# CLAUDE.md — Dyno Lead
 
 Arahan untuk Claude Code yang bekerja dalam repo ini. Baca fail ini dan
 `docs/dyno-leads-spec.md` sebelum mula apa-apa kerja.
 
 ## Apa app ini
 
-Dyno Leads ialah app prospek untuk SME Malaysia, sebahagian daripada ekosistem
+Dyno Lead ialah app prospek untuk SME Malaysia, sebahagian daripada ekosistem
 DYNOPRO (DynoPOS Technologies, Pasir Mas). App ini:
 
 1. cari bisnes tempatan ikut jenis dan kawasan (Google Places API),

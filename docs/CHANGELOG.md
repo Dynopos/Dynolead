@@ -131,3 +131,9 @@
   Leads bantu anda cari lead." Kami cari lead, kami sediakan teks, anda cuma tekan hantar).
 - Halaman jualan: harga "Bayar ikut lead" (anggaran RM setiap lead dan bilangan lead untuk
   RM20/RM50/RM100), dikira dari jadual harga oleh `PriceGuide`. FAQ harga dikemas kini.
+- Logo Dyno Lead (dinosaur) di header, footer, halaman masuk/daftar, favicon dan ikon skrin
+  utama telefon. Logo penuh dalam `public/images/logo.png` (JSON-LD).
+- WhatsApp syarikat (`COMPANY_WHATSAPP`, lalai 018-288 9932): butang "WhatsApp kami" terapung
+  di halaman jualan, nombor di footer, Terma dan Privasi. Pautan `wa.me` dengan mesej awal.
+- Nama produk ditukar ke **Dyno Lead**. Warna oren dari logo untuk butang ajakan dan sorotan
+  di halaman jualan (`btn-accent`); hijau kekal warna utama app.

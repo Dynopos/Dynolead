@@ -1,8 +1,8 @@
 <x-layouts.marketing>
     <x-slot:head>
         <x-seo.meta
-            title="Susah Cari Customer? Kami Cari Lead untuk SME | Dyno Leads"
-            description="Susah cari customer, sales slow? Dyno Leads cari lead di kawasan anda dan sediakan teks WhatsApp custom untuk setiap satu. Anda cuma tekan hantar.">
+            title="Susah Cari Customer? Kami Cari Lead untuk SME | Dyno Lead"
+            description="Susah cari customer, sales slow? Dyno Lead cari lead di kawasan anda dan sediakan teks WhatsApp custom untuk setiap satu. Anda cuma tekan hantar.">
             <script type="application/ld+json">{!! json_encode([
                 '@context' => 'https://schema.org',
                 '@graph' => array_values(array_filter([
@@ -10,11 +10,11 @@
                         '@type' => 'Organization',
                         'name' => config('dynoleads.company.name'),
                         'url' => url('/'),
-                        'logo' => asset('favicon.svg'),
+                        'logo' => asset('images/logo.png'),
                     ],
                     [
                         '@type' => 'SoftwareApplication',
-                        'name' => 'Dyno Leads',
+                        'name' => 'Dyno Lead',
                         'applicationCategory' => 'BusinessApplication',
                         'operatingSystem' => 'Web',
                         'inLanguage' => 'ms',
@@ -45,13 +45,14 @@
         {{-- Hero --}}
         <section class="relative overflow-hidden bg-gradient-to-b from-emerald-50 via-white to-white">
             <div class="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" aria-hidden="true"></div>
+            <div class="absolute -left-24 top-40 h-64 w-64 rounded-full bg-orange-200/40 blur-3xl" aria-hidden="true"></div>
             <div class="relative mx-auto grid max-w-5xl items-center gap-10 px-4 pb-16 pt-12 md:grid-cols-2 md:pt-20">
                 <div>
                     <p class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-200">
                         <x-icon name="sparkles" class="h-4 w-4" /> Cari prospek dengan AI untuk SME Malaysia
                     </p>
                     <h1 class="mt-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 md:text-5xl">
-                        Susah cari customer? Pening sales slow? <span class="text-emerald-600">Biar Dyno Leads bantu anda cari lead.</span>
+                        Susah cari customer? Pening sales slow? <span class="text-emerald-600">Biar <span class="text-orange-500">Dyno Lead</span> bantu anda cari lead.</span>
                     </h1>
                     <ul class="mt-6 space-y-3 text-lg text-slate-700">
                         <li class="flex gap-3"><x-icon name="search" class="mt-1 h-5 w-5 shrink-0 text-emerald-600" /><span><b>Kami cari lead</b> di kawasan anda, yang sesuai dengan produk anda.</span></li>
@@ -59,7 +60,7 @@
                         <li class="flex gap-3"><x-icon name="chat" class="mt-1 h-5 w-5 shrink-0 text-emerald-600" /><span><b>Anda cuma tekan hantar.</b> Itu sahaja.</span></li>
                     </ul>
                     <div class="mt-7 flex flex-col gap-3 sm:flex-row">
-                        <a href="{{ route('register') }}" class="btn-primary px-6 py-3.5 text-base">Cuba percuma</a>
+                        <a href="{{ route('register') }}" class="btn-accent px-6 py-3.5 text-base">Cuba percuma</a>
                         <a href="#cara" class="btn-soft px-6 py-3.5 text-base">Tengok cara guna</a>
                     </div>
                     <p class="mt-3 text-sm text-slate-500">{{ $trial['leads'] }} lead percuma · tanpa kad kredit · tiada yuran bulanan</p>
@@ -108,7 +109,7 @@
                         <li class="card p-5">
                             <span class="flex items-center gap-3">
                                 <span class="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><x-icon :name="$icon" /></span>
-                                <span class="text-sm font-bold text-slate-400">0{{ $i + 1 }}</span>
+                                <span class="text-sm font-bold text-orange-500">0{{ $i + 1 }}</span>
                             </span>
                             <h3 class="mt-4 font-semibold">{{ $title }}</h3>
                             <p class="mt-1 text-sm leading-relaxed text-slate-600">{{ $text }}</p>
@@ -123,7 +124,7 @@
             <div class="mx-auto grid max-w-5xl gap-10 px-4 md:grid-cols-2">
                 <div>
                     <h2 class="text-3xl font-bold tracking-tight">Mesej WhatsApp jualan yang orang baca</h2>
-                    <p class="mt-3 text-slate-600">Mesej umum mudah diabaikan. Dyno Leads tulis mesej yang sebut perkara sebenar tentang kedai itu, dan masalah yang produk anda boleh bantu.</p>
+                    <p class="mt-3 text-slate-600">Mesej umum mudah diabaikan. Dyno Lead tulis mesej yang sebut perkara sebenar tentang kedai itu, dan masalah yang produk anda boleh bantu.</p>
                     <ul class="mt-6 space-y-3">
                         @foreach ([
                             'Pujian spesifik dari review Google kedai',
@@ -164,16 +165,16 @@
                         <p class="mt-2 text-sm text-slate-600">{{ $trial['leads'] }} lead atau {{ $trial['days'] }} hari, mana dulu. Tanpa kad kredit.</p>
                         <a href="{{ route('register') }}" class="btn-soft mt-6 w-full">Mula percuma</a>
                     </li>
-                    <li class="card p-6 ring-2 ring-emerald-500">
-                        <p class="text-sm font-bold text-emerald-600">2 · Aktifkan</p>
+                    <li class="card p-6 ring-2 ring-orange-400">
+                        <p class="text-sm font-bold text-orange-600">2 · Aktifkan</p>
                         <p class="mt-2"><span class="text-3xl font-extrabold">RM{{ number_format($fee, 2) }}</span> <span class="text-slate-500">sekali</span></p>
                         <p class="mt-2 text-sm text-slate-600">Bayar sekali sahaja untuk teruskan selepas percubaan.</p>
-                        <a href="{{ route('register') }}" class="btn-primary mt-6 w-full">Daftar sekarang</a>
+                        <a href="{{ route('register') }}" class="btn-accent mt-6 w-full">Daftar sekarang</a>
                     </li>
                     <li class="card p-6">
                         <p class="text-sm font-bold text-emerald-600">3 · Bayar ikut lead</p>
                         @if ($guide)
-                            <p class="mt-2"><span class="text-sm text-slate-500">lebih kurang</span> <span class="text-3xl font-extrabold">RM{{ number_format($guide['per_lead_sen'] / 100, 2) }}</span> <span class="text-slate-500">/ lead</span></p>
+                            <p class="mt-2"><span class="text-sm text-slate-500">lebih kurang</span> <span class="text-3xl font-extrabold text-orange-600">RM{{ number_format($guide['per_lead_sen'] / 100, 2) }}</span> <span class="text-slate-500">/ lead</span></p>
                             <p class="mt-2 text-sm text-slate-600">Tambah baki, guna bila perlu. Satu lead = satu kedai yang sesuai, lengkap dengan mesej WhatsApp siap ditulis.</p>
                             <table class="mt-4 w-full text-sm">
                                 <thead><tr class="text-left text-xs text-slate-500"><th class="pb-1 font-medium">Tambah baki</th><th class="pb-1 text-right font-medium">Anggaran lead</th></tr></thead>
@@ -215,9 +216,10 @@
         <section class="py-16">
             <div class="mx-auto max-w-5xl px-4">
                 <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-700 px-6 py-12 text-center text-white">
-                    <h2 class="text-3xl font-bold tracking-tight">Biar kami cari lead. Anda fokus closing.</h2>
-                    <p class="mx-auto mt-3 max-w-xl text-emerald-50/90">Daftar dalam satu minit, isi profil produk, dan dapat lead pertama hari ni.</p>
-                    <a href="{{ route('register') }}" class="btn mt-7 bg-white px-7 py-3.5 text-base text-emerald-700 hover:bg-emerald-50">Cuba percuma</a>
+                    <div class="absolute -bottom-16 -right-16 h-56 w-56 rounded-full bg-orange-400/40 blur-3xl" aria-hidden="true"></div>
+                    <h2 class="relative text-3xl font-bold tracking-tight">Biar kami cari lead. Anda fokus closing.</h2>
+                    <p class="relative mx-auto mt-3 max-w-xl text-emerald-50/90">Daftar dalam satu minit, isi profil produk, dan dapat lead pertama hari ni.</p>
+                    <a href="{{ route('register') }}" class="btn-accent relative mt-7 px-7 py-3.5 text-base">Cuba percuma</a>
                 </div>
             </div>
         </section>

@@ -28,12 +28,12 @@ class AppServiceProvider extends ServiceProvider
         Livewire::addPersistentMiddleware([SetCurrentWorkspace::class]);
 
         ResetPassword::toMailUsing(fn ($user, string $token) => (new MailMessage)
-            ->subject('Tukar kata laluan Dyno Leads')
+            ->subject('Tukar kata laluan Dyno Lead')
             ->greeting('Salam '.$user->name.',')
             ->line('Kami terima permintaan untuk tukar kata laluan akaun anda.')
             ->action('Tukar kata laluan', route('password.reset', ['token' => $token, 'email' => $user->email]))
             ->line('Pautan ini tamat dalam '.config('auth.passwords.users.expire').' minit.')
             ->line('Kalau anda tak minta, abaikan e-mel ini.')
-            ->salutation('Dyno Leads'));
+            ->salutation('Dyno Lead'));
     }
 }
