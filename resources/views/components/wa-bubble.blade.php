@@ -1,5 +1,5 @@
 @props(['message', 'tone' => 'out'])
-{{-- WhatsApp-style preview of the message Bob will send. --}}
+{{-- WhatsApp-style preview of the message the user will send. --}}
 @php($long = mb_strlen($message) > 240 || substr_count($message, "\n") > 6)
 <div x-data="{ open: false }" class="rounded-xl bg-[#efeae2] p-3">
     <div class="relative ml-6 rounded-lg rounded-tr-none {{ $tone === 'out' ? 'bg-[#d9fdd3]' : 'bg-white' }} px-3 py-2 text-[14px] leading-relaxed text-slate-800 shadow-sm">

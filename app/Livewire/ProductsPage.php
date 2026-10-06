@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Product;
 use App\Services\Products\ProductService;
+use App\Support\Tenancy\CurrentWorkspace;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -16,7 +17,7 @@ class ProductsPage extends Component
 
     public string $name = '';
 
-    public string $sender_name = 'Bob';
+    public string $sender_name = '';
 
     public string $company = '';
 
@@ -80,6 +81,9 @@ class ProductsPage extends Component
     public function create(): void
     {
         $this->resetForm();
+        $workspace = app(CurrentWorkspace::class)->get();
+        $this->sender_name = (string) ($workspace?->sender_name ?: auth()->user()?->name);
+        $this->company = (string) $workspace?->name;
         $this->showForm = true;
     }
 

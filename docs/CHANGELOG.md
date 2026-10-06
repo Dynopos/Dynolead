@@ -71,3 +71,14 @@
 - Kos: kad utama kos vs had (warna ikut peratus), jubin statistik, senarai panggilan.
 - Produk: kad produk, borang berseksyen dengan suis togol. Follow-up: kad selaras Lead.
 - Skrin masuk baru. Semua skrin disemak pada 400px tanpa skrol mendatar.
+
+## Fasa 2
+
+### F2.1 — Laravel 12
+- Naik taraf ke Laravel 12.69; `composer audit` bersih.
+
+### F2.2 — Akaun dan workspace
+- Daftar, masuk dengan e-mel, lupa/tukar kata laluan (e-mel dalam BM), halaman Akaun.
+- Workspace setiap pelanggan; semua data lead, produk, STOP, kos diasingkan.
+- Arahan `dynoleads:admin` untuk akaun Bob dan produk demo.
+- Terma dan Polisi Privasi (draf). Jenama DynoPOS dibuang dari antara muka.

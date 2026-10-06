@@ -6,6 +6,7 @@ use App\Exceptions\BudgetExceeded;
 use App\Exceptions\PricesNotConfigured;
 use App\Models\Lead;
 use App\Services\Ai\FollowupWriter;
+use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -21,16 +22,18 @@ class GenerateFollowupJob implements ShouldQueue
 
     public function handle(FollowupWriter $writer): void
     {
-        $lead = Lead::query()->find($this->leadId);
+        $lead = Lead::query()->withoutGlobalScope('workspace')->find($this->leadId);
 
         if ($lead === null) {
             return;
         }
 
-        try {
-            $writer->write($lead);
-        } catch (BudgetExceeded|PricesNotConfigured $e) {
-            $lead->forceFill(['review_note' => $e->getMessage()])->save();
-        }
+        app(CurrentWorkspace::class)->runAs($lead->workspace_id, function () use ($lead, $writer) {
+            try {
+                $writer->write($lead);
+            } catch (BudgetExceeded|PricesNotConfigured $e) {
+                $lead->forceFill(['review_note' => $e->getMessage()])->save();
+            }
+        });
     }
 }

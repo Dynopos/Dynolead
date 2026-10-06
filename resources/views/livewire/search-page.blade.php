@@ -45,7 +45,7 @@
         <x-field label="Kawasan" name="areas" hint="Satu kawasan setiap baris (maksimum 5).">
             <div class="relative">
                 <x-icon name="map-pin" class="pointer-events-none absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
-                <textarea wire:model.blur="areas" rows="2" class="input pl-11" placeholder="Pasir Mas, Kelantan"></textarea>
+                <textarea wire:model.blur="areas" rows="2" class="input pl-11" placeholder="cth: Kota Bharu, Kelantan"></textarea>
             </div>
         </x-field>
 
@@ -161,7 +161,7 @@
                 @endif
             </article>
         @empty
-            <x-empty icon="search" title="Belum ada carian">Cuba carian kecil dulu, contohnya 10 kedai runcit di Pasir Mas.</x-empty>
+            <x-empty icon="search" title="Belum ada carian">Cuba carian kecil dulu, contohnya 10 kedai runcit di satu kawasan.</x-empty>
         @endforelse
     </section>
 </div>

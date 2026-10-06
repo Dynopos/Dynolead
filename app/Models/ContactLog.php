@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWorkspace;
 use Illuminate\Database\Eloquent\Model;
 
 class ContactLog extends Model
 {
+    use BelongsToWorkspace;
+
     protected $table = 'contacts_log';
 
     public $timestamps = false;

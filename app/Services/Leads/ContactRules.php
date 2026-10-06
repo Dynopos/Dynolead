@@ -62,10 +62,14 @@ class ContactRules
         $since = now()->subDays($this->windowDays());
 
         return $leads
-            ->whereNotIn('leads.place_id', fn (QueryBuilder $q) => $q->select('place_id')->from('suppressions')->whereNotNull('place_id'))
+            ->whereNotExists(fn (QueryBuilder $q) => $q->selectRaw('1')
+                ->from('suppressions')
+                ->whereColumn('suppressions.place_id', 'leads.place_id')
+                ->whereColumn('suppressions.workspace_id', 'leads.workspace_id'))
             ->whereNotExists(fn (QueryBuilder $q) => $q->selectRaw('1')
                 ->from('contacts_log')
                 ->whereColumn('contacts_log.place_id', 'leads.place_id')
+                ->whereColumn('contacts_log.workspace_id', 'leads.workspace_id')
                 ->whereColumn('contacts_log.product_id', '!=', 'leads.product_id')
                 ->where('contacts_log.contacted_at', '>=', $since));
     }

@@ -31,7 +31,6 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="APP_TIMEZONE" value="Asia/Kuala_Lumpur"/>
-        <env name="APP_LOGIN_PASSWORD" value="rahsia-test"/>
         <env name="ANTHROPIC_API_KEY" value="test-anthropic-key"/>
         <env name="CLAUDE_MODEL_SCORE" value="claude-haiku-4-5-20251001"/>
         <env name="CLAUDE_MODEL_WRITE" value="claude-sonnet-5-5"/>

@@ -2,8 +2,13 @@
 
 return [
 
-    // Fasa 0: one owner account. The password lives in .env only.
-    'login_password' => env('APP_LOGIN_PASSWORD'),
+    // Seller of the service (shown on Terma/Privasi and invoices).
+    'company' => [
+        'name' => env('COMPANY_NAME', 'DynoPOS Technologies'),
+        'registration' => env('COMPANY_REGISTRATION'),
+        'email' => env('COMPANY_EMAIL'),
+        'address' => env('COMPANY_ADDRESS', 'Pasir Mas, Kelantan'),
+    ],
 
     'ai' => [
         'model_score' => env('CLAUDE_MODEL_SCORE'),

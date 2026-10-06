@@ -1,7 +1,10 @@
 <?php
 
 use App\Models\PlaceCache;
+use App\Models\User;
+use App\Models\Workspace;
 use App\Services\Places\PlaceData;
+use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Collection;
@@ -13,23 +16,37 @@ use Tests\TestCase;
 |--------------------------------------------------------------------------
 | Test Case
 |--------------------------------------------------------------------------
-| Feature tests run against an in-memory SQLite database. No test may call a
-| real external API: every HTTP call must be faked with Http::fake().
+| Feature tests run against an in-memory SQLite database, inside one customer
+| workspace ($this->workspace, owned by $this->user). No test may call a real
+| external API: every HTTP call must be faked with Http::fake().
 */
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
+    ->beforeEach(function () {
+        $this->workspace = Workspace::factory()->create(['plan' => 'dalaman']);
+        $this->user = User::factory()->create(['workspace_id' => $this->workspace->id, 'role' => 'owner']);
+        app(CurrentWorkspace::class)->set($this->workspace);
+    })
     ->in('Feature');
 
 pest()->extend(TestCase::class)
     ->in('Unit');
 
-/** Log in as the single Fasa 0 owner. */
+/** Sign in as the owner of the test workspace. */
 function actingAsOwner(): TestCase
 {
-    return test()->withSession(['owner' => true]);
+    return test()->actingAs(test()->user);
 }
 
+/** A second, unrelated customer with its own user. */
+function otherWorkspace(): array
+{
+    $workspace = Workspace::factory()->create(['plan' => 'dalaman']);
+    $user = User::factory()->create(['workspace_id' => $workspace->id]);
+
+    return [$workspace, $user];
+}
 /** A Places API (New) place object, as Google returns it. */
 function apiPlace(string $id, array $overrides = []): array
 {

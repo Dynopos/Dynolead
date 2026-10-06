@@ -6,14 +6,12 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/** Fasa 0: single owner session (password from APP_LOGIN_PASSWORD). */
-class EnsureOwner
+/** Platform admin (Bob) only. */
+class EnsureAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->session()->get('owner') !== true) {
-            return redirect()->route('login');
-        }
+        abort_unless($request->user()?->isAdmin(), 403);
 
         return $next($request);
     }

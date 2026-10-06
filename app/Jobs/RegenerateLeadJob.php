@@ -8,6 +8,7 @@ use App\Models\Lead;
 use App\Services\Ai\LeadScorer;
 use App\Services\Ai\MessageWriter;
 use App\Services\Leads\LeadService;
+use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -24,12 +25,17 @@ class RegenerateLeadJob implements ShouldQueue
 
     public function handle(LeadScorer $scorer, MessageWriter $writer): void
     {
-        $lead = Lead::query()->find($this->leadId);
+        $lead = Lead::query()->withoutGlobalScope('workspace')->find($this->leadId);
 
         if ($lead === null) {
             return;
         }
 
+        app(CurrentWorkspace::class)->runAs($lead->workspace_id, fn () => $this->run($lead, $scorer, $writer));
+    }
+
+    private function run(Lead $lead, LeadScorer $scorer, MessageWriter $writer): void
+    {
         try {
             if ($this->rescore || ! $lead->isScored()) {
                 $lead = $scorer->score($lead, force: true);

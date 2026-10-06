@@ -23,14 +23,14 @@ use App\Services\Ai\MessageWriter;
 use App\Services\Leads\LeadService;
 use App\Services\Places\PlacesClient;
 use App\Services\Search\SearchPipeline;
-use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\ProductSeeder;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 
 beforeEach(function () {
     withAiPrices();
-    $this->seed(DatabaseSeeder::class);
+    $this->seed(ProductSeeder::class);
     $this->dynopos = Product::where('slug', 'dynopos')->first();
     $this->murah = Product::where('slug', 'murahwebsite')->first();
 });

@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Jobs\Concerns\HandlesSearchFailure;
 use App\Models\Search;
 use App\Services\Search\SearchPipeline;
+use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -23,12 +24,12 @@ class ScoreLeadsJob implements ShouldQueue
 
     public function handle(SearchPipeline $pipeline): void
     {
-        $search = Search::query()->find($this->searchId);
+        $search = Search::query()->withoutGlobalScope('workspace')->find($this->searchId);
 
         if ($search === null || $search->status->isFinished()) {
             return;
         }
 
-        $pipeline->scoreLeads($search);
+        app(CurrentWorkspace::class)->runAs($search->workspace_id, fn () => $pipeline->scoreLeads($search));
     }
 }

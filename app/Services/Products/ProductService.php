@@ -70,6 +70,7 @@ class ProductService
         $slug = $base;
         $i = 2;
 
+        // Product query is scoped to the current workspace: slugs are unique per workspace.
         while (Product::query()->where('slug', $slug)->exists()) {
             $slug = $base.'-'.$i++;
         }

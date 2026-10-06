@@ -5,7 +5,11 @@ namespace Database\Seeders;
 use App\Models\Product;
 use Illuminate\Database\Seeder;
 
-/** Seed products from spec §7. Only creates missing products, so edits made on the Produk screen survive re-seeding. */
+/**
+ * Seed the spec §7 products (DynoPOS, murahwebsite.my) into the current workspace.
+ * Used for the platform owner's own workspace and as demo data. Only creates
+ * missing products, so edits made on the Produk screen survive re-seeding.
+ */
 class ProductSeeder extends Seeder
 {
     public function run(): void

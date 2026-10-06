@@ -151,3 +151,29 @@ melalui wa.me (spec §8: Fasa 0–2), tiada API WhatsApp tidak rasmi.
 ### F2.1 — Naik taraf Laravel 12
 - `laravel/framework` 11.57 → 12.69.3. `composer audit` kini bersih (3 nasihat Laravel 11
   dalam keputusan Langkah 1 sudah tertutup). Tiada perubahan kod diperlukan.
+
+### F2.2 — Akaun dan workspace
+- **Satu pengguna, satu workspace** (`users.workspace_id`, `role`). Pasukan berbilang
+  pengguna boleh ditambah kemudian; jadual sudah ada `role`.
+- **Data diasingkan dengan global scope** (`BelongsToWorkspace`) pada `products`, `searches`,
+  `leads`, `suppressions`, `contacts_log`, `ai_usage`, `places_usage`, `settings`. Konteks
+  ditetapkan oleh middleware `SetCurrentWorkspace` (juga untuk permintaan Livewire) dan
+  oleh setiap job melalui `CurrentWorkspace::runAs()`, yang memulihkan konteks selepas job.
+  Worker queue kosongkan konteks pada setiap pusingan.
+- **`place_cache` dikongsi** antara pelanggan: ia hanya cache sementara data Google ikut
+  `place_id`, dan berkongsi menjimatkan panggilan Places.
+- **Senarai STOP dan peraturan 30 hari ikut workspace.** STOP kepada penjual A tidak
+  bermakna kedai itu tolak penjual B. Peraturan 30 hari menghalang *satu penjual* hantar
+  mesej dua produk berbeza kepada kedai yang sama.
+- **Login e-mel + kata laluan** (Livewire): daftar, masuk (had 5 cubaan seminit setiap
+  e-mel/IP), lupa dan tukar kata laluan (jawapan sama untuk e-mel yang tiada, elak
+  pendedahan akaun). `APP_LOGIN_PASSWORD` dibuang.
+- **Admin platform:** `php artisan dynoleads:admin email --demo-products` cipta akaun Bob
+  (`is_admin`), workspace pelan `dalaman` dan produk DynoPOS + murahwebsite.my.
+  `DatabaseSeeder` tidak lagi seed apa-apa.
+- **Jenama DynoPOS dibuang dari antara muka:** header tunjuk nama bisnes pelanggan;
+  borang produk guna nama pengirim/bisnes pelanggan. Nama penjual perkhidmatan (Terma,
+  Privasi) dari `.env` (`COMPANY_*`).
+- **Terma dan Polisi Privasi dalam bentuk DRAF** dengan amaran jelas. Mesti disemak peguam
+  sebelum jual (PDPA, Google Maps, WhatsApp).
+- Data Fasa 0 sedia ada (jika ada) dipindah ke workspace "DynoPOS Technologies" oleh migration.

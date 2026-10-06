@@ -1,11 +1,10 @@
 <?php
 
-use App\Livewire\Login;
 use App\Models\Product;
-use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\ProductSeeder;
 
 it('seeds DynoPOS and murahwebsite.my from spec §7', function () {
-    $this->seed(DatabaseSeeder::class);
+    $this->seed(ProductSeeder::class);
 
     $dynopos = Product::where('slug', 'dynopos')->firstOrFail();
     $murah = Product::where('slug', 'murahwebsite')->firstOrFail();
@@ -23,14 +22,14 @@ it('seeds DynoPOS and murahwebsite.my from spec §7', function () {
 });
 
 it('can be seeded twice without duplicates', function () {
-    $this->seed(DatabaseSeeder::class);
-    $this->seed(DatabaseSeeder::class);
+    $this->seed(ProductSeeder::class);
+    $this->seed(ProductSeeder::class);
 
     expect(Product::count())->toBe(2);
 });
 
 it('picks the DynoPOS pitch variant by shop type', function () {
-    $this->seed(DatabaseSeeder::class);
+    $this->seed(ProductSeeder::class);
     $dynopos = Product::where('slug', 'dynopos')->firstOrFail();
 
     expect($dynopos->pitchFor('kedai runcit'))->toContain('Imbas barcode')
@@ -52,37 +51,23 @@ it('shows the mobile menu with all five sections', function () {
         ->assertSeeInOrder(['Produk', 'Cari', 'Lead', 'Follow-up', 'Kos']);
 });
 
-it('logs in with the password from .env', function () {
-    Livewire\Livewire::test(Login::class)
-        ->set('password', 'salah')
-        ->call('login')
-        ->assertHasErrors('password');
-
-    Livewire\Livewire::test(Login::class)
-        ->set('password', 'rahsia-test')
-        ->call('login')
-        ->assertRedirect(route('leads'));
-
-    expect(session('owner'))->toBeTrue();
-});
-
 it('keeps secrets out of .env.example', function () {
     $example = file_get_contents(base_path('.env.example'));
 
-    foreach (['ANTHROPIC_API_KEY', 'GOOGLE_PLACES_API_KEY', 'APP_LOGIN_PASSWORD', 'CLAUDE_MODEL_SCORE', 'CLAUDE_MODEL_WRITE', 'CLAUDE_USE_BATCH', 'CLAUDE_WEB_SEARCH', 'AI_MONTHLY_BUDGET_MYR', 'PLACES_CACHE_HOURS', 'PRICE_TABLE_PATH'] as $name) {
+    foreach (['ANTHROPIC_API_KEY', 'GOOGLE_PLACES_API_KEY', 'CHIP_SECRET_KEY', 'CHIP_BRAND_ID', 'CLAUDE_MODEL_SCORE', 'CLAUDE_MODEL_WRITE', 'CLAUDE_USE_BATCH', 'CLAUDE_WEB_SEARCH', 'AI_MONTHLY_BUDGET_MYR', 'PLACES_CACHE_HOURS', 'PRICE_TABLE_PATH'] as $name) {
         expect($example)->toContain($name.'=');
     }
 
     expect($example)->toMatch('/^ANTHROPIC_API_KEY=$/m')
         ->and($example)->toMatch('/^GOOGLE_PLACES_API_KEY=$/m')
-        ->and($example)->toMatch('/^APP_LOGIN_PASSWORD=$/m');
+        ->and($example)->toMatch('/^CHIP_SECRET_KEY=$/m');
 });
 
 it('does not overwrite product edits when seeding again', function () {
-    $this->seed(DatabaseSeeder::class);
+    $this->seed(ProductSeeder::class);
     Product::where('slug', 'dynopos')->update(['cta' => 'CTA baru Bob']);
 
-    $this->seed(DatabaseSeeder::class);
+    $this->seed(ProductSeeder::class);
 
     expect(Product::where('slug', 'dynopos')->value('cta'))->toBe('CTA baru Bob');
 });

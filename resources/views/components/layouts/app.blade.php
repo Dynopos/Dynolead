@@ -17,16 +17,14 @@
                     <x-logo />
                     <span class="leading-tight">
                         <span class="block text-[15px] font-bold tracking-tight">Dyno Leads</span>
-                        <span class="block text-[11px] font-medium text-slate-500">DynoPOS Technologies</span>
+                        <span class="block max-w-[200px] truncate text-[11px] font-medium text-slate-500">{{ app(\App\Support\Tenancy\CurrentWorkspace::class)->get()?->name }}</span>
                     </span>
                 </a>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="grid h-9 w-9 place-items-center rounded-xl text-slate-500 hover:bg-slate-100" title="Keluar">
-                        <x-icon name="logout" />
-                        <span class="sr-only">Keluar</span>
-                    </button>
-                </form>
+                <a href="{{ route('account') }}" wire:navigate title="Akaun"
+                   @class(['grid h-9 w-9 place-items-center rounded-full text-sm font-bold', 'bg-emerald-600 text-white' => request()->routeIs('account'), 'bg-slate-100 text-slate-600 hover:bg-slate-200' => ! request()->routeIs('account')])>
+                    {{ mb_strtoupper(mb_substr(auth()->user()?->name ?? '?', 0, 1)) }}
+                    <span class="sr-only">Akaun</span>
+                </a>
             </div>
         </header>
 
