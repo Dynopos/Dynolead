@@ -123,3 +123,5 @@
 - Harga Claude diisi dalam `config/ai_prices.php` (Haiku 4.5, Sonnet 5.5). Harga Places dan
   `usd_to_myr` masih untuk Bob isi.
 - `usd_to_myr` = 4.70 (Bob). Harga Google Places masih untuk Bob isi.
+- Harga Google Places diisi ikut harga senarai Google: Text Search Enterprise $0.035,
+  Place Details Enterprise + Atmosphere $0.025, Place Details Enterprise $0.020 setiap panggilan.

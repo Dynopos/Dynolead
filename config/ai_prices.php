@@ -5,7 +5,7 @@
 | Jadual harga AI dan Google Places
 |--------------------------------------------------------------------------
 | Harga Claude diisi Oktober 2026 (semak semula bila Anthropic ubah harga).
-| Harga Places dan usd_to_myr: Bob isi ikut harga semasa.
+| Harga Places diisi Oktober 2026; usd_to_myr ditetapkan Bob.
 |
 | - Harga Claude: USD setiap 1 juta token (rujuk https://www.anthropic.com/pricing).
 |   Kunci = ID model yang sama seperti CLAUDE_MODEL_SCORE / CLAUDE_MODEL_WRITE dalam .env.
@@ -37,9 +37,11 @@ return [
     ],
 
     'places' => [
-        'text_search' => null,      // Bob isi ikut harga semasa (USD setiap panggilan)
-        'details' => null,          // Bob isi ikut harga semasa (USD setiap panggilan)
-        'details_display' => null,  // Bob isi ikut harga semasa (Details tanpa review)
+        // Harga senarai Google, peringkat pertama (Oktober 2026). Kuota percuma bulanan
+        // Google tidak ditolak di sini, jadi caj pelanggan tidak pernah di bawah kos.
+        'text_search' => 0.035,     // Text Search Enterprise: $35 / 1000 (ada rating)
+        'details' => 0.025,         // Place Details Enterprise + Atmosphere: $25 / 1000 (ada review)
+        'details_display' => 0.020, // Place Details Enterprise: $20 / 1000 (telefon, tanpa review)
     ],
 
     // Kadar tukaran USD ke RM (ditetapkan Bob, Oktober 2026).
