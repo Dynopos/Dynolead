@@ -78,6 +78,18 @@ it('shows the Dyno Leads logo and icons', function () {
     }
 });
 
+it('lets prospects WhatsApp the company from the sales page, terms and privacy', function () {
+    config(['dynoleads.company.whatsapp' => '0182889932']);
+    $link = 'https://wa.me/60182889932?text='.rawurlencode('Salam, saya nak tahu tentang Dyno Leads.');
+
+    $this->get('/')->assertSee($link, false)->assertSee('WhatsApp kami')->assertSee('018-288 9932');
+    $this->get('/terma')->assertSee('wa.me/60182889932', false);
+    $this->get('/privasi')->assertSee('wa.me/60182889932', false);
+
+    config(['dynoleads.company.whatsapp' => null]);
+    $this->get('/')->assertDontSee('wa.me/', false);
+});
+
 it('sends signed-in users to their leads', function () {
     $this->actingAs($this->user)->get('/')->assertRedirect(route('leads'));
 });

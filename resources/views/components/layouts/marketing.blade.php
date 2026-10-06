@@ -23,8 +23,9 @@
     </header>
     {{ $slot }}
     <footer class="border-t border-slate-100 bg-slate-50">
-        <div class="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+        <div class="mx-auto flex max-w-5xl flex-col gap-3 px-4 pb-24 pt-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:pb-8">
             <div class="flex items-center gap-2"><x-logo /><span>© {{ date('Y') }} {{ config('dynoleads.company.name') }}</span></div>
+            <x-whatsapp-contact class="font-medium text-emerald-700 hover:text-emerald-800" />
             <nav class="flex gap-4" aria-label="Pautan kaki">
                 <a href="{{ route('terms') }}" class="hover:text-slate-800">Terma</a>
                 <a href="{{ route('privacy') }}" class="hover:text-slate-800">Privasi</a>
@@ -32,5 +33,6 @@
             </nav>
         </div>
     </footer>
+    <x-whatsapp-contact variant="float" />
 </body>
 </html>

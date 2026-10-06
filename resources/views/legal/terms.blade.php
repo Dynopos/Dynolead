@@ -49,6 +49,6 @@
         <p>Kami boleh mengubah terma ini. Perubahan penting akan dimaklumkan melalui e-mel atau dalam app.</p>
 
         <h2>8. Hubungi kami</h2>
-        <p>{{ $c['name'] }} · {{ $c['address'] }} @if($c['email']) · <a href="mailto:{{ $c['email'] }}" class="text-emerald-700 underline">{{ $c['email'] }}</a>@endif</p>
+        <p>{{ $c['name'] }} · {{ $c['address'] }} @if($c['email']) · <a href="mailto:{{ $c['email'] }}" class="text-emerald-700 underline">{{ $c['email'] }}</a>@endif · <x-whatsapp-contact class="text-emerald-700 underline" /></p>
     </article>
 </x-layouts.page>

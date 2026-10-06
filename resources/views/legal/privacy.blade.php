@@ -36,6 +36,6 @@
         <p>Anda boleh meminta akses, pembetulan atau pemadaman data anda dengan menghubungi kami. Kami akan membalas dalam 21 hari.</p>
 
         <h2>7. Hubungi kami</h2>
-        <p>{{ $c['name'] }} · {{ $c['address'] }} @if($c['email']) · <a href="mailto:{{ $c['email'] }}" class="text-emerald-700 underline">{{ $c['email'] }}</a>@endif</p>
+        <p>{{ $c['name'] }} · {{ $c['address'] }} @if($c['email']) · <a href="mailto:{{ $c['email'] }}" class="text-emerald-700 underline">{{ $c['email'] }}</a>@endif · <x-whatsapp-contact class="text-emerald-700 underline" /></p>
     </article>
 </x-layouts.page>

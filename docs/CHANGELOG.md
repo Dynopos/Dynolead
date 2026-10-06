@@ -133,3 +133,5 @@
   RM20/RM50/RM100), dikira dari jadual harga oleh `PriceGuide`. FAQ harga dikemas kini.
 - Logo Dyno Lead (dinosaur) di header, footer, halaman masuk/daftar, favicon dan ikon skrin
   utama telefon. Logo penuh dalam `public/images/logo.png` (JSON-LD).
+- WhatsApp syarikat (`COMPANY_WHATSAPP`, lalai 018-288 9932): butang "WhatsApp kami" terapung
+  di halaman jualan, nombor di footer, Terma dan Privasi. Pautan `wa.me` dengan mesej awal.
