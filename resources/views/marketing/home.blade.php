@@ -10,7 +10,7 @@
                         '@type' => 'Organization',
                         'name' => config('dynoleads.company.name'),
                         'url' => url('/'),
-                        'logo' => asset('favicon.svg'),
+                        'logo' => asset('images/logo.png'),
                     ],
                     [
                         '@type' => 'SoftwareApplication',

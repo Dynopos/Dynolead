@@ -131,3 +131,5 @@
   Leads bantu anda cari lead." Kami cari lead, kami sediakan teks, anda cuma tekan hantar).
 - Halaman jualan: harga "Bayar ikut lead" (anggaran RM setiap lead dan bilangan lead untuk
   RM20/RM50/RM100), dikira dari jadual harga oleh `PriceGuide`. FAQ harga dikemas kini.
+- Logo Dyno Lead (dinosaur) di header, footer, halaman masuk/daftar, favicon dan ikon skrin
+  utama telefon. Logo penuh dalam `public/images/logo.png` (JSON-LD).

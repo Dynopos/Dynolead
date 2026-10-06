@@ -69,6 +69,15 @@ it('falls back to "cost + markup" while prices are missing', function () {
     $this->get('/')->assertSee('Kos + 20%');
 });
 
+it('shows the Dyno Leads logo and icons', function () {
+    $this->get('/')->assertSee('images/logo-mark.webp', false)->assertSee('/favicon.png', false)->assertSee('/apple-touch-icon.png', false);
+    $this->get('/masuk')->assertSee('images/logo-mark.webp', false);
+
+    foreach (['images/logo-mark.webp', 'images/logo.png', 'favicon.png', 'favicon.ico', 'apple-touch-icon.png'] as $file) {
+        expect(public_path($file))->toBeFile();
+    }
+});
+
 it('sends signed-in users to their leads', function () {
     $this->actingAs($this->user)->get('/')->assertRedirect(route('leads'));
 });

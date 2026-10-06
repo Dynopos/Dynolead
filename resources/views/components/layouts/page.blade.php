@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <title>{{ $title ?? 'Dyno Leads' }} · Dyno Leads</title>
     <meta name="description" content="{{ $title ?? 'Dyno Leads' }} untuk Dyno Leads, app cari prospek dengan AI untuk SME Malaysia.">
     <link rel="canonical" href="{{ url()->current() }}">
