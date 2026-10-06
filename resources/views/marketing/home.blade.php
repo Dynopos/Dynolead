@@ -1,0 +1,215 @@
+<x-layouts.marketing>
+    <x-slot:head>
+        <x-seo.meta
+            title="Cari Prospek dengan AI untuk SME Malaysia | Dyno Leads"
+            description="Cari prospek kedai tempatan dengan AI. Dyno Leads cari bisnes di Google Maps, pilih yang sesuai dan tulis mesej WhatsApp custom. Anda tekan hantar sendiri.">
+            <script type="application/ld+json">{!! json_encode([
+                '@context' => 'https://schema.org',
+                '@graph' => array_values(array_filter([
+                    [
+                        '@type' => 'Organization',
+                        'name' => config('dynoleads.company.name'),
+                        'url' => url('/'),
+                        'logo' => asset('favicon.svg'),
+                    ],
+                    [
+                        '@type' => 'SoftwareApplication',
+                        'name' => 'Dyno Leads',
+                        'applicationCategory' => 'BusinessApplication',
+                        'operatingSystem' => 'Web',
+                        'inLanguage' => 'ms',
+                        'url' => url('/'),
+                        'description' => 'Cari prospek kedai tempatan dengan AI dan tulis mesej WhatsApp custom untuk setiap kedai.',
+                        'offers' => collect($plans)->filter(fn ($p) => $p->priceMyr !== null)->map(fn ($p) => [
+                            '@type' => 'Offer',
+                            'name' => $p->name,
+                            'price' => number_format($p->priceMyr, 2, '.', ''),
+                            'priceCurrency' => 'MYR',
+                        ])->values()->all() ?: ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'MYR', 'description' => "Percubaan percuma {$trialDays} hari"],
+                    ],
+                    [
+                        '@type' => 'FAQPage',
+                        'mainEntity' => collect($faqs)->map(fn ($f) => [
+                            '@type' => 'Question',
+                            'name' => $f[0],
+                            'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f[1]],
+                        ])->all(),
+                    ],
+                ])),
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+        </x-seo.meta>
+    </x-slot:head>
+
+    <main>
+        {{-- Hero --}}
+        <section class="relative overflow-hidden bg-gradient-to-b from-emerald-50 via-white to-white">
+            <div class="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" aria-hidden="true"></div>
+            <div class="relative mx-auto grid max-w-5xl items-center gap-10 px-4 pb-16 pt-12 md:grid-cols-2 md:pt-20">
+                <div>
+                    <p class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-200">
+                        <x-icon name="sparkles" class="h-4 w-4" /> Untuk SME yang jual kepada bisnes lain
+                    </p>
+                    <h1 class="mt-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 md:text-5xl">
+                        Cari prospek dengan AI. <span class="text-emerald-600">Hantar mesej sendiri.</span>
+                    </h1>
+                    <p class="mt-5 text-lg leading-relaxed text-slate-600">
+                        Dyno Leads bantu anda cari prospek dengan AI: cari kedai tempatan di Google Maps, pilih yang paling sesuai untuk produk anda, dan tulis mesej WhatsApp custom ikut review setiap kedai. Anda semak, tekan hantar, dan jejak siapa yang balas.
+                    </p>
+                    <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+                        <a href="{{ route('register') }}" class="btn-primary px-6 py-3.5 text-base">Cuba percuma {{ $trialDays }} hari</a>
+                        <a href="#cara" class="btn-soft px-6 py-3.5 text-base">Tengok cara guna</a>
+                    </div>
+                    <p class="mt-3 text-sm text-slate-500">Tanpa kad kredit · {{ $trial->monthlyLeads }} lead percuma</p>
+                </div>
+
+                {{-- Product preview, built in HTML (no image to load) --}}
+                <div class="relative mx-auto w-full max-w-sm" aria-hidden="true">
+                    <div class="card overflow-hidden shadow-xl shadow-emerald-900/10">
+                        <div class="flex items-start gap-3 p-4">
+                            <span class="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-lg font-bold text-white">K</span>
+                            <div class="flex-1">
+                                <p class="font-semibold">Kedai Runcit Pak Mat</p>
+                                <p class="flex items-center gap-1 text-xs text-slate-500"><x-icon name="star" class="h-3.5 w-3.5 text-amber-400" /><b class="text-slate-700">4.6</b> (312 review) · kedai runcit</p>
+                            </div>
+                            <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200">Skor 88</span>
+                        </div>
+                        <div class="mx-4 rounded-xl bg-slate-50 p-3">
+                            <p class="flex items-center gap-1.5 text-xs font-semibold text-emerald-700"><x-icon name="sparkles" class="h-4 w-4" />Kenapa sesuai</p>
+                            <p class="mt-1 text-sm text-slate-700">Ramai komplen kaunter lambat waktu petang.</p>
+                        </div>
+                        <div class="m-4 rounded-xl bg-[#efeae2] p-3">
+                            <div class="ml-6 rounded-lg rounded-tr-none bg-[#d9fdd3] px-3 py-2 text-[13px] leading-relaxed text-slate-800 shadow-sm">
+                                Salam Kedai Runcit Pak Mat 👋<br><br>Saya Ali dari KedaiPOS. Ramai pelanggan puji barang lengkap dan layanan mesra...<br><br>Kalau tak berminat, balas STOP, saya tak ganggu lagi 🙏
+                            </div>
+                        </div>
+                        <div class="border-t border-slate-100 bg-slate-50/60 p-3">
+                            <span class="btn-wa w-full py-3"><x-icon name="chat" class="h-5 w-5" />Buka WhatsApp</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {{-- How it works --}}
+        <section id="cara" class="scroll-mt-16 py-16">
+            <div class="mx-auto max-w-5xl px-4">
+                <h2 class="text-3xl font-bold tracking-tight">Cara Dyno Leads cari prospek</h2>
+                <p class="mt-2 max-w-2xl text-slate-600">Empat langkah, semua dari telefon.</p>
+                <ol class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach ([
+                        ['search', 'Pilih jenis & kawasan', 'Contoh: kedai runcit di Kota Bharu. Anda nampak anggaran kos sebelum mula.'],
+                        ['funnel', 'Tapis automatik', 'Buang kedai rating rendah, yang dah ada website (jika perlu), dan yang pernah minta STOP.'],
+                        ['sparkles', 'AI nilai & tulis', 'AI baca review, beri skor kesesuaian dan tulis mesej custom ikut profil produk anda.'],
+                        ['chat', 'Anda tekan hantar', 'Buka WhatsApp dengan mesej siap. Tanda status, dapat peringatan follow-up.'],
+                    ] as $i => [$icon, $title, $text])
+                        <li class="card p-5">
+                            <span class="flex items-center gap-3">
+                                <span class="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><x-icon :name="$icon" /></span>
+                                <span class="text-sm font-bold text-slate-400">0{{ $i + 1 }}</span>
+                            </span>
+                            <h3 class="mt-4 font-semibold">{{ $title }}</h3>
+                            <p class="mt-1 text-sm leading-relaxed text-slate-600">{{ $text }}</p>
+                        </li>
+                    @endforeach
+                </ol>
+            </div>
+        </section>
+
+        {{-- Why --}}
+        <section class="bg-slate-50 py-16">
+            <div class="mx-auto grid max-w-5xl gap-10 px-4 md:grid-cols-2">
+                <div>
+                    <h2 class="text-3xl font-bold tracking-tight">Mesej WhatsApp jualan yang orang baca</h2>
+                    <p class="mt-3 text-slate-600">Mesej umum mudah diabaikan. Dyno Leads tulis mesej yang sebut perkara sebenar tentang kedai itu, dan masalah yang produk anda boleh bantu.</p>
+                    <ul class="mt-6 space-y-3">
+                        @foreach ([
+                            'Pujian spesifik dari review Google kedai',
+                            'Ayat produk dan penutup ikut tulisan anda sendiri',
+                            'Perkataan dilarang ditolak automatik',
+                            'Tiada harga atau janji yang anda tak tulis',
+                        ] as $point)
+                            <li class="flex gap-2.5 text-slate-700"><x-icon name="check-circle" class="mt-0.5 h-5 w-5 text-emerald-600" />{{ $point }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold tracking-tight">Selamat untuk nombor anda</h2>
+                    <p class="mt-3 text-slate-600">Tiada blast, tiada bot tak rasmi. Itu cara paling cepat nombor WhatsApp kena sekat.</p>
+                    <ul class="mt-6 space-y-3">
+                        @foreach ([
+                            'Anda sendiri tekan hantar untuk setiap mesej',
+                            'Cadangan 10–15 mesej sehari setiap nombor',
+                            'STOP kekal: kedai tu takkan muncul lagi',
+                            'Satu kedai, satu produk dalam 30 hari',
+                        ] as $point)
+                            <li class="flex gap-2.5 text-slate-700"><x-icon name="lock" class="mt-0.5 h-5 w-5 text-emerald-600" />{{ $point }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        {{-- Pricing --}}
+        <section id="harga" class="scroll-mt-16 py-16">
+            <div class="mx-auto max-w-5xl px-4">
+                <h2 class="text-3xl font-bold tracking-tight">Harga</h2>
+                <p class="mt-2 text-slate-600">Mula dengan percubaan percuma. Bayar setiap 30 hari melalui FPX, kad atau e-wallet. Tiada kontrak.</p>
+                <div class="mt-8 grid gap-4 md:grid-cols-3">
+                    <article class="card p-6">
+                        <h3 class="text-lg font-bold">{{ $trial->name }}</h3>
+                        <p class="mt-2"><span class="text-3xl font-extrabold">Percuma</span> <span class="text-slate-500">{{ $trialDays }} hari</span></p>
+                        <ul class="mt-5 space-y-2 text-sm text-slate-600">
+                            @foreach ($trial->features as $f)<li class="flex gap-2"><x-icon name="check" class="h-4 w-4 text-emerald-600" :solid="true" />{{ $f }}</li>@endforeach
+                        </ul>
+                        <a href="{{ route('register') }}" class="btn-soft mt-6 w-full">Mula percuma</a>
+                    </article>
+                    @foreach ($plans as $p)
+                        <article @class(['card p-6', 'ring-2 ring-emerald-500' => $loop->first])>
+                            <h3 class="text-lg font-bold">{{ $p->name }}</h3>
+                            <p class="mt-2">
+                                @if ($p->priceMyr !== null)
+                                    <span class="text-3xl font-extrabold">RM{{ number_format($p->priceMyr, 0) }}</span> <span class="text-slate-500">/ 30 hari</span>
+                                @else
+                                    <span class="text-lg font-semibold text-slate-400">Harga akan diumumkan</span>
+                                @endif
+                            </p>
+                            <ul class="mt-5 space-y-2 text-sm text-slate-600">
+                                @foreach ($p->features as $f)<li class="flex gap-2"><x-icon name="check" class="h-4 w-4 text-emerald-600" :solid="true" />{{ $f }}</li>@endforeach
+                            </ul>
+                            <a href="{{ route('register') }}" class="{{ $loop->first ? 'btn-primary' : 'btn-soft' }} mt-6 w-full">Cuba dulu</a>
+                        </article>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        {{-- FAQ --}}
+        <section id="soalan" class="scroll-mt-16 bg-slate-50 py-16">
+            <div class="mx-auto max-w-3xl px-4">
+                <h2 class="text-3xl font-bold tracking-tight">Soalan lazim</h2>
+                <div class="mt-8 space-y-3">
+                    @foreach ($faqs as [$q, $a])
+                        <details class="card group p-5" @if($loop->first) open @endif>
+                            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold">
+                                <h3>{{ $q }}</h3>
+                                <x-icon name="chevron-down" class="h-5 w-5 text-slate-400 transition group-open:rotate-180" />
+                            </summary>
+                            <p class="mt-3 leading-relaxed text-slate-600">{{ $a }}</p>
+                        </details>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        {{-- Final CTA --}}
+        <section class="py-16">
+            <div class="mx-auto max-w-5xl px-4">
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-700 px-6 py-12 text-center text-white">
+                    <h2 class="text-3xl font-bold tracking-tight">Prospek pertama anda, hari ni</h2>
+                    <p class="mx-auto mt-3 max-w-xl text-emerald-50/90">Daftar dalam satu minit, isi profil produk, dan buat carian pertama.</p>
+                    <a href="{{ route('register') }}" class="btn mt-7 bg-white px-7 py-3.5 text-base text-emerald-700 hover:bg-emerald-50">Cuba percuma {{ $trialDays }} hari</a>
+                </div>
+            </div>
+        </section>
+    </main>
+</x-layouts.marketing>

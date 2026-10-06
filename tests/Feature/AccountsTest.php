@@ -137,3 +137,13 @@ it('creates the platform admin with the DynoPOS demo products', function () {
         ->and(Product::withoutGlobalScope('workspace')->where('workspace_id', $bob->workspace_id)->pluck('slug')->sort()->values()->all())
         ->toBe(['dynopos', 'murahwebsite']);
 });
+
+it('gives the admin the workspace that holds migrated Fasa 0 data', function () {
+    $legacy = Workspace::factory()->create(['name' => 'DynoPOS Technologies', 'plan' => 'dalaman']);
+
+    $this->artisan('dynoleads:admin', ['email' => 'bob@dynopos.my'])
+        ->expectsQuestion('Kata laluan (min 8 aksara)', 'rahsiabob1')
+        ->assertSuccessful();
+
+    expect(User::where('email', 'bob@dynopos.my')->value('workspace_id'))->toBe($legacy->id);
+});

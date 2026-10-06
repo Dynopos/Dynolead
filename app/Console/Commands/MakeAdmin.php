@@ -34,13 +34,15 @@ class MakeAdmin extends Command
             }
 
             $user = DB::transaction(function () use ($email, $password) {
-                $workspace = Workspace::query()->create([
-                    'name' => (string) $this->option('business'),
-                    'slug' => Workspace::uniqueSlug((string) $this->option('business')),
-                    'sender_name' => (string) $this->option('name'),
-                    'plan' => 'dalaman',
-                    'onboarded_at' => now(),
-                ]);
+                // Fasa 0 data moved by migration into an internal workspace with no owner: take it over.
+                $workspace = Workspace::query()->where('plan', 'dalaman')->whereDoesntHave('users')->oldest('id')->first()
+                    ?? Workspace::query()->create([
+                        'name' => (string) $this->option('business'),
+                        'slug' => Workspace::uniqueSlug((string) $this->option('business')),
+                        'sender_name' => (string) $this->option('name'),
+                        'plan' => 'dalaman',
+                        'onboarded_at' => now(),
+                    ]);
 
                 return User::query()->create([
                     'workspace_id' => $workspace->id,

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <title>{{ $title ?? 'Dyno Leads' }} · Dyno Leads</title>
+    <meta name="description" content="{{ $title ?? 'Dyno Leads' }} untuk Dyno Leads, app cari prospek dengan AI untuk SME Malaysia.">
+    <link rel="canonical" href="{{ url()->current() }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-full bg-white text-slate-900 antialiased">

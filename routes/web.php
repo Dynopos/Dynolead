@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BillingReturnController;
 use App\Http\Controllers\ChipCallbackController;
+use App\Http\Controllers\HomeController;
 use App\Livewire\AccountPage;
 use App\Livewire\AdminPage;
 use App\Livewire\Auth\ForgotPassword;
@@ -18,7 +19,25 @@ use App\Livewire\SearchPage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => auth()->check() ? redirect()->route('leads') : redirect()->route('login'))->name('home');
+Route::get('/', HomeController::class)->name('home');
+
+Route::get('/sitemap.xml', function () {
+    $urls = [route('home'), route('terms'), route('privacy')];
+
+    return response()->view('marketing.sitemap', ['urls' => $urls])->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
+// Only the public pages are crawlable; the app itself is private.
+Route::get('/robots.txt', fn () => response(implode("\n", [
+    'User-agent: *',
+    'Allow: /$',
+    'Allow: /terma',
+    'Allow: /privasi',
+    'Disallow: /',
+    '',
+    'Sitemap: '.route('sitemap'),
+    '',
+]))->header('Content-Type', 'text/plain'))->name('robots');
 
 Route::view('/terma', 'legal.terms')->name('terms');
 Route::view('/privasi', 'legal.privacy')->name('privacy');
