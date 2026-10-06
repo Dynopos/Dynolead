@@ -15,8 +15,13 @@ DYNOPRO (DynoPOS Technologies, Pasir Mas). App ini:
 4. jejak status setiap lead (Baru, Dah hantar, Reply, Deal, Tolak) dan peringatan
    follow-up.
 
-Pemilik produk: Bob (Borhan Sidqy). Fasa 0 ialah alat untuk satu akaun (Bob
-sahaja). Login berbilang pengguna dan bayaran datang kemudian (lihat spec).
+Pemilik produk: Bob (Borhan Sidqy). App ini **dijual kepada SME lain** (Fasa 2): setiap
+pelanggan ada workspace sendiri: **percubaan percuma 20 lead / 14 hari**, kemudian
+**yuran aktif sekali** (RM23.90), kemudian **bayar ikut guna** dari baki prabayar (kos sebenar
+AI + Places + markup, `config/billing.php`). Tiada langganan bulanan; carian hanya bila
+pelanggan minta. Bob ialah admin
+platform dan juga pengguna (workspace pelan `dalaman`). Kunci API Claude dan Google
+ialah kunci pusat milik Bob.
 
 ## Stack
 
@@ -55,6 +60,13 @@ test.
 7. **Tiada rahsia dalam repo.** Semua kunci API dalam `.env`. `.env.example` tunjuk
    nama pembolehubah sahaja.
 
+8. **Data setiap pelanggan terasing.** Model data guna `BelongsToWorkspace`. Query merentas
+   workspace (`withoutGlobalScope('workspace')`) hanya dalam kod admin, job (selepas
+   `CurrentWorkspace::runAs()`), dan semakan pelan. Subquery mentah mesti padankan
+   `workspace_id`. Setiap ciri baru perlu test pengasingan.
+9. **Bayaran disahkan dengan CHIP sendiri.** Jangan aktifkan langganan dari URL atau payload
+   sahaja: sahkan `X-Signature`, kemudian ambil semula pembelian dari API CHIP.
+
 ## Kawalan kos (penting)
 
 Kos utama app ini ialah token Claude dan panggilan Places. Ikut susunan ini:
@@ -71,12 +83,17 @@ Kos utama app ini ialah token Claude dan panggilan Places. Ikut susunan ini:
 - Web search tool Claude: OFF secara default.
 - Setiap panggilan direkod dalam jadual `ai_usage` (token masuk, token keluar,
   anggaran kos).
+- Carian berbayar dimeter (`UsageMeter`, `billable_search_id`) dan dicaj berperingkat
+  (`WalletService::settle`); carian berhenti bila baki habis. Hanya kerja dalam meter
+  dicaj. Jana semula/follow-up percuma tetapi dihadkan setiap lead. Had platform
+  `AI_MONTHLY_BUDGET_MYR` melindungi kunci pusat.
+- Pelanggan tidak nampak kos RM dalaman, model atau amaran harga; itu untuk admin sahaja.
 
 ## Konvensyen
 
 - Bahasa UI: Bahasa Melayu santai, jelas. Kod, nama jadual dan komen: English.
 - Logik dalam service classes (`app/Services/...`), bukan dalam komponen Livewire.
-- Semua panggilan luar (Claude, Places, WhatsApp) melalui satu client class setiap
+- Semua panggilan luar (Claude, Places, CHIP) melalui satu client class setiap
   satu supaya senang di-mock.
 - Prompt disimpan dalam `resources/prompts/*.md` dengan `prompt_version`.
 - Nombor Malaysia: mudah alih `01x...` ditukar ke `601x...` untuk wa.me. Talian tetap
