@@ -40,5 +40,9 @@
         <env name="AI_MONTHLY_BUDGET_MYR" value="100"/>
         <env name="GOOGLE_PLACES_API_KEY" value="test-places-key"/>
         <env name="PLACES_CACHE_HOURS" value="24"/>
+        <env name="PRICE_TABLE_PATH" value="config/ai_prices.php"/>
+        <env name="APP_LOCALE" value="ms"/>
+        <env name="CLAUDE_EFFORT_SCORE" value=""/>
+        <env name="CLAUDE_EFFORT_WRITE" value="low"/>
     </php>
 </phpunit>

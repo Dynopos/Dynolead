@@ -90,3 +90,34 @@ Catat setiap keputusan reka bentuk di sini (tarikh, keputusan, sebab).
   job panjang akan diambil oleh worker lain dan menyebabkan panggilan AI berganda.
 - **`CLAUDE_USE_BATCH`** dibaca dalam config tetapi Message Batches untuk agen malam ialah
   kerja Fasa 1, belum dibina.
+
+## 2026-10-06 — Langkah 4 (skrin)
+
+- **Logik dalam service:** `LeadService` (senarai, kad, status, nota, edit mesej, jana
+  semula), `FollowupService`, `SearchService`, `CostEstimator`, `CostReport`,
+  `ProductService`. Komponen Livewire hanya panggil service. Test arkitektur halang
+  Livewire guna `Http`, `ClaudeClient` atau `PlacesClient` terus.
+- **Butang "Cari" kira anggaran dahulu**, kemudian "Sahkan & cari". Carian tidak boleh
+  dimulakan jika harga AI kosong atau had bulanan dah dicapai (Places pun tidak dipanggil,
+  sebab tanpa AI carian itu tak berguna).
+- **Anggaran §9.3:** kadar lulus = `lead_count / found_count` carian 30 hari, kadar sesuai =
+  fit ≥ 50 / dinilai, kos purata nilai/tulis = purata `ai_usage` setiap lead (termasuk
+  jana semula). Data sebenar hanya diguna bila ada ≥ 20 calon / ≥ 10 lead dinilai;
+  kalau tidak, default 50% / 60% (sampel kecil terlalu bising).
+- **Tolak = STOP kekal.** Suppression dicipta dengan `place_id` dan telefon (bentuk `60...`).
+  Lead itu dan lead produk lain untuk kedai sama disembunyikan, tidak boleh diubah status
+  dan tidak boleh dijana semula. Kad juga disembunyikan jika nombor telefonnya dalam STOP.
+- **Dah hantar** → rekod `contacts_log`, `contacted_at`, follow-up 3 hari lagi. Ditolak
+  jika kedai dihubungi untuk produk lain dalam 30 hari. Lead produk lain untuk kedai itu
+  disembunyikan selama 30 hari.
+- **Mesej yang gagal semakan** tidak dapat butang WhatsApp atau Salin. Bob boleh edit
+  mesej; suntingan melalui semakan yang sama.
+- **Jana semula** minta pengesahan dengan anggaran kos, berjalan dalam queue; skrin
+  `wire:poll` sehingga siap. Follow-up guna model murah (`CLAUDE_MODEL_SCORE`).
+- **Lead list 10 setiap halaman** supaya bila cache tamat, paling banyak 10 panggilan
+  Place Details (tanpa review) untuk satu halaman.
+- **Panduan 10–15 mesej sehari** dipaparkan di atas senarai lead (bilangan "Dah hantar"
+  hari ini).
+- **Atribusi "Data kedai: Google Maps"** pada setiap kad yang tunjuk data Places
+  (Lead dan Follow-up), dengan pautan ke Google Maps bila ada.
+- **Bahasa app `ms`** (nama bulan dalam BM).

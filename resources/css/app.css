@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .input {
+        @apply block w-full rounded-lg border-slate-300 text-base shadow-sm focus:border-emerald-500 focus:ring-emerald-500;
+    }
+}
+
+[x-cloak] {
+    display: none !important;
+}

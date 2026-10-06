@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\PlaceCache;
+use App\Services\Places\PlaceData;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Collection;
@@ -137,4 +139,14 @@ function claudeRequests(string $purpose): Collection
 
     return Http::recorded(fn ($request) => str_contains($request->url(), 'api.anthropic.com') && $request['model'] === $model)
         ->map(fn ($pair) => $pair[0]);
+}
+
+/** Put place details in the short cache so screens do not call Google. */
+function cachePlace(string $placeId, array $overrides = []): void
+{
+    PlaceCache::query()->updateOrCreate(['place_id' => $placeId], [
+        'payload' => PlaceData::fromApi(apiDetails($placeId, $overrides), true, true),
+        'has_details' => true,
+        'fetched_at' => now(),
+    ]);
 }

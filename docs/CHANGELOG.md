@@ -33,3 +33,17 @@
 - `MessageValidator`: tiada `banned_words`, ≤ 900 aksara, ada STOP, tiada harga rekaan.
   Gagal → jana semula sekali → "Semak manual".
 - Job `ScoreLeadsJob`, `WriteMessagesJob`, `RegenerateLeadJob`.
+
+### Langkah 4 — Skrin
+- **Produk:** senarai + borang tambah/edit (varian pitch, perkataan dilarang, tapisan).
+- **Cari:** anggaran kos sebelum jalan + butang sahkan, kemajuan dicari → ditapis →
+  dinilai → siap, kos sebenar setiap carian.
+- **Lead:** ringkasan ikut status, penapis (produk, jenis, status, kawasan), kad lead
+  (rating, skor, "Kenapa sesuai", amaran, mesej), Buka WhatsApp (wa.me), Salin mesej,
+  Edit, Jana semula (dengan pengesahan kos), dropdown status, nota, atribusi Google.
+  Talian tetap: "Telefon atau singgah".
+- **Follow-up:** lead "Dah hantar" > 3 hari, jana mesej follow-up (model murah), Dah follow-up.
+- **Kos:** token, kos RM, panggilan Places bulan ini, had bulanan boleh ubah, bar kemajuan,
+  50 panggilan AI terakhir.
+- Tolak → `suppressions`; Dah hantar → `contacts_log`.
+- Semua skrin diuji pada lebar 400px (tiada skrol mendatar).

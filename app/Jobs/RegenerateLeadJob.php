@@ -7,6 +7,7 @@ use App\Exceptions\PricesNotConfigured;
 use App\Models\Lead;
 use App\Services\Ai\LeadScorer;
 use App\Services\Ai\MessageWriter;
+use App\Services\Leads\LeadService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -39,6 +40,13 @@ class RegenerateLeadJob implements ShouldQueue
             }
         } catch (BudgetExceeded|PricesNotConfigured $e) {
             $lead->forceFill(['needs_review' => true, 'review_note' => $e->getMessage()])->save();
+
+            return;
+        } finally {
+            $lead->refresh();
+            if ($lead->review_note === LeadService::REGENERATING) {
+                $lead->forceFill(['review_note' => null])->save();
+            }
         }
     }
 }
