@@ -34,7 +34,9 @@ function initVoiceNote() {
     const time = root.querySelector('[data-voice-time]');
     const progress = root.querySelector('[data-voice-progress]');
     const storageKey = 'dyno-lead-voice-played';
-    const events = ['pointerdown', 'touchstart', 'keydown'];
+    // Browsers allow sound only after a completed tap/click/key (touchend, click, keydown),
+    // not on touchstart. Keep listening until one of them actually starts the audio.
+    const events = ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'];
     let pausedByVisitor = false;
 
     const format = (seconds) => {
@@ -69,11 +71,12 @@ function initVoiceNote() {
     const stopWaiting = () => events.forEach((name) => document.removeEventListener(name, onFirstInteraction, true));
 
     function onFirstInteraction(event) {
-        stopWaiting();
         // A tap on the player itself is handled by its own button.
-        if (!root.contains(event.target) && !pausedByVisitor && audio.paused) {
-            audio.play().catch(() => {});
+        if (pausedByVisitor || !audio.paused || root.contains(event.target)) {
+            stopWaiting();
+            return;
         }
+        audio.play().then(stopWaiting).catch(() => {});
     }
 
     button.addEventListener('click', () => {
@@ -102,6 +105,14 @@ function initVoiceNote() {
     audio.play().then(stopWaiting).catch(() => {
         root.classList.add('is-waiting');
         events.forEach((name) => document.addEventListener(name, onFirstInteraction, { capture: true, passive: true }));
+    });
+}
+
+// The demo screen recording is decoration: keep it still for reduced-motion users.
+if (reduceMotion) {
+    document.querySelectorAll('video[data-autoplay]').forEach((video) => {
+        video.removeAttribute('autoplay');
+        video.pause();
     });
 }
 

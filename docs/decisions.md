@@ -317,3 +317,14 @@ contoh kos RM50 kita caj RM60." Ini **menggantikan** model kredit (commit sebelu
   Pemain disembunyikan jika fail tiada.
 - Animasi (barisan niche bergerak, bahagian muncul semasa skrol, bar bunyi) dimatikan untuk
   pengguna yang pilih "kurangkan gerakan" pada peranti. Kandungan tetap kelihatan tanpa JS.
+
+## 2026-10-07 — Video demo di halaman jualan
+
+- Rakaman skrin Bob memaparkan nama dan nombor telefon kedai sebenar dari Google Maps. Ia
+  tidak disiarkan: syarat Google tidak membenarkan data Places disimpan/diguna dalam iklan
+  (peraturan 4), dan kedai itu tidak beri izin. Ganti: rakaman app sebenar dengan data kedai
+  contoh (`public/video/demo-lead.mp4` + `.webm`, 18 saat, tanpa bunyi), dimain senyap dan
+  berulang dalam bingkai telefon.
+- Pembetulan voice note: telefon hanya membenarkan bunyi selepas sentuhan lengkap (`touchend`/
+  `click`), bukan `touchstart`. Skrip kini terus mencuba pada setiap sentuhan sehingga audio
+  benar-benar bermula.
