@@ -94,30 +94,19 @@
                     <p class="mt-3 text-sm text-slate-500">{{ $trial['leads'] }} lead percuma · tanpa kad kredit · tiada yuran bulanan</p>
                 </div>
 
-                {{-- Product preview, built in HTML (no image to load) --}}
-                <div class="relative mx-auto w-full max-w-sm" aria-hidden="true">
-                    <div class="card overflow-hidden shadow-xl shadow-emerald-900/10">
-                        <div class="flex items-start gap-3 p-4">
-                            <span class="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-lg font-bold text-white">K</span>
-                            <div class="flex-1">
-                                <p class="font-semibold">Kedai Runcit Pak Mat</p>
-                                <p class="flex items-center gap-1 text-xs text-slate-500"><x-icon name="star" class="h-3.5 w-3.5 text-amber-400" /><b class="text-slate-700">4.6</b> (312 review) · kedai runcit</p>
-                            </div>
-                            <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200">Skor 88</span>
-                        </div>
-                        <div class="mx-4 rounded-xl bg-slate-50 p-3">
-                            <p class="flex items-center gap-1.5 text-xs font-semibold text-emerald-700"><x-icon name="sparkles" class="h-4 w-4" />Kenapa sesuai</p>
-                            <p class="mt-1 text-sm text-slate-700">Ramai komplen kaunter lambat waktu petang.</p>
-                        </div>
-                        <div class="m-4 rounded-xl bg-[#efeae2] p-3">
-                            <div class="ml-6 rounded-lg rounded-tr-none bg-[#d9fdd3] px-3 py-2 text-[13px] leading-relaxed text-slate-800 shadow-sm">
-                                Salam Kedai Runcit Pak Mat 👋<br><br>Saya Ali dari KedaiPOS. Ramai pelanggan puji barang lengkap dan layanan mesra...<br><br>Kalau tak berminat, balas STOP, saya tak ganggu lagi 🙏
-                            </div>
-                        </div>
-                        <div class="border-t border-slate-100 bg-slate-50/60 p-3">
-                            <span class="btn-wa w-full py-3"><x-icon name="chat" class="h-5 w-5" />Buka WhatsApp</span>
+                {{-- Screen recording of the real app (demo data, no real shops): plays muted on loop. --}}
+                <div class="relative mx-auto w-full max-w-[280px]">
+                    <p class="absolute -left-4 top-16 z-10 -rotate-6 rounded-xl bg-amber-300 px-3 py-1 font-hand text-xl font-semibold text-slate-900 shadow-md">Lead siap dengan mesej!</p>
+                    <div class="rounded-[2.5rem] bg-slate-900 p-2.5 shadow-2xl shadow-emerald-900/25">
+                        <div class="relative overflow-hidden rounded-[2rem] bg-white">
+                            <video class="block aspect-[600/1298] w-full" data-autoplay autoplay muted loop playsinline preload="metadata"
+                                   poster="{{ asset('video/demo-lead.jpg') }}" aria-label="Rakaman skrin app Dyno Lead: senarai lead dengan mesej WhatsApp siap ditulis">
+                                <source src="{{ asset('video/demo-lead.mp4') }}" type="video/mp4">
+                                <source src="{{ asset('video/demo-lead.webm') }}" type="video/webm">
+                            </video>
                         </div>
                     </div>
+                    <p class="mt-3 text-center text-xs text-slate-500">Rakaman app sebenar · data kedai contoh</p>
                 </div>
             </div>
         </section>

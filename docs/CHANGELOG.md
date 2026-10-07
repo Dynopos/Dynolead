@@ -140,3 +140,5 @@
 - Halaman jualan: voice note Bob (cuba main bila dibuka, atau pada sentuhan pertama), barisan
   "Khas untuk anda yang jual..." bergerak, kotak kuning pada "Susah cari customer?", dan
   bahagian muncul perlahan semasa skrol.
+- Halaman jualan: video demo app (data contoh) dalam bingkai telefon. Voice note kini mula
+  pada sentuhan jari pertama di telefon (sebelum ini hanya berfungsi dengan klik tetikus).

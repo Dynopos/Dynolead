@@ -98,7 +98,11 @@ it('plays Bob\'s voice note on the sales page, and shows who Dyno Lead is for', 
         ->assertSee('audio/pesanan-bob.mp3', false)
         ->assertSee('Dengar pesanan Bob')
         ->assertSee('Khas untuk anda yang jual')
-        ->assertSee('Sistem POS');
+        ->assertSee('Sistem POS')
+        ->assertSee('video/demo-lead.mp4', false)
+        ->assertSee('playsinline', false);
+
+    expect(public_path('video/demo-lead.mp4'))->toBeFile()->and(public_path('video/demo-lead.jpg'))->toBeFile();
 });
 
 it('sends signed-in users to their leads', function () {
