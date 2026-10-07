@@ -63,6 +63,11 @@
                             <span class="absolute inset-x-0 bottom-0 h-0.5 bg-white/10" aria-hidden="true"><span data-voice-progress class="block h-full w-0 bg-orange-400"></span></span>
                             <audio preload="auto" src="{{ asset('audio/pesanan-bob.mp3') }}"></audio>
                         </div>
+                        {{-- Shown only while the browser waits for a tap before it allows sound. --}}
+                        <button type="button" data-voice-hint hidden
+                                class="fixed left-1/2 top-[4.5rem] z-40 inline-flex [&[hidden]]:hidden -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-600/30">
+                            <span aria-hidden="true">🔊</span> Ketik skrin untuk dengar pesanan Bob
+                        </button>
                     @endif
 
                     <p class="mt-6 font-hand text-2xl font-semibold text-orange-600">Khas untuk anda yang jual...</p>
