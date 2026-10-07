@@ -137,3 +137,6 @@
   di halaman jualan, nombor di footer, Terma dan Privasi. Pautan `wa.me` dengan mesej awal.
 - Nama produk ditukar ke **Dyno Lead**. Warna oren dari logo untuk butang ajakan dan sorotan
   di halaman jualan (`btn-accent`); hijau kekal warna utama app.
+- Halaman jualan: voice note Bob (cuba main bila dibuka, atau pada sentuhan pertama), barisan
+  "Khas untuk anda yang jual..." bergerak, kotak kuning pada "Susah cari customer?", dan
+  bahagian muncul perlahan semasa skrol.

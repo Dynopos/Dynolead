@@ -304,3 +304,16 @@ contoh kos RM50 kita caj RM60." Ini **menggantikan** model kredit (commit sebelu
 - Warna: hijau zamrud kekal warna utama app; oren dari logo untuk butang ajakan utama
   (`btn-accent`) dan sorotan di halaman jualan. Tiada gradien hijau→oren terus (jadi warna
   zaitun yang kusam); dua warna diletak sebagai blok berasingan.
+
+## 2026-10-07 — Voice note Bob di halaman jualan
+
+- Bob mahu suara terus main bila halaman dibuka. Pelayar (Chrome, Safari, telefon) menyekat
+  bunyi automatik sehingga pelawat sentuh halaman, jadi `resources/js/marketing.js` cuba main
+  bila halaman dibuka; jika disekat, ia mula pada sentuhan atau tekanan kekunci pertama di
+  mana-mana pada halaman. Butang play berdenyut sementara menunggu.
+- Main sendiri sekali sahaja setiap sesi (`sessionStorage`), supaya pelawat yang kembali ke
+  halaman tidak dengar lagi. Jika pelawat tekan jeda, sentuhan lain tidak memulakannya semula.
+- Fail: `public/audio/pesanan-bob.mp3` (mono 96 kbps, kelantangan diseragamkan, ~590 KB).
+  Pemain disembunyikan jika fail tiada.
+- Animasi (barisan niche bergerak, bahagian muncul semasa skrol, bar bunyi) dimatikan untuk
+  pengguna yang pilih "kurangkan gerakan" pada peranti. Kandungan tetap kelihatan tanpa JS.

@@ -6,8 +6,9 @@
     <meta name="theme-color" content="#059669">
     <link rel="icon" href="/favicon.png" type="image/png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <script>document.documentElement.classList.add('js')</script>
     {{ $head }}
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/marketing.js'])
 </head>
 <body class="bg-white text-slate-900 antialiased">
     <header class="sticky top-0 z-30 border-b border-slate-100 bg-white/85 backdrop-blur-lg">

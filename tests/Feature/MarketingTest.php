@@ -90,6 +90,17 @@ it('lets prospects WhatsApp the company from the sales page, terms and privacy',
     $this->get('/')->assertDontSee('wa.me/', false);
 });
 
+it('plays Bob\'s voice note on the sales page, and shows who Dyno Lead is for', function () {
+    expect(public_path('audio/pesanan-bob.mp3'))->toBeFile();
+
+    $this->get('/')
+        ->assertSee('data-voice', false)
+        ->assertSee('audio/pesanan-bob.mp3', false)
+        ->assertSee('Dengar pesanan Bob')
+        ->assertSee('Khas untuk anda yang jual')
+        ->assertSee('Sistem POS');
+});
+
 it('sends signed-in users to their leads', function () {
     $this->actingAs($this->user)->get('/')->assertRedirect(route('leads'));
 });
