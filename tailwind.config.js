@@ -15,6 +15,7 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['"Inter Variable"', 'Inter', 'system-ui', ...defaultTheme.fontFamily.sans],
+                hand: ['Caveat', 'cursive'],
             },
         },
     },

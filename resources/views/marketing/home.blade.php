@@ -47,13 +47,41 @@
             <div class="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" aria-hidden="true"></div>
             <div class="absolute -left-24 top-40 h-64 w-64 rounded-full bg-orange-200/40 blur-3xl" aria-hidden="true"></div>
             <div class="relative mx-auto grid max-w-5xl items-center gap-10 px-4 pb-16 pt-12 md:grid-cols-2 md:pt-20">
-                <div>
-                    <p class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-200">
+                <div class="min-w-0">
+                    @if (file_exists(public_path('audio/pesanan-bob.mp3')))
+                        {{-- Bob's voice note: tries to play on open, otherwise on the first tap (resources/js/marketing.js). --}}
+                        <div data-voice class="relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-slate-900 py-1.5 pl-1.5 pr-4 text-white shadow-lg shadow-slate-900/20">
+                            <button type="button" data-voice-toggle aria-pressed="false" aria-label="Dengar pesanan Bob" class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-orange-500 text-white transition hover:bg-orange-600">
+                                <svg class="voice-play h-5 w-5 translate-x-px" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14Z"/></svg>
+                                <svg class="voice-pause h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+                            </button>
+                            <span class="text-sm font-semibold">Dengar pesanan Bob</span>
+                            <span class="voice-bars flex h-4 items-end gap-0.5" aria-hidden="true">
+                                <span class="h-4 w-1 rounded-full bg-orange-400"></span><span class="h-4 w-1 rounded-full bg-orange-400"></span><span class="h-4 w-1 rounded-full bg-orange-400"></span><span class="h-4 w-1 rounded-full bg-orange-400"></span>
+                            </span>
+                            <span data-voice-time class="text-sm tabular-nums text-slate-300">0:50</span>
+                            <span class="absolute inset-x-0 bottom-0 h-0.5 bg-white/10" aria-hidden="true"><span data-voice-progress class="block h-full w-0 bg-orange-400"></span></span>
+                            <audio preload="auto" src="{{ asset('audio/pesanan-bob.mp3') }}"></audio>
+                        </div>
+                    @endif
+
+                    <p class="mt-6 font-hand text-2xl font-semibold text-orange-600">Khas untuk anda yang jual...</p>
+                    <div class="marquee relative mt-2 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+                        <div class="marquee-track flex w-max gap-2">
+                            @foreach ([false, true] as $copy)
+                                @foreach (['Sistem POS', 'Website', 'Pemasaran digital', 'Katering', 'Percetakan', 'Insurans & takaful', 'Servis IT', 'Barang borong'] as $niche)
+                                    <span @if($copy) aria-hidden="true" @endif class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-sm font-medium text-slate-700 shadow-sm ring-1 ring-emerald-200"><span class="h-1.5 w-1.5 rounded-full bg-orange-500"></span>{{ $niche }}</span>
+                                @endforeach
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <h1 class="mt-6 text-4xl font-extrabold leading-[1.15] tracking-tight text-slate-900 md:text-5xl">
+                        <span class="box-decoration-clone rounded-lg bg-amber-300 px-1.5">Susah cari customer?</span> Pening sales slow? <span class="text-emerald-600">Biar <span class="text-orange-500">Dyno Lead</span> bantu anda cari lead.</span>
+                    </h1>
+                    <p class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
                         <x-icon name="sparkles" class="h-4 w-4" /> Cari prospek dengan AI untuk SME Malaysia
                     </p>
-                    <h1 class="mt-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 md:text-5xl">
-                        Susah cari customer? Pening sales slow? <span class="text-emerald-600">Biar <span class="text-orange-500">Dyno Lead</span> bantu anda cari lead.</span>
-                    </h1>
                     <ul class="mt-6 space-y-3 text-lg text-slate-700">
                         <li class="flex gap-3"><x-icon name="search" class="mt-1 h-5 w-5 shrink-0 text-emerald-600" /><span><b>Kami cari lead</b> di kawasan anda, yang sesuai dengan produk anda.</span></li>
                         <li class="flex gap-3"><x-icon name="sparkles" class="mt-1 h-5 w-5 shrink-0 text-emerald-600" /><span><b>Kami sediakan teks</b> WhatsApp custom untuk setiap lead.</span></li>
@@ -106,7 +134,7 @@
                         ['sparkles', 'Kami sediakan teks', 'AI baca review, beri skor kesesuaian dan tulis mesej custom ikut profil produk anda.'],
                         ['chat', 'Anda tekan hantar', 'Buka WhatsApp dengan mesej siap. Tanda status, dapat peringatan follow-up.'],
                     ] as $i => [$icon, $title, $text])
-                        <li class="card p-5">
+                        <li class="card p-5" data-reveal style="transition-delay: {{ $i * 80 }}ms">
                             <span class="flex items-center gap-3">
                                 <span class="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><x-icon :name="$icon" /></span>
                                 <span class="text-sm font-bold text-orange-500">0{{ $i + 1 }}</span>
@@ -122,7 +150,7 @@
         {{-- Why --}}
         <section class="bg-slate-50 py-16">
             <div class="mx-auto grid max-w-5xl gap-10 px-4 md:grid-cols-2">
-                <div>
+                <div data-reveal>
                     <h2 class="text-3xl font-bold tracking-tight">Mesej WhatsApp jualan yang orang baca</h2>
                     <p class="mt-3 text-slate-600">Mesej umum mudah diabaikan. Dyno Lead tulis mesej yang sebut perkara sebenar tentang kedai itu, dan masalah yang produk anda boleh bantu.</p>
                     <ul class="mt-6 space-y-3">
@@ -136,7 +164,7 @@
                         @endforeach
                     </ul>
                 </div>
-                <div>
+                <div data-reveal style="transition-delay: 80ms">
                     <h2 class="text-3xl font-bold tracking-tight">Selamat untuk nombor anda</h2>
                     <p class="mt-3 text-slate-600">Tiada blast, tiada bot tak rasmi. Itu cara paling cepat nombor WhatsApp kena sekat.</p>
                     <ul class="mt-6 space-y-3">
@@ -159,19 +187,19 @@
                 <h2 class="text-3xl font-bold tracking-tight">Harga mudah, tiada yuran bulanan</h2>
                 <p class="mt-2 max-w-2xl text-slate-600">Anda hanya bayar bila cari lead.</p>
                 <ol class="mt-8 grid gap-4 md:grid-cols-3">
-                    <li class="card p-6">
+                    <li class="card p-6" data-reveal>
                         <p class="text-sm font-bold text-emerald-600">1 · Cuba</p>
                         <p class="mt-2 text-3xl font-extrabold">Percuma</p>
                         <p class="mt-2 text-sm text-slate-600">{{ $trial['leads'] }} lead atau {{ $trial['days'] }} hari, mana dulu. Tanpa kad kredit.</p>
                         <a href="{{ route('register') }}" class="btn-soft mt-6 w-full">Mula percuma</a>
                     </li>
-                    <li class="card p-6 ring-2 ring-orange-400">
+                    <li class="card p-6 ring-2 ring-orange-400" data-reveal style="transition-delay: 80ms">
                         <p class="text-sm font-bold text-orange-600">2 · Aktifkan</p>
                         <p class="mt-2"><span class="text-3xl font-extrabold">RM{{ number_format($fee, 2) }}</span> <span class="text-slate-500">sekali</span></p>
                         <p class="mt-2 text-sm text-slate-600">Bayar sekali sahaja untuk teruskan selepas percubaan.</p>
                         <a href="{{ route('register') }}" class="btn-accent mt-6 w-full">Daftar sekarang</a>
                     </li>
-                    <li class="card p-6">
+                    <li class="card p-6" data-reveal style="transition-delay: 160ms">
                         <p class="text-sm font-bold text-emerald-600">3 · Bayar ikut lead</p>
                         @if ($guide)
                             <p class="mt-2"><span class="text-sm text-slate-500">lebih kurang</span> <span class="text-3xl font-extrabold text-orange-600">RM{{ number_format($guide['per_lead_sen'] / 100, 2) }}</span> <span class="text-slate-500">/ lead</span></p>
@@ -215,7 +243,7 @@
         {{-- Final CTA --}}
         <section class="py-16">
             <div class="mx-auto max-w-5xl px-4">
-                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-700 px-6 py-12 text-center text-white">
+                <div data-reveal class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-700 px-6 py-12 text-center text-white">
                     <div class="absolute -bottom-16 -right-16 h-56 w-56 rounded-full bg-orange-400/40 blur-3xl" aria-hidden="true"></div>
                     <h2 class="relative text-3xl font-bold tracking-tight">Biar kami cari lead. Anda fokus closing.</h2>
                     <p class="relative mx-auto mt-3 max-w-xl text-emerald-50/90">Daftar dalam satu minit, isi profil produk, dan dapat lead pertama hari ni.</p>
