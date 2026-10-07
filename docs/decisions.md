@@ -328,3 +328,10 @@ contoh kos RM50 kita caj RM60." Ini **menggantikan** model kredit (commit sebelu
 - Pembetulan voice note: telefon hanya membenarkan bunyi selepas sentuhan lengkap (`touchend`/
   `click`), bukan `touchstart`. Skrip kini terus mencuba pada setiap sentuhan sehingga audio
   benar-benar bermula.
+
+## 2026-10-07 — Voice note: cuba main setiap kali (Bob)
+
+- Bob mahu suara main setiap kali halaman dibuka. Had "sekali setiap sesi" dibuang.
+- Chrome/Safari tetap tidak membenarkan bunyi tanpa ketikan (skrol tidak dikira). Semasa
+  menunggu, jalur oren "Ketik skrin untuk dengar pesanan Bob" dipaparkan di atas; ia hilang
+  bila suara bermula. Jika pelawat tekan jeda, ketikan lain tidak memulakannya semula.

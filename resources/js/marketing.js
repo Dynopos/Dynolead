@@ -33,7 +33,7 @@ function initVoiceNote() {
     const button = root.querySelector('[data-voice-toggle]');
     const time = root.querySelector('[data-voice-time]');
     const progress = root.querySelector('[data-voice-progress]');
-    const storageKey = 'dyno-lead-voice-played';
+    const hint = document.querySelector('[data-voice-hint]');
     // Browsers allow sound only after a completed tap/click/key (touchend, click, keydown),
     // not on touchstart. Keep listening until one of them actually starts the audio.
     const events = ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'];
@@ -59,14 +59,14 @@ function initVoiceNote() {
 
     ['play', 'pause', 'ended', 'timeupdate', 'loadedmetadata'].forEach((name) => audio.addEventListener(name, render));
 
-    audio.addEventListener('play', () => {
-        root.classList.remove('is-waiting');
-        try {
-            sessionStorage.setItem(storageKey, '1');
-        } catch (e) {
-            // Private mode: the voice note may play again on the next page view.
+    const setWaiting = (waiting) => {
+        root.classList.toggle('is-waiting', waiting);
+        if (hint) {
+            hint.hidden = !waiting;
         }
-    });
+    };
+
+    audio.addEventListener('play', () => setWaiting(false));
 
     const stopWaiting = () => events.forEach((name) => document.removeEventListener(name, onFirstInteraction, true));
 
@@ -89,21 +89,11 @@ function initVoiceNote() {
         }
     });
 
-    let alreadyPlayed = false;
-    try {
-        alreadyPlayed = sessionStorage.getItem(storageKey) === '1';
-    } catch (e) {
-        alreadyPlayed = false;
-    }
-
-    if (alreadyPlayed) {
-        return;
-    }
-
-    // Play as soon as the page opens. Most browsers block sound until the visitor
-    // touches the page; then it starts on their first tap or key press instead.
+    // Play as soon as the page opens (every visit, as Bob asked). Chrome and Safari block
+    // sound until the visitor taps the page (scrolling does not count), so if blocked,
+    // show the hint and start on the first tap or key press instead.
     audio.play().then(stopWaiting).catch(() => {
-        root.classList.add('is-waiting');
+        setWaiting(true);
         events.forEach((name) => document.addEventListener(name, onFirstInteraction, { capture: true, passive: true }));
     });
 }

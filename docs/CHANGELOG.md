@@ -142,3 +142,5 @@
   bahagian muncul perlahan semasa skrol.
 - Halaman jualan: video demo app (data contoh) dalam bingkai telefon. Voice note kini mula
   pada sentuhan jari pertama di telefon (sebelum ini hanya berfungsi dengan klik tetikus).
+- Voice note cuba main setiap kali halaman dibuka; jalur "Ketik skrin untuk dengar pesanan Bob"
+  semasa pelayar menunggu ketikan.
