@@ -144,3 +144,4 @@
   pada sentuhan jari pertama di telefon (sebelum ini hanya berfungsi dengan klik tetikus).
 - Voice note cuba main setiap kali halaman dibuka; jalur "Ketik skrin untuk dengar pesanan Bob"
   semasa pelayar menunggu ketikan.
+- Domain `dynolead.my`: www dan domain lain dialih 301 ke `https://dynolead.my`.

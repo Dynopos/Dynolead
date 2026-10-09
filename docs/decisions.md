@@ -335,3 +335,12 @@ contoh kos RM50 kita caj RM60." Ini **menggantikan** model kredit (commit sebelu
 - Chrome/Safari tetap tidak membenarkan bunyi tanpa ketikan (skrol tidak dikira). Semasa
   menunggu, jalur oren "Ketik skrin untuk dengar pesanan Bob" dipaparkan di atas; ia hilang
   bila suara bermula. Jika pelawat tekan jeda, ketikan lain tidak memulakannya semula.
+
+## 2026-10-09 — Domain dynolead.my
+
+- Domain rasmi: `https://dynolead.my` (APP_URL). `lead.dynopro.my` dibuang kerana belum
+  diterbitkan di mana-mana dan CHIP belum didaftar.
+- `RedirectToCanonicalHost`: permintaan GET/HEAD ke host lain (www, domain ujian Forge) dialih
+  301 ke laluan yang sama di APP_URL, supaya Google nampak satu alamat. POST (callback CHIP,
+  Livewire) dan `/up` tidak dialih. Tidak aktif untuk localhost/IP; boleh dimatikan dengan
+  `CANONICAL_REDIRECT=false`.
