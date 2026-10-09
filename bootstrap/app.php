@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureOnboarded;
+use App\Http\Middleware\RedirectToCanonicalHost;
 use App\Http\Middleware\SetCurrentWorkspace;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -14,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->prepend(RedirectToCanonicalHost::class);
         $middleware->alias([
             'workspace' => SetCurrentWorkspace::class,
             'admin' => EnsureAdmin::class,

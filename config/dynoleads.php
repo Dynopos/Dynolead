@@ -3,6 +3,9 @@
 return [
 
     // Seller of the service (shown on Terma/Privasi and invoices).
+    // Redirect other hosts (www, Forge test domain) to APP_URL's host. See RedirectToCanonicalHost.
+    'canonical_redirect' => (bool) env('CANONICAL_REDIRECT', true),
+
     'company' => [
         'name' => env('COMPANY_NAME', 'DynoPOS Technologies'),
         'registration' => env('COMPANY_REGISTRATION'),

@@ -44,7 +44,7 @@ Dalam Forge, guna pelayan sedia ada atau cipta baru:
 
 ## 2. Cipta site
 
-1. *Sites → New Site*: domain (cth `leads.dynopro.my`, lihat soalan terbuka §11 spec),
+1. *Sites → New Site*: domain `dynolead.my` (tambah juga `www.dynolead.my`),
    project type **General PHP / Laravel**, web directory `/public`.
 2. *Create database*: tanda dan beri nama `dynolead`.
 3. Selepas site dicipta: *Git Repository* → provider GitHub → repo **`Dynopos/Dynolead`**,
@@ -60,7 +60,7 @@ Site → *Environment*. Mula dari `.env.example` dan isi:
 |---|---|
 | `APP_ENV` | `production` |
 | `APP_DEBUG` | `false` |
-| `APP_URL` | `https://domain-anda` |
+| `APP_URL` | `https://dynolead.my`. Semua domain lain (www, `*.on-forge.com`) dialih 301 ke domain ini (`CANONICAL_REDIRECT=false` untuk matikan). Pastikan SSL domain ini aktif dahulu. |
 | `APP_KEY` | Forge jana sendiri; jika kosong, jalankan `php artisan key:generate --force` sekali |
 | `MAIL_*` | Tetapan SMTP dari langkah 0 (`MAIL_FROM_ADDRESS` mesti domain yang disahkan) |
 | `COMPANY_NAME`, `COMPANY_REGISTRATION`, `COMPANY_EMAIL`, `COMPANY_ADDRESS` | Butiran penjual (muncul di Terma, Privasi, halaman utama) |
