@@ -362,3 +362,13 @@ contoh kos RM50 kita caj RM60." Ini **menggantikan** model kredit (commit sebelu
   `places_usage` dan transaksi baki merujuk `search_id`; padam sebenar akan putuskan pautan
   itu dan mengganggu sejarah caj dan kos. Pilihan paling selamat.
 - Hanya carian yang sudah selesai boleh dipadam; yang masih berjalan perlu dibatalkan dahulu.
+
+## 2026-10-10 — Sandaran worker giliran
+
+- Di pelayan, worker Forge tidak mengambil kerja walaupun ditunjukkan "Running", tetapi
+  `queue:work --once` berjaya. Supaya carian pelanggan tidak tersangkut "Dalam giliran",
+  scheduler juga menjalankan `queue:work --stop-when-empty --max-time=50` setiap minit.
+- `withoutOverlapping(15)` menghalang dua salinan sandaran serentak. Jika worker Forge juga
+  hidup, kedua-duanya berkongsi giliran dengan selamat: job yang diambil tidak diambil semula
+  sebelum `retry_after` (900 saat), jadi tiada kos AI berganda.
+- Boleh dimatikan dengan `QUEUE_VIA_SCHEDULER=false` bila pindah ke Redis/Horizon.

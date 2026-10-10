@@ -150,3 +150,5 @@
   berbayar seterusnya. Kerja yang sudah dibuat dicaj seperti biasa (percuma dalam percubaan).
 - Butang **Padam** pada carian yang sudah selesai: buang dari senarai "Carian terkini".
   Rekod kos, caj dan lead kekal (lajur `searches.hidden_at`).
+- Sandaran giliran: scheduler (setiap minit) juga proses giliran sehingga kosong, supaya carian
+  tetap berjalan jika worker Forge mati (`QUEUE_VIA_SCHEDULER`, lalai hidup).

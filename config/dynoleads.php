@@ -6,6 +6,10 @@ return [
     // Redirect other hosts (www, Forge test domain) to APP_URL's host. See RedirectToCanonicalHost.
     'canonical_redirect' => (bool) env('CANONICAL_REDIRECT', true),
 
+    // Safety net: the scheduler (cron, every minute) also works the queue until it is empty,
+    // so searches still run if the Forge queue worker is down. See routes/console.php.
+    'queue_via_scheduler' => (bool) env('QUEUE_VIA_SCHEDULER', true),
+
     'company' => [
         'name' => env('COMPANY_NAME', 'DynoPOS Technologies'),
         'registration' => env('COMPANY_REGISTRATION'),
