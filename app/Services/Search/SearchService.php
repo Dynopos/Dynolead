@@ -107,6 +107,21 @@ class SearchService
     /** @return Collection<int, Search> */
     public function recent(int $limit = 10): Collection
     {
-        return Search::query()->with('product')->latest('id')->limit($limit)->get();
+        return Search::query()->with('product')->whereNull('hidden_at')->latest('id')->limit($limit)->get();
+    }
+
+    /**
+     * Remove a finished search from the list. Only hidden, never deleted: costs, charges
+     * and leads stay linked to it. An unfinished search must be cancelled first.
+     */
+    public function hide(Search $search): bool
+    {
+        if (! $search->status->isFinished()) {
+            return false;
+        }
+
+        $search->forceFill(['hidden_at' => now()])->save();
+
+        return true;
     }
 }

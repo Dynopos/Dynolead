@@ -129,6 +129,16 @@ class SearchPage extends Component
         }
     }
 
+    public function hide(int $searchId, SearchService $service): void
+    {
+        // Workspace-scoped query: another workspace's search is simply not found.
+        $search = Search::query()->find($searchId);
+
+        if ($search !== null) {
+            $service->hide($search);
+        }
+    }
+
     public function render(SearchService $service, WalletService $wallet)
     {
         $searches = $service->recent();

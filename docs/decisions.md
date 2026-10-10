@@ -355,3 +355,10 @@ contoh kos RM50 kita caj RM60." Ini **menggantikan** model kredit (commit sebelu
   setiap Place Details dan setiap panggilan AI, jadi ia berhenti cepat. `Search::markStatus()`
   tidak menulis ganti status Dibatalkan (job yang gagal atau siap selepas itu tidak mengubahnya).
 - Query batal guna skop workspace biasa: carian pelanggan lain tidak dijumpai.
+
+## 2026-10-10 — Padam carian
+
+- "Padam" hanya menyembunyikan carian (`hidden_at`), tidak memadam baris. Lead, `ai_usage`,
+  `places_usage` dan transaksi baki merujuk `search_id`; padam sebenar akan putuskan pautan
+  itu dan mengganggu sejarah caj dan kos. Pilihan paling selamat.
+- Hanya carian yang sudah selesai boleh dipadam; yang masih berjalan perlu dibatalkan dahulu.

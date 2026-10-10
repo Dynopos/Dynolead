@@ -148,3 +148,5 @@
 - Butang **Batalkan** pada carian yang belum siap (skrin Cari). Status baru "Dibatalkan";
   job dalam giliran melangkau carian itu, job yang sedang berjalan berhenti sebelum panggilan
   berbayar seterusnya. Kerja yang sudah dibuat dicaj seperti biasa (percuma dalam percubaan).
+- Butang **Padam** pada carian yang sudah selesai: buang dari senarai "Carian terkini".
+  Rekod kos, caj dan lead kekal (lajur `searches.hidden_at`).
