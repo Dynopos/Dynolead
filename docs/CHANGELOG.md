@@ -163,3 +163,5 @@
   tanpa menambah fakta. Ayat ajakan (CTA) kini pilihan; jika kosong, mesej ditutup dengan
   "Kalau berminat, balas je mesej ni" (dengan kontak jika ada). Tanda kedai, perkataan dilarang
   dan varian dipindah ke "Tetapan lanjutan (pilihan)".
+- `dynoleads:admin`: jika e-mel tiada dan tiada kata laluan diberi (contoh dari Forge Commands),
+  arahan beritahu "Tiada akaun dengan e-mel ..." dan bukan "Kata laluan terlalu pendek".

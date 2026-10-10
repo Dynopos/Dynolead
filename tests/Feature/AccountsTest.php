@@ -165,6 +165,20 @@ it('promotes a user who signed up first, without asking for a password', functio
         ->and(Product::withoutGlobalScope('workspace')->where('workspace_id', $bob->workspace_id)->count())->toBe(2);
 });
 
+it('says the e-mail was not found instead of asking for a password when run from Forge', function () {
+    $this->artisan('dynoleads:admin', ['email' => 'tiada@contoh.my', '--no-interaction' => true])
+        ->expectsOutputToContain('Tiada akaun dengan e-mel tiada@contoh.my')
+        ->assertFailed();
+
+    // Forge may show the prompt but send no answer.
+    $this->artisan('dynoleads:admin', ['email' => 'tiada@contoh.my'])
+        ->expectsQuestion('Kata laluan (min 8 aksara)', '')
+        ->expectsOutputToContain('Tiada akaun dengan e-mel tiada@contoh.my')
+        ->assertFailed();
+
+    expect(User::where('email', 'tiada@contoh.my')->exists())->toBeFalse();
+});
+
 it('sends new sign-ups to onboarding', function () {
     Livewire::test(Register::class)
         ->set('name', 'Siti')->set('business', 'Siti Web')->set('email', 'siti@contoh.my')
