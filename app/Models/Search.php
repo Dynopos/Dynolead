@@ -81,4 +81,13 @@ class Search extends Model
         $rejections[$placeId] = $reason;
         $this->rejections = $rejections;
     }
+
+    /** @return array<string, int> reason => number of candidates, most common first */
+    public function rejectionSummary(): array
+    {
+        $counts = array_count_values(array_values($this->rejections ?? []));
+        arsort($counts);
+
+        return $counts;
+    }
 }

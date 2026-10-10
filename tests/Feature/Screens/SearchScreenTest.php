@@ -139,3 +139,22 @@ it('keeps "Pasir Mas, Kelantan" as one area and splits areas by line', function 
     expect(SearchService::parseAreas("Pasir Mas, Kelantan\nTumpat, Kelantan; Kota Bharu"))
         ->toBe(['Pasir Mas, Kelantan', 'Tumpat, Kelantan', 'Kota Bharu']);
 });
+
+it('explains why a finished search found no leads', function () {
+    Search::factory()->for($this->dynopos)->create([
+        'status' => SearchStatus::Done,
+        'found_count' => 3,
+        'rejections' => ['a' => 'Dah ada website', 'b' => 'Dah ada website', 'c' => 'Review bawah minimum'],
+    ]);
+
+    Livewire::test(SearchPage::class)
+        ->assertSee('Tiada lead: semua 3 calon ditapis.')
+        ->assertSee('Sebab calon ditapis (3)')
+        ->assertSeeInOrder(['Dah ada website', '2', 'Review bawah minimum', '1']);
+});
+
+it('says when Google found nothing for the search', function () {
+    Search::factory()->for($this->dynopos)->create(['status' => SearchStatus::Done, 'found_count' => 0]);
+
+    Livewire::test(SearchPage::class)->assertSee('Google tak jumpa bisnes untuk carian ini.');
+});
