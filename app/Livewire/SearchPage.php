@@ -4,7 +4,9 @@ namespace App\Livewire;
 
 use App\Exceptions\BudgetExceeded;
 use App\Models\Product;
+use App\Models\Search;
 use App\Services\Billing\WalletService;
+use App\Services\Search\SearchPipeline;
 use App\Services\Search\SearchService;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -115,6 +117,16 @@ class SearchPage extends Component
 
         $this->lastSearchId = $search->id;
         $this->estimate = null;
+    }
+
+    public function cancel(int $searchId, SearchPipeline $pipeline): void
+    {
+        // Workspace-scoped query: another workspace's search is simply not found.
+        $search = Search::query()->find($searchId);
+
+        if ($search !== null) {
+            $pipeline->cancel($search);
+        }
     }
 
     public function render(SearchService $service, WalletService $wallet)

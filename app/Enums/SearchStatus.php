@@ -13,6 +13,7 @@ enum SearchStatus: string
     case Done = 'done';
     case Failed = 'failed';
     case BudgetExceeded = 'budget_exceeded';
+    case Cancelled = 'cancelled';
 
     public function label(): string
     {
@@ -26,12 +27,13 @@ enum SearchStatus: string
             self::Done => 'Siap',
             self::Failed => 'Gagal',
             self::BudgetExceeded => 'Had kos AI dicapai',
+            self::Cancelled => 'Dibatalkan',
         };
     }
 
     public function isFinished(): bool
     {
-        return in_array($this, [self::Done, self::Failed, self::BudgetExceeded], true);
+        return in_array($this, [self::Done, self::Failed, self::BudgetExceeded, self::Cancelled], true);
     }
 
     /** Progress step 1..4 for the UI: dicari → ditapis → dinilai → siap. */

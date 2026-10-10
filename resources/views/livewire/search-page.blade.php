@@ -122,6 +122,7 @@
             @php($step = $search->status->step())
             @php($done = $search->status === \App\Enums\SearchStatus::Done)
             @php($bad = in_array($search->status, [\App\Enums\SearchStatus::Failed, \App\Enums\SearchStatus::BudgetExceeded]))
+            @php($cancelled = $search->status === \App\Enums\SearchStatus::Cancelled)
             <article wire:key="search-{{ $search->id }}" class="card p-4">
                 <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0">
@@ -133,6 +134,7 @@
                         'inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset',
                         'bg-emerald-50 text-emerald-700 ring-emerald-200' => $done,
                         'bg-rose-50 text-rose-700 ring-rose-200' => $bad,
+                        'bg-slate-100 text-slate-600 ring-slate-200' => $cancelled,
                         'bg-sky-50 text-sky-700 ring-sky-200' => ! $search->status->isFinished(),
                     ])>
                         @unless ($search->status->isFinished())<span class="h-1.5 w-1.5 animate-pulse rounded-full bg-sky-500"></span>@endunless
@@ -141,6 +143,7 @@
                 </div>
 
                 {{-- Stepper: dicari → ditapis → dinilai → siap --}}
+                @unless ($cancelled)
                 <ol class="mt-4 flex items-center" aria-label="Kemajuan">
                     @foreach (['Dicari', 'Ditapis', 'Dinilai', 'Siap'] as $i => $label)
                         @php($complete = $done || $step > $i + 1)
@@ -162,6 +165,7 @@
                         </li>
                     @endforeach
                 </ol>
+                @endunless
 
                 <dl class="mt-4 grid grid-cols-5 gap-1 rounded-xl bg-slate-50 p-2 text-center">
                     @foreach (['Jumpa' => $search->found_count, 'Lulus' => $search->passed_count, 'Lead' => $search->lead_count, 'Dinilai' => $search->scored_count, 'Mesej' => $search->written_count] as $k => $v)
@@ -180,11 +184,20 @@
                             Caj {{ \App\Services\Billing\WalletService::rm($search->charged_sen) }}
                         @endif
                     </span>
-                    @if ($done)
+                    @unless ($search->status->isFinished())
+                        <button type="button" wire:click="cancel({{ $search->id }})" wire:confirm="Batalkan carian ini? Kerja yang belum siap akan dihentikan."
+                                wire:loading.attr="disabled" wire:target="cancel({{ $search->id }})"
+                                class="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-semibold text-rose-600 ring-1 ring-inset ring-rose-200 hover:bg-rose-50 disabled:opacity-50">
+                            Batalkan
+                        </button>
+                    @endunless
+                    @if ($done || ($cancelled && $search->lead_count > 0))
                         <a href="{{ route('leads', ['product' => $search->product_id]) }}" wire:navigate class="inline-flex items-center gap-0.5 font-semibold text-emerald-700">Tengok lead <x-icon name="chevron-right" class="h-4 w-4" /></a>
                     @endif
                 </div>
-                @if ($search->error)
+                @if ($cancelled)
+                    <p class="mt-3 text-xs text-slate-500">{{ $search->error ?: 'Dibatalkan.' }}</p>
+                @elseif ($search->error)
                     <x-alert type="danger" class="mt-3 text-xs">{{ $search->error }}</x-alert>
                 @endif
             </article>

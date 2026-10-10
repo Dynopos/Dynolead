@@ -344,3 +344,14 @@ contoh kos RM50 kita caj RM60." Ini **menggantikan** model kredit (commit sebelu
   301 ke laluan yang sama di APP_URL, supaya Google nampak satu alamat. POST (callback CHIP,
   Livewire) dan `/up` tidak dialih. Tidak aktif untuk localhost/IP; boleh dimatikan dengan
   `CANONICAL_REDIRECT=false`.
+
+## 2026-10-10 — Batalkan carian
+
+- Pengguna boleh batalkan carian yang belum siap dari skrin Cari (sebelum ini perlu arahan
+  Forge). Status `cancelled` ("Dibatalkan") dikira sebagai selesai.
+- Kerja yang sudah dibuat sebelum batal tetap dicaj (`WalletService::settle`), kerana kos
+  Places/AI itu sudah berlaku. Ini pilihan paling selamat untuk kunci pusat.
+- Job yang sedang berjalan semak status dari pangkalan data sebelum setiap halaman Text Search,
+  setiap Place Details dan setiap panggilan AI, jadi ia berhenti cepat. `Search::markStatus()`
+  tidak menulis ganti status Dibatalkan (job yang gagal atau siap selepas itu tidak mengubahnya).
+- Query batal guna skop workspace biasa: carian pelanggan lain tidak dijumpai.
