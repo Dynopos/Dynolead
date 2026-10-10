@@ -208,3 +208,19 @@ it('works without Google data when Places fails', function () {
 
     Livewire::test(LeadsPage::class)->assertOk()->assertSee('Nama tak dapat dimuat');
 });
+
+it('scores a "Tak sesuai" lead again on Jana semula, and writes a message once it fits', function () {
+    $lead = shownLead($this->murah, 'p1', [], ['fit' => 15, 'status' => LeadStatus::TakSesuai, 'message' => null, 'reason' => 'Bukan F&B.']);
+    fakeClaude(
+        [claudeReply(['fit' => 75, 'reason' => 'Bisnes tempatan tanpa website.', 'hook' => '', 'gap' => '', 'flag' => null])],
+        [claudeReply(['message' => goodMessage()])],
+    );
+
+    Livewire::test(LeadsPage::class)->set('status', 'tak_sesuai')->call('regenerate', $lead->id);
+
+    $lead->refresh();
+    expect($lead->fit)->toBe(75)
+        ->and($lead->status)->toBe(LeadStatus::Baru)
+        ->and($lead->reason)->toBe('Bisnes tempatan tanpa website.')
+        ->and($lead->message)->not->toBeNull();
+});

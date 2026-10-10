@@ -372,3 +372,11 @@ contoh kos RM50 kita caj RM60." Ini **menggantikan** model kredit (commit sebelu
   hidup, kedua-duanya berkongsi giliran dengan selamat: job yang diambil tidak diambil semula
   sebelum `retry_after` (900 saat), jadi tiada kos AI berganda.
 - Boleh dimatikan dengan `QUEUE_VIA_SCHEDULER=false` bila pindah ke Redis/Horizon.
+
+## 2026-10-10 — Tanda produk ialah contoh
+
+- Lead "Construction" untuk produk website dinilai 15 kerana tanda produk (dari templat
+  murahwebsite: "pelancong cari menu/lokasi") dibaca sebagai syarat. Prompt `score-v2` jelaskan
+  tanda ialah contoh; nilaian ikut "Apa produk buat". Templat tanda murahwebsite dibuat umum.
+- Jana semula lead yang tidak sesuai menilai semula (satu panggilan model murah tambahan), kerana
+  profil produk atau prompt mungkin sudah berubah. Had jana semula setiap lead kekal.

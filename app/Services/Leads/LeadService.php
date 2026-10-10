@@ -237,7 +237,7 @@ class LeadService
         $d = config('dynoleads.estimate_defaults');
         $write = $this->prices->aiCostMyr($model, $d['write_input_tokens'], $d['write_output_tokens']);
 
-        if ($lead->isScored()) {
+        if ($lead->isFit()) {
             return round($write, 4);
         }
 
@@ -270,7 +270,9 @@ class LeadService
         $lead->forceFill(['needs_review' => false, 'review_note' => self::REGENERATING])->save();
         $lead->increment('regenerate_count');
 
-        RegenerateLeadJob::dispatch($lead->id, rescore: ! $lead->isScored());
+        // A lead judged unfit is scored again (the product profile or prompt may have changed);
+        // otherwise only the message is rewritten.
+        RegenerateLeadJob::dispatch($lead->id, rescore: ! $lead->isFit());
     }
 
     /** Free regenerations left for this lead (unlimited for the internal workspace). */

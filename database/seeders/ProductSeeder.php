@@ -61,7 +61,7 @@ class ProductSeeder extends Seeder
             'pitch_variants' => null,
             'cta' => 'Nak saya hantar contoh website yang kami dah buat? Info: murahwebsite.my',
             'banned_words' => [],
-            'fit_signals' => 'review banyak tetapi tiada website, pelancong cari menu/lokasi, perlu katalog atau tempahan',
+            'fit_signals' => 'semua jenis bisnes; terutama review banyak tetapi tiada website, pelanggan cari info/lokasi/harga, perlu katalog atau tempahan',
             'filters' => [
                 'min_rating' => 3.5,
                 'min_reviews' => 20,
