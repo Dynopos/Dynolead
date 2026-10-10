@@ -184,15 +184,21 @@
                             Caj {{ \App\Services\Billing\WalletService::rm($search->charged_sen) }}
                         @endif
                     </span>
-                    @unless ($search->status->isFinished())
+                    @if ($search->status->isFinished())
+                        <span class="flex items-center gap-4">
+                            <button type="button" wire:click="hide({{ $search->id }})" wire:confirm="Padam carian ini dari senarai? Lead yang sudah dijumpai tidak dipadam."
+                                    wire:loading.attr="disabled" wire:target="hide({{ $search->id }})"
+                                    class="font-semibold text-slate-500 hover:text-rose-600 disabled:opacity-50">Padam</button>
+                            @if ($done || ($cancelled && $search->lead_count > 0))
+                                <a href="{{ route('leads', ['product' => $search->product_id]) }}" wire:navigate class="inline-flex items-center gap-0.5 font-semibold text-emerald-700">Tengok lead <x-icon name="chevron-right" class="h-4 w-4" /></a>
+                            @endif
+                        </span>
+                    @else
                         <button type="button" wire:click="cancel({{ $search->id }})" wire:confirm="Batalkan carian ini? Kerja yang belum siap akan dihentikan."
                                 wire:loading.attr="disabled" wire:target="cancel({{ $search->id }})"
                                 class="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-semibold text-rose-600 ring-1 ring-inset ring-rose-200 hover:bg-rose-50 disabled:opacity-50">
                             Batalkan
                         </button>
-                    @endunless
-                    @if ($done || ($cancelled && $search->lead_count > 0))
-                        <a href="{{ route('leads', ['product' => $search->product_id]) }}" wire:navigate class="inline-flex items-center gap-0.5 font-semibold text-emerald-700">Tengok lead <x-icon name="chevron-right" class="h-4 w-4" /></a>
                     @endif
                 </div>
                 @if ($cancelled)

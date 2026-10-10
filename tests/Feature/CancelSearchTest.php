@@ -4,6 +4,7 @@ use App\Enums\SearchStatus;
 use App\Jobs\FilterCandidatesJob;
 use App\Jobs\SearchPlacesJob;
 use App\Livewire\SearchPage;
+use App\Models\Lead;
 use App\Models\Product;
 use App\Models\Search;
 use App\Models\WalletTransaction;
@@ -114,4 +115,38 @@ it('charges a paid search only for what it used before it was cancelled', functi
         ->and($search->charged_sen)->toBe($expected)
         ->and($wallet->balanceSen())->toBe(1000 - $expected)
         ->and(WalletTransaction::where('reason', 'usage')->count())->toBe(1);
+});
+
+it('lets the user remove a finished search from the list, keeping its leads and costs', function () {
+    $search = Search::factory()->for($this->product)->create(['status' => SearchStatus::Failed, 'error' => 'Dibatalkan oleh admin']);
+    $lead = Lead::factory()->for($this->product)->create(['search_id' => $search->id]);
+
+    Livewire::test(SearchPage::class)
+        ->assertSee('Dibatalkan oleh admin')
+        ->assertSeeHtml('wire:click="hide('.$search->id.')"')
+        ->call('hide', $search->id)
+        ->assertDontSee('Dibatalkan oleh admin');
+
+    expect(Search::find($search->id)->hidden_at)->not->toBeNull()
+        ->and($lead->refresh()->search_id)->toBe($search->id);
+});
+
+it('cannot remove an unfinished search, only cancel it', function () {
+    $search = Search::factory()->for($this->product)->create(['status' => SearchStatus::Searching]);
+
+    Livewire::test(SearchPage::class)
+        ->assertDontSeeHtml('wire:click="hide('.$search->id.')"')
+        ->call('hide', $search->id)
+        ->assertSee('Sedang cari');
+
+    expect($search->refresh()->hidden_at)->toBeNull();
+});
+
+it('cannot remove another customer’s search', function () {
+    [$other] = otherWorkspace();
+    $theirs = app(CurrentWorkspace::class)->runAs($other, fn () => Search::factory()->for(Product::factory()->create())->create(['status' => SearchStatus::Done]));
+
+    Livewire::test(SearchPage::class)->call('hide', $theirs->id);
+
+    expect(Search::withoutGlobalScope('workspace')->find($theirs->id)->hidden_at)->toBeNull();
 });
