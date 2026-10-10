@@ -25,8 +25,21 @@ class MakeAdmin extends Command
         $email = mb_strtolower(trim((string) $this->argument('email')));
         $user = User::query()->where('email', $email)->first();
 
+        if ($user === null && ! $this->input->isInteractive()) {
+            // Forge "Commands" cannot answer a password prompt.
+            $this->error("Tiada akaun dengan e-mel {$email}. Semak ejaan, atau daftar dahulu di /daftar dan jalankan semula.");
+
+            return self::FAILURE;
+        }
+
         if ($user === null) {
             $password = (string) $this->secret('Kata laluan (min 8 aksara)');
+            if ($password === '') {
+                // No answer (e.g. Forge "Commands"): most likely a typo in the e-mail.
+                $this->error("Tiada akaun dengan e-mel {$email}. Semak ejaan, atau daftar dahulu di /daftar dan jalankan semula.");
+
+                return self::FAILURE;
+            }
             if (mb_strlen($password) < 8) {
                 $this->error('Kata laluan terlalu pendek.');
 
