@@ -152,3 +152,5 @@
   Rekod kos, caj dan lead kekal (lajur `searches.hidden_at`).
 - Sandaran giliran: scheduler (setiap minit) juga proses giliran sehingga kosong, supaya carian
   tetap berjalan jika worker Forge mati (`QUEUE_VIA_SCHEDULER`, lalai hidup).
+- Skrin Cari: carian yang siap tanpa lead kini terangkan sebabnya (Google tak jumpa apa-apa,
+  atau semua calon ditapis) dan senarai "Sebab calon ditapis" dengan bilangan setiap sebab.

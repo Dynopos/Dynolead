@@ -201,6 +201,27 @@
                         </button>
                     @endif
                 </div>
+                @if ($search->status->isFinished() && ! $cancelled && $search->lead_count === 0 && ! $search->error)
+                    <div class="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-900 ring-1 ring-inset ring-amber-200">
+                        @if ($search->found_count === 0)
+                            <p class="font-semibold">Google tak jumpa bisnes untuk carian ini.</p>
+                            <p class="mt-1">Cuba perkataan lain (contoh "kontraktor" atau "syarikat pembinaan"), atau kawasan yang lebih luas.</p>
+                        @else
+                            <p class="font-semibold">Tiada lead: semua {{ $search->found_count }} calon ditapis.</p>
+                            <p class="mt-1">Longgarkan tapisan produk (rating, bilangan review, "tiada website") di skrin Produk, atau cuba jenis bisnes lain.</p>
+                        @endif
+                    </div>
+                @endif
+                @if ($search->status->isFinished() && $search->rejectionSummary() !== [])
+                    <details class="mt-3 text-xs" @if ($search->lead_count === 0) open @endif>
+                        <summary class="cursor-pointer font-semibold text-slate-600">Sebab calon ditapis ({{ count($search->rejections) }})</summary>
+                        <ul class="mt-2 space-y-1">
+                            @foreach ($search->rejectionSummary() as $reason => $count)
+                                <li class="flex justify-between gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5"><span class="text-slate-600">{{ $reason }}</span><span class="font-bold tabular-nums">{{ $count }}</span></li>
+                            @endforeach
+                        </ul>
+                    </details>
+                @endif
                 @if ($cancelled)
                     <p class="mt-3 text-xs text-slate-500">{{ $search->error ?: 'Dibatalkan.' }}</p>
                 @elseif ($search->error)
