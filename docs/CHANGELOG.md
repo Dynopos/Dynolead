@@ -154,3 +154,7 @@
   tetap berjalan jika worker Forge mati (`QUEUE_VIA_SCHEDULER`, lalai hidup).
 - Skrin Cari: carian yang siap tanpa lead kini terangkan sebabnya (Google tak jumpa apa-apa,
   atau semua calon ditapis) dan senarai "Sebab calon ditapis" dengan bilangan setiap sebab.
+- Prompt nilai `score-v2`: "Tanda kedai perlukan produk ini" ialah contoh, bukan syarat; AI tidak
+  boleh andaikan kegunaan produk yang tiada dalam profil (contoh "website untuk menu").
+- "Jana semula" pada lead Tak sesuai kini menilai semula lead itu; jika sesuai, status kembali
+  Baru dan mesej ditulis. Sebelum ini butang itu tidak buat apa-apa pada lead Tak sesuai.

@@ -328,7 +328,7 @@ it('runs the full pipeline: search to scored leads with messages', function () {
             ->and($lead->reason)->not->toBeEmpty()
             ->and($lead->message)->toContain('STOP')
             ->and($lead->prompt_version)->toBe('write-v1')
-            ->and($lead->score_prompt_version)->toBe('score-v1');
+            ->and($lead->score_prompt_version)->toBe('score-v2');
     });
 
     expect(AiUsage::where('purpose', 'score')->count())->toBe(2)
@@ -340,4 +340,18 @@ it('keeps prompt_version on the first line of every prompt file', function () {
     foreach (glob(resource_path('prompts/*.md')) as $file) {
         expect(strtok(file_get_contents($file), "\n"))->toMatch('/^prompt_version: \S+$/');
     }
+});
+
+it('treats the product fit signals as examples, not a whitelist of business types', function () {
+    fakeClaude();
+
+    app(LeadScorer::class)->score(leadFor($this->murah, ['business_type' => 'construction']));
+
+    Http::assertSent(function (Request $r) {
+        $system = json_encode($r['system']);
+
+        return str_contains($r->url(), 'anthropic')
+            && str_contains($system, 'contoh sahaja, bukan syarat')
+            && str_contains($system, 'Jangan andaikan ciri');
+    });
 });
