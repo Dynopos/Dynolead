@@ -158,3 +158,8 @@
   boleh andaikan kegunaan produk yang tiada dalam profil (contoh "website untuk menu").
 - "Jana semula" pada lead Tak sesuai kini menilai semula lead itu; jika sesuai, status kembali
   Baru dan mesej ditulis. Sebelum ini butang itu tidak buat apa-apa pada lead Tak sesuai.
+- Profil produk lebih mudah: pelanggan isi **fakta produk** sahaja (apa dijual, harga, promosi).
+  AI tulis semula fakta itu menjadi ayat jualan yang menarik untuk setiap kedai (`write-v2`),
+  tanpa menambah fakta. Ayat ajakan (CTA) kini pilihan; jika kosong, mesej ditutup dengan
+  "Kalau berminat, balas je mesej ni" (dengan kontak jika ada). Tanda kedai, perkataan dilarang
+  dan varian dipindah ke "Tetapan lanjutan (pilihan)".

@@ -13,10 +13,10 @@
     @else
         <form wire:submit="finish" class="space-y-4">
             <x-field label="Nama produk" name="name"><input type="text" wire:model="name" class="input" placeholder="cth: KedaiPOS" autofocus></x-field>
-            <x-field label="Apa produk buat" name="pitch_core" hint="1–2 ayat. Sebut kelebihan yang benar sahaja.">
-                <textarea wire:model="pitch_core" rows="4" class="input"></textarea>
+            <x-field label="Apa yang anda jual" name="pitch_core" hint="Tulis fakta ringkas sahaja: apa yang dijual, harga, promosi, kelebihan. AI akan tulis ayat yang menarik untuk setiap kedai. Harga dan promosi hanya diambil dari sini.">
+                <textarea wire:model="pitch_core" rows="4" class="input" placeholder="cth: Website premium RM200 termasuk domain &amp; hosting. Siap dalam 2 hari. Promosi untuk tempahan 10–13 Oktober."></textarea>
             </x-field>
-            <x-field label="Ayat penutup (CTA)" name="cta"><textarea wire:model="cta" rows="2" class="input"></textarea></x-field>
+            <x-field label="Ayat ajakan (pilihan)" name="cta" hint="Pilihan. Jika kosong, mesej ditutup dengan: “Kalau berminat, balas je mesej ni”."><textarea wire:model="cta" rows="2" class="input"></textarea></x-field>
             <x-field label="Tanda kedai perlukan produk ni" name="fit_signals" hint="AI guna ni untuk nilai kedai mana sesuai.">
                 <textarea wire:model="fit_signals" rows="2" class="input"></textarea>
             </x-field>

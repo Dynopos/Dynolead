@@ -28,7 +28,7 @@ class LeadFactory extends Factory
             'flag' => null,
             'message' => "Salam Kedai Contoh 👋\n\nSaya Bob dari DynoPOS.\n\nKalau tak berminat, balas STOP, saya tak ganggu lagi 🙏",
             'score_prompt_version' => 'score-v2',
-            'prompt_version' => 'write-v1',
+            'prompt_version' => 'write-v2',
         ];
     }
 }

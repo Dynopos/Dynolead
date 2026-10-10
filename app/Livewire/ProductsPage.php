@@ -56,7 +56,7 @@ class ProductsPage extends Component
             'pitch_variants.*.key' => 'nullable|string|max:40',
             'pitch_variants.*.match' => 'nullable|string|max:300',
             'pitch_variants.*.pitch' => 'nullable|string|max:600',
-            'cta' => 'required|string|max:300',
+            'cta' => 'nullable|string|max:300',
             'banned_words' => 'nullable|string|max:500',
             'fit_signals' => 'nullable|string|max:1000',
             'min_rating' => 'required|numeric|min:0|max:5',
@@ -103,7 +103,7 @@ class ProductsPage extends Component
             'match' => implode(', ', $v['match'] ?? []),
             'pitch' => (string) ($v['pitch'] ?? ''),
         ])->all();
-        $this->cta = $p->cta;
+        $this->cta = (string) $p->cta;
         $this->banned_words = implode(', ', $p->banned_words ?? []);
         $this->fit_signals = (string) $p->fit_signals;
         $this->min_rating = (string) $p->minRating();

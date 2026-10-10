@@ -62,5 +62,22 @@ it('validates required fields', function () {
         ->set('name', '')
         ->set('min_rating', '9')
         ->call('save')
-        ->assertHasErrors(['name' => 'required', 'pitch_core' => 'required', 'cta' => 'required', 'min_rating' => 'max']);
+        ->assertHasErrors(['name' => 'required', 'pitch_core' => 'required', 'min_rating' => 'max'])
+        ->assertHasNoErrors('cta');
+});
+
+it('only needs the product facts: the closing line is optional', function () {
+    Livewire::test(ProductsPage::class)
+        ->call('create')
+        ->set('name', 'Website Premium')
+        ->set('pitch_core', 'Website premium RM200 termasuk domain.')
+        ->set('cta', '')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $product = Product::where('name', 'Website Premium')->firstOrFail();
+    expect($product->ctaText())->toBe('Kalau berminat, balas je mesej ni ya.');
+
+    $product->update(['contact_info' => '018-288 9932']);
+    expect($product->ctaText())->toBe('Kalau berminat, balas je mesej ni atau hubungi 018-288 9932.');
 });

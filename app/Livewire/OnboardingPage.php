@@ -56,7 +56,7 @@ class OnboardingPage extends Component
         $data = $this->validate([
             'name' => 'required|string|max:100',
             'pitch_core' => ['required', 'string', 'max:600', 'not_regex:/\[[^\]]+\]/'],
-            'cta' => 'required|string|max:300',
+            'cta' => 'nullable|string|max:300',
             'fit_signals' => 'nullable|string|max:1000',
             'default_place_types' => 'nullable|string|max:500',
             'banned_words' => 'nullable|string|max:500',
