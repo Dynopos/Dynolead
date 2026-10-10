@@ -145,3 +145,6 @@
 - Voice note cuba main setiap kali halaman dibuka; jalur "Ketik skrin untuk dengar pesanan Bob"
   semasa pelayar menunggu ketikan.
 - Domain `dynolead.my`: www dan domain lain dialih 301 ke `https://dynolead.my`.
+- Butang **Batalkan** pada carian yang belum siap (skrin Cari). Status baru "Dibatalkan";
+  job dalam giliran melangkau carian itu, job yang sedang berjalan berhenti sebelum panggilan
+  berbayar seterusnya. Kerja yang sudah dibuat dicaj seperti biasa (percuma dalam percubaan).

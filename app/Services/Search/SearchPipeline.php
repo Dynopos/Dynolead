@@ -6,6 +6,7 @@ use App\Enums\LeadStatus;
 use App\Enums\SearchStatus;
 use App\Exceptions\BudgetExceeded;
 use App\Exceptions\PricesNotConfigured;
+use App\Exceptions\SearchCancelled;
 use App\Exceptions\WalletEmpty;
 use App\Jobs\FetchDetailsJob;
 use App\Jobs\FilterCandidatesJob;
@@ -90,6 +91,10 @@ class SearchPipeline
             $token = null;
             // Places returns at most 3 pages (60 results) per query.
             for ($page = 0; $page < 3 && count($candidates) < $max; $page++) {
+                if ($search->isCancelled()) {
+                    return;
+                }
+
                 $result = $this->places->textSearch(
                     query: $search->business_type.' '.$area,
                     pageSize: min(20, $max - count($candidates)),
@@ -173,6 +178,10 @@ class SearchPipeline
                 continue;
             }
 
+            if ($search->isCancelled()) {
+                return;
+            }
+
             // Trial: stop at the lead limit. Paid: charge usage so far, stop when the balance is gone.
             // Both checks run before paying for Place Details or AI.
             if ($search->is_trial && $this->wallet->trialLeadsRemaining() === 0) {
@@ -239,6 +248,7 @@ class SearchPipeline
 
         if (! $this->guardAi($search, function () use ($leads, $search) {
             foreach ($leads as $lead) {
+                $this->abortIfCancelled($search);
                 $this->wallet->ensureFunds($search);
                 $this->scorer->score($lead);
                 $search->increment('scored_count');
@@ -267,6 +277,7 @@ class SearchPipeline
 
         if (! $this->guardAi($search, function () use ($leads, $search) {
             foreach ($leads as $lead) {
+                $this->abortIfCancelled($search);
                 $this->wallet->ensureFunds($search);
                 $this->writer->write($lead);
                 $search->increment('written_count');
@@ -289,9 +300,37 @@ class SearchPipeline
             $this->stop($search, SearchStatus::BudgetExceeded, $e->getMessage());
         } catch (PricesNotConfigured $e) {
             $this->stop($search, SearchStatus::Failed, $e->getMessage());
+        } catch (SearchCancelled) {
+            // Already settled and marked by cancel().
         }
 
         return false;
+    }
+
+    /**
+     * Cancel a search that has not finished. Jobs still in the queue skip it, and a job
+     * that is already running stops before its next paid call. Work already done is
+     * billed as usual (nothing in a trial). Returns false if it had already finished.
+     */
+    public function cancel(Search $search, string $message = 'Dibatalkan oleh pengguna'): bool
+    {
+        $search->refresh();
+
+        if ($search->status->isFinished()) {
+            return false;
+        }
+
+        $this->stop($search, SearchStatus::Cancelled, $message);
+
+        return true;
+    }
+
+    /** @throws SearchCancelled */
+    private function abortIfCancelled(Search $search): void
+    {
+        if ($search->isCancelled()) {
+            throw new SearchCancelled;
+        }
     }
 
     private function stop(Search $search, SearchStatus $status, string $message): void

@@ -48,11 +48,30 @@ class Search extends Model
 
     public function markStatus(SearchStatus $status, ?string $error = null): void
     {
+        // A cancelled search stays cancelled, even if a job that was already running
+        // reaches its next step, finishes or fails afterwards.
+        if ($status !== SearchStatus::Cancelled && $this->isCancelled()) {
+            $this->status = SearchStatus::Cancelled;
+
+            return;
+        }
+
         $this->forceFill([
             'status' => $status,
             'error' => $error ?? $this->error,
             'finished_at' => $status->isFinished() ? now() : $this->finished_at,
         ])->save();
+    }
+
+    /** Read from the database: the user may cancel while a job holds an older copy. */
+    public function isCancelled(): bool
+    {
+        if (! $this->exists) {
+            return false;
+        }
+
+        return static::query()->withoutGlobalScope('workspace')->whereKey($this->getKey())
+            ->toBase()->value('status') === SearchStatus::Cancelled->value;
     }
 
     public function addRejection(string $placeId, string $reason): void
