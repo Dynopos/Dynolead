@@ -200,6 +200,9 @@ Jadual sekarang (`routes/console.php`):
 - `purge-place-cache` setiap hari 03:15 dan `purge-place-cache-hourly` setiap jam:
   padam data Google dalam `place_cache` yang lebih lama daripada `PLACES_CACHE_HOURS`.
 - `sync-pending-payments` setiap jam: semak bayaran CHIP yang callbacknya terlepas.
+- `queue-safety-net` setiap minit: proses giliran sehingga kosong (`queue:work --stop-when-empty`).
+  Sandaran jika worker Forge (§6) mati: carian tetap berjalan, lewat paling lama ~1 minit setiap
+  langkah. Boleh dimatikan dengan `QUEUE_VIA_SCHEDULER=false`.
 
 Semak dengan SSH: `php artisan schedule:list`.
 

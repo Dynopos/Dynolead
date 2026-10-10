@@ -12,3 +12,14 @@ Schedule::job(new PurgePlaceCacheJob)->hourly()->name('purge-place-cache-hourly'
 
 // Billing: pick up CHIP payments whose callback did not arrive.
 Schedule::job(new SyncPendingPaymentsJob)->hourly()->name('sync-pending-payments')->withoutOverlapping();
+
+// Safety net for the queue worker: every minute, work the queue until it is empty. If the
+// Forge worker is down, searches still run (at most ~1 minute late per step). If it is up,
+// both share the queue safely: a reserved job is not taken again before retry_after (900s).
+if (config('dynoleads.queue_via_scheduler')) {
+    Schedule::command('queue:work database --queue=default --stop-when-empty --max-time=50 --timeout=660 --tries=2')
+        ->everyMinute()
+        ->name('queue-safety-net')
+        ->withoutOverlapping(15)
+        ->runInBackground();
+}

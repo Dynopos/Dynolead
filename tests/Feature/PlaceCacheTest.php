@@ -52,3 +52,13 @@ it('schedules the cache purge job', function () {
 
     expect($events->contains(fn ($e) => str_contains((string) $e->description, 'purge-place-cache')))->toBeTrue();
 });
+
+it('works the queue from the scheduler too, so searches run if the queue worker is down', function () {
+    $event = collect(app(Schedule::class)->events())
+        ->first(fn ($e) => str_contains((string) $e->command, 'queue:work database --queue=default --stop-when-empty'));
+
+    expect($event)->not->toBeNull()
+        ->and($event->expression)->toBe('* * * * *')
+        ->and($event->withoutOverlapping)->toBeTrue()
+        ->and($event->runInBackground)->toBeTrue();
+});
