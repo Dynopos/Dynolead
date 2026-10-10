@@ -49,7 +49,7 @@ class ProductService
             'company' => trim($data['company']),
             'pitch_core' => trim($data['pitch_core']),
             'pitch_variants' => $variants ?: null,
-            'cta' => trim($data['cta']),
+            'cta' => trim((string) ($data['cta'] ?? '')),
             'banned_words' => self::splitList($data['banned_words'] ?? ''),
             'fit_signals' => trim((string) ($data['fit_signals'] ?? '')) ?: null,
             'filters' => [

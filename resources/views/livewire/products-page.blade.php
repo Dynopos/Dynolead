@@ -28,35 +28,40 @@
                 </section>
 
                 <section class="space-y-3">
-                    <h3 class="label">Ayat jualan</h3>
-                    <x-field label="Apa produk buat (pitch_core)" name="pitch_core" hint="AI guna ayat ini, maksud tak diubah.">
-                        <textarea wire:model="pitch_core" rows="4" class="input"></textarea>
+                    <h3 class="label">Apa yang anda jual</h3>
+                    <x-field label="Fakta produk" name="pitch_core" hint="Tulis fakta ringkas sahaja: apa yang dijual, harga, promosi, kelebihan. AI akan tulis ayat yang menarik untuk setiap kedai. Harga dan promosi hanya diambil dari sini.">
+                        <textarea wire:model="pitch_core" rows="4" class="input" placeholder="cth: Website premium RM200 termasuk domain &amp; hosting. Siap dalam 2 hari. Promosi untuk tempahan 10–13 Oktober."></textarea>
                     </x-field>
+                    <x-field label="Ayat ajakan (pilihan)" name="cta" hint="Pilihan. Jika kosong, mesej ditutup dengan: “Kalau berminat, balas je mesej ni”."><textarea wire:model="cta" rows="2" class="input"></textarea></x-field>
 
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-slate-700">Varian pitch ikut jenis kedai</span>
-                            <button type="button" wire:click="addVariant" class="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700"><x-icon name="plus" class="h-4 w-4" />Varian</button>
-                        </div>
-                        @foreach ($pitch_variants as $i => $variant)
-                            <div wire:key="variant-{{ $i }}" class="space-y-2 rounded-xl bg-slate-50 p-3 ring-1 ring-inset ring-slate-200">
-                                <div class="grid grid-cols-2 gap-2">
-                                    <input type="text" wire:model="pitch_variants.{{ $i }}.key" class="input text-sm" placeholder="Nama (cth runcit)">
-                                    <input type="text" wire:model="pitch_variants.{{ $i }}.match" class="input text-sm" placeholder="Padan: runcit, grocery">
+                    <details class="rounded-xl ring-1 ring-inset ring-slate-200" @if ($pitch_variants !== [] || $errors->hasAny(['banned_words', 'fit_signals', 'pitch_variants.*'])) open @endif>
+                        <summary class="cursor-pointer px-3 py-2.5 text-sm font-semibold text-slate-700">Tetapan lanjutan (pilihan)</summary>
+                        <div class="space-y-3 border-t border-slate-100 p-3">
+                            <x-field label="Tanda kedai perlukan produk ini" name="fit_signals" hint="Contoh sahaja, bukan syarat. Kosongkan jika produk sesuai untuk semua bisnes.">
+                                <textarea wire:model="fit_signals" rows="3" class="input"></textarea>
+                            </x-field>
+                            <x-field label="Perkataan dilarang" name="banned_words" hint="Perkataan yang AI tak boleh guna. Asingkan dengan koma. Cth: demo">
+                                <input type="text" wire:model="banned_words" class="input">
+                            </x-field>
+
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-slate-700">Fakta lain ikut jenis kedai</span>
+                                    <button type="button" wire:click="addVariant" class="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700"><x-icon name="plus" class="h-4 w-4" />Varian</button>
                                 </div>
-                                <textarea wire:model="pitch_variants.{{ $i }}.pitch" rows="4" class="input text-sm" placeholder="Ayat pitch untuk jenis ini"></textarea>
-                                <button type="button" wire:click="removeVariant({{ $i }})" class="inline-flex items-center gap-1 text-xs font-medium text-rose-600"><x-icon name="trash" class="h-3.5 w-3.5" />Buang varian</button>
+                                @foreach ($pitch_variants as $i => $variant)
+                                    <div wire:key="variant-{{ $i }}" class="space-y-2 rounded-xl bg-slate-50 p-3 ring-1 ring-inset ring-slate-200">
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <input type="text" wire:model="pitch_variants.{{ $i }}.key" class="input text-sm" placeholder="Nama (cth runcit)">
+                                            <input type="text" wire:model="pitch_variants.{{ $i }}.match" class="input text-sm" placeholder="Padan: runcit, grocery">
+                                        </div>
+                                        <textarea wire:model="pitch_variants.{{ $i }}.pitch" rows="4" class="input text-sm" placeholder="Fakta produk untuk jenis kedai ini"></textarea>
+                                        <button type="button" wire:click="removeVariant({{ $i }})" class="inline-flex items-center gap-1 text-xs font-medium text-rose-600"><x-icon name="trash" class="h-3.5 w-3.5" />Buang varian</button>
+                                    </div>
+                                @endforeach
                             </div>
-                        @endforeach
-                    </div>
-
-                    <x-field label="CTA (ayat penutup)" name="cta"><textarea wire:model="cta" rows="2" class="input"></textarea></x-field>
-                    <x-field label="Perkataan dilarang" name="banned_words" hint="Asingkan dengan koma. Cth: demo">
-                        <input type="text" wire:model="banned_words" class="input">
-                    </x-field>
-                    <x-field label="Tanda kedai perlukan produk ini" name="fit_signals">
-                        <textarea wire:model="fit_signals" rows="3" class="input"></textarea>
-                    </x-field>
+                        </div>
+                    </details>
                 </section>
 
                 <section class="space-y-3">

@@ -34,7 +34,7 @@ class FollowupWriter
             'sender_name' => $product->sender_name,
             'company' => $product->company,
             'product_name' => $product->name,
-            'cta' => $product->cta,
+            'cta' => $product->ctaText(),
             'banned_words' => $banned === [] ? '(tiada)' : implode(', ', $banned),
             'max_chars' => 500,
         ], [

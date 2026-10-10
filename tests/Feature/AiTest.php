@@ -327,7 +327,7 @@ it('runs the full pipeline: search to scored leads with messages', function () {
         expect($lead->fit)->toBe(80)
             ->and($lead->reason)->not->toBeEmpty()
             ->and($lead->message)->toContain('STOP')
-            ->and($lead->prompt_version)->toBe('write-v1')
+            ->and($lead->prompt_version)->toBe('write-v2')
             ->and($lead->score_prompt_version)->toBe('score-v2');
     });
 
@@ -353,5 +353,22 @@ it('treats the product fit signals as examples, not a whitelist of business type
         return str_contains($r->url(), 'anthropic')
             && str_contains($system, 'contoh sahaja, bukan syarat')
             && str_contains($system, 'Jangan andaikan ciri');
+    });
+});
+
+it('asks the AI to rewrite the product facts attractively without adding any, and closes with the default CTA when none is set', function () {
+    $this->murah->update(['cta' => '', 'contact_info' => null]);
+    fakeClaude();
+
+    app(MessageWriter::class)->write(leadFor($this->murah, ['fit' => 80]));
+
+    Http::assertSent(function (Request $r) {
+        $system = json_encode($r['system'], JSON_UNESCAPED_UNICODE);
+
+        return str_contains($r->url(), 'anthropic')
+            && $r['model'] === config('dynoleads.ai.model_write')
+            && str_contains($system, 'Tulis semula')
+            && str_contains($system, 'Jangan tambah fakta')
+            && str_contains($system, 'Kalau berminat, balas je mesej ni ya.');
     });
 });

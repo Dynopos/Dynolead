@@ -57,6 +57,21 @@ class Product extends Model
         return (bool) $this->filter('require_no_website', false);
     }
 
+    /**
+     * Closing call to action. Optional: when the owner leaves it empty, a plain one is
+     * used (with their contact if given), so the AI never has to invent one.
+     */
+    public function ctaText(): string
+    {
+        if (filled($this->cta)) {
+            return trim($this->cta);
+        }
+
+        return filled($this->contact_info)
+            ? 'Kalau berminat, balas je mesej ni atau hubungi '.trim($this->contact_info).'.'
+            : 'Kalau berminat, balas je mesej ni ya.';
+    }
+
     /** Banned words, trimmed and without blanks. */
     public function bannedWords(): array
     {

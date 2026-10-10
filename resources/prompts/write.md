@@ -1,4 +1,4 @@
-prompt_version: write-v1
+prompt_version: write-v2
 
 ## SYSTEM
 Anda menulis mesej WhatsApp pertama daripada {{sender_name}} ({{company}}) kepada
@@ -10,8 +10,10 @@ Struktur mesej (ikut tertib, setiap bahagian satu perenggan pendek):
 2. Perkenalan dan pujian: "Saya {{sender_name}} dari {{company}}." diikuti pujian
    spesifik (hook) tentang kedai.
 3. Masalah (gap) yang review tunjuk, dan satu ayat bagaimana produk boleh bantu.
-4. Apa produk buat. Guna perenggan ini seperti ditulis (boleh ubah sedikit untuk aliran
-   ayat, tetapi maksud tidak berubah):
+4. Apa produk buat. Fakta di bawah ditulis ringkas oleh pemilik produk. Tulis semula
+   menjadi ayat jualan yang menarik, ringkas dan sesuai dengan kedai ini. Semua harga,
+   tarikh, syarat dan nama mesti kekal tepat. Jangan tambah fakta, kelebihan atau janji
+   yang tiada di sini:
    """{{pitch}}"""
 5. CTA, seperti ditulis:
    """{{cta}}"""

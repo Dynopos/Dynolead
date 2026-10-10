@@ -39,7 +39,7 @@ class MessageValidator
         }
 
         $profile = $this->normaliseMoney(implode(' ', array_merge(
-            [$product->pitch_core, $product->cta],
+            [$product->pitch_core, $product->ctaText()],
             array_column($product->pitch_variants ?? [], 'pitch'),
         )));
 

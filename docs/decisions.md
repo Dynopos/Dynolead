@@ -380,3 +380,12 @@ contoh kos RM50 kita caj RM60." Ini **menggantikan** model kredit (commit sebelu
   tanda ialah contoh; nilaian ikut "Apa produk buat". Templat tanda murahwebsite dibuat umum.
 - Jana semula lead yang tidak sesuai menilai semula (satu panggilan model murah tambahan), kerana
   profil produk atau prompt mungkin sudah berubah. Had jana semula setiap lead kekal.
+
+## 2026-10-10 — Pelanggan isi fakta, AI tulis ayat
+
+- Bob: pelanggan tidak patut menulis ayat jualan sendiri. Medan "Apa produk buat" kini "Fakta
+  produk"; prompt `write-v2` minta AI tulis semula fakta itu dengan menarik, kekalkan harga,
+  tarikh dan syarat tepat, dan tidak menambah fakta (peraturan 6 kekal; `MessageValidator`
+  masih tolak harga RM yang tiada dalam profil).
+- Fakta tetap wajib: AI tidak boleh reka harga atau promosi, jadi sumbernya mesti pelanggan.
+- CTA pilihan. Jika kosong, `Product::ctaText()` beri ayat tetap dalam kod (bukan reka AI).

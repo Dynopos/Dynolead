@@ -56,7 +56,7 @@ class MessageWriter
             'sender_name' => $product->sender_name,
             'company' => $product->company,
             'pitch' => $product->pitchFor($lead->business_type, $place['types'] ?? []),
-            'cta' => $product->cta,
+            'cta' => $product->ctaText(),
             'banned_words' => $banned === [] ? '(tiada)' : implode(', ', $banned),
             'max_chars' => (int) config('dynoleads.rules.message_max_chars', 900),
         ];
