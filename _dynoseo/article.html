@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}} | {{site_name}}</title>
+<meta name="description" content="{{meta_description}}">
+<link rel="canonical" href="{{canonical}}">
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{title}}">
+<meta property="og:description" content="{{meta_description}}">
+<meta property="og:url" content="{{canonical}}">
+<meta property="og:image" content="{{og_image}}">
+<meta property="og:site_name" content="{{site_name}}">
+<meta property="article:published_time" content="{{date_iso}}">
+<meta property="article:modified_time" content="{{updated_iso}}">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="alternate" type="application/rss+xml" title="{{site_name}}" href="{{blog_url}}feed.xml">
+<link rel="stylesheet" href="/blog/assets/dynoseo.css">
+{{schema}}
+</head>
+<body class="dynoseo">
+<header class="dynoseo-top">
+  <a href="{{home_url}}" class="dynoseo-brand">{{site_name}}</a>
+  <a href="{{blog_url}}" class="dynoseo-nav">Blog</a>
+</header>
+<main class="dynoseo-wrap">
+  <nav class="dynoseo-crumbs"><a href="{{home_url}}">Utama</a> › <a href="{{blog_url}}">Blog</a></nav>
+  <article class="dynoseo-article">
+    <h1>{{title}}</h1>
+    <p class="dynoseo-meta">{{author}} · <time datetime="{{date_iso}}">{{date}}</time></p>
+    {{image}}
+    <div class="dynoseo-body">
+{{body}}
+    </div>
+    {{faq}}
+  </article>
+  {{cta}}
+  {{related}}
+</main>
+<footer class="dynoseo-foot">© {{year}} {{site_name}}</footer>
+</body>
+</html>
