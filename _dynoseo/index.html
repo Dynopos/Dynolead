@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<meta name="description" content="{{meta_description}}">
+<link rel="canonical" href="{{canonical}}">
+{{robots}}
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{title}}">
+<meta property="og:url" content="{{canonical}}">
+<meta property="og:site_name" content="{{site_name}}">
+<link rel="alternate" type="application/rss+xml" title="{{site_name}}" href="{{blog_url}}feed.xml">
+<link rel="stylesheet" href="/blog/assets/dynoseo.css">
+</head>
+<body class="dynoseo">
+<header class="dynoseo-top">
+  <a href="{{home_url}}" class="dynoseo-brand">{{site_name}}</a>
+  <a href="{{blog_url}}" class="dynoseo-nav">Blog</a>
+</header>
+<main class="dynoseo-wrap">
+  <h1 class="dynoseo-title">Blog {{site_name}}</h1>
+  <p class="dynoseo-lead">{{niche_line}}</p>
+  <div class="dynoseo-cards">
+{{cards}}
+  </div>
+  {{pagination}}
+</main>
+<footer class="dynoseo-foot">© {{year}} {{site_name}}</footer>
+</body>
+</html>
