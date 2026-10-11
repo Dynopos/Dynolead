@@ -165,3 +165,5 @@
   dan varian dipindah ke "Tetapan lanjutan (pilihan)".
 - `dynoleads:admin`: jika e-mel tiada dan tiada kata laluan diberi (contoh dari Forge Commands),
   arahan beritahu "Tiada akaun dengan e-mel ..." dan bukan "Kata laluan terlalu pendek".
+- Blog Dyno SEO: `robots.txt` benarkan `/blog/` dan sebut `/blog/sitemap.xml`; pautan **Blog**
+  di footer halaman jualan. Artikel ialah fail statik dalam `public/blog/` yang ditulis oleh Dyno SEO.

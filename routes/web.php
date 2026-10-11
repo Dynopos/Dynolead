@@ -27,15 +27,18 @@ Route::get('/sitemap.xml', function () {
     return response()->view('marketing.sitemap', ['urls' => $urls])->header('Content-Type', 'application/xml');
 })->name('sitemap');
 
-// Only the public pages are crawlable; the app itself is private.
+// Only the public pages are crawlable; the app itself is private. The blog (/blog/) is
+// static files written to public/blog by Dyno SEO, with its own sitemap.
 Route::get('/robots.txt', fn () => response(implode("\n", [
     'User-agent: *',
     'Allow: /$',
     'Allow: /terma',
     'Allow: /privasi',
+    'Allow: /blog/',
     'Disallow: /',
     '',
     'Sitemap: '.route('sitemap'),
+    'Sitemap: '.url('/blog/sitemap.xml'),
     '',
 ]))->header('Content-Type', 'text/plain'))->name('robots');
 

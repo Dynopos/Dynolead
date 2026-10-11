@@ -28,6 +28,7 @@
             <div class="flex items-center gap-2"><x-logo /><span>© {{ date('Y') }} {{ config('dynoleads.company.name') }}</span></div>
             <x-whatsapp-contact class="font-medium text-emerald-700 hover:text-emerald-800" />
             <nav class="flex gap-4" aria-label="Pautan kaki">
+                <a href="/blog/" class="hover:text-slate-800">Blog</a>
                 <a href="{{ route('terms') }}" class="hover:text-slate-800">Terma</a>
                 <a href="{{ route('privacy') }}" class="hover:text-slate-800">Privasi</a>
                 <a href="{{ route('login') }}" class="hover:text-slate-800">Masuk</a>

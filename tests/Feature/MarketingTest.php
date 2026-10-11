@@ -113,7 +113,9 @@ it('publishes a sitemap and a robots.txt that hides the app', function () {
     $this->get('/sitemap.xml')->assertOk()->assertHeader('Content-Type', 'application/xml')->assertSee(url('/'), false)->assertDontSee('/lead');
 
     $robots = $this->get('/robots.txt')->assertOk()->getContent();
-    expect($robots)->toContain('Allow: /$')->toContain('Disallow: /')->toContain('Sitemap: '.route('sitemap'));
+    expect($robots)->toContain('Allow: /$')->toContain('Disallow: /')->toContain('Sitemap: '.route('sitemap'))
+        // Dyno SEO articles (static files in public/blog) are crawlable.
+        ->toContain('Allow: /blog/')->toContain('Sitemap: '.url('/blog/sitemap.xml'));
 });
 
 it('keeps app pages out of search engines', function () {
