@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Models\WalletTransaction;
 use App\Models\Workspace;
 use App\Services\Billing\BillingService;
+use App\Services\Billing\PriceGuide;
 use App\Services\Billing\WalletService;
 use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Http\Client\Request;
@@ -243,4 +244,21 @@ it('keeps the admin panel for the admin only', function () {
     $this->get('/admin')->assertForbidden();
 
     actingAsAdmin()->get('/admin')->assertOk()->assertSee('Admin');
+});
+
+it('shows customers a price per lead on the Baki page, never the cost markup', function () {
+    withAiPrices(1.0, 5.0);
+    config([
+        'ai_prices.places' => ['text_search' => 0.035, 'details' => 0.025, 'details_display' => 0.02],
+        'billing.markup_percent' => 20,
+        'billing.topup_options' => [20, 50, 100],
+    ]);
+    $this->workspace->forceFill(['activated_at' => now()])->save();
+    $guide = app(PriceGuide::class)->get();
+
+    Livewire::test(BillingPage::class)
+        ->assertSee('RM'.number_format($guide['per_lead_sen'] / 100, 2).' setiap lead')
+        ->assertSee('± '.$guide['topups'][50].' lead', false)
+        ->assertDontSee('+ 20%')
+        ->assertDontSee('kos sebenar AI');
 });
