@@ -94,7 +94,7 @@
                     </ul>
                     <div class="mt-7 flex flex-col gap-3 sm:flex-row">
                         <a href="{{ route('register') }}" class="btn-accent px-6 py-3.5 text-base">Cuba percuma</a>
-                        <a href="#cara" class="btn-soft px-6 py-3.5 text-base">Tengok cara guna</a>
+                        <a href="#video" class="btn-soft px-6 py-3.5 text-base">Tonton video 1 minit</a>
                     </div>
                     <p class="mt-3 text-sm text-slate-500">{{ $trial['leads'] }} lead percuma · tanpa kad kredit · tiada yuran bulanan</p>
                 </div>
@@ -112,6 +112,29 @@
                         </div>
                     </div>
                     <p class="mt-3 text-center text-xs text-slate-500">Rakaman app sebenar · data kedai contoh</p>
+                </div>
+            </div>
+        </section>
+
+        {{-- Product video: animated explainer, no voice, demo data only. Loads and plays only when on screen. --}}
+        <section id="video" class="relative scroll-mt-16 overflow-hidden bg-[#050a0a] py-16 text-white">
+            <div class="pointer-events-none absolute -left-24 top-0 h-80 w-80 rounded-full bg-emerald-500/25 blur-3xl" aria-hidden="true"></div>
+            <div class="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-orange-500/25 blur-3xl" aria-hidden="true"></div>
+            <div class="relative mx-auto grid max-w-5xl items-center gap-10 px-4 md:grid-cols-2">
+                <div data-reveal>
+                    <p class="text-sm font-bold uppercase tracking-[.25em] text-emerald-300">Tonton 1 minit</p>
+                    <h2 class="mt-3 text-3xl font-extrabold italic tracking-tight md:text-4xl">Kita cari lead, <span class="text-orange-400">bukan lead cari kita!</span></h2>
+                    <p class="mt-4 text-lg text-slate-300">Tengok macam mana Dyno Lead cari kedai, tapis yang tak sesuai, dan tulis mesej WhatsApp untuk setiap satu. Anda cuma semak dan tekan hantar.</p>
+                    <a href="{{ route('register') }}" class="btn-accent mt-6 px-6 py-3.5 text-base">Cuba percuma</a>
+                </div>
+                <div class="mx-auto w-full max-w-[300px]" data-reveal>
+                    <div class="overflow-hidden rounded-[2rem] shadow-2xl shadow-emerald-500/20 ring-1 ring-white/10">
+                        <video class="block aspect-[9/16] w-full bg-black" data-play-inview muted loop playsinline controls preload="none"
+                               poster="{{ asset('video/dyno-lead-demo.jpg') }}" aria-label="Video demo Dyno Lead: cari lead, AI tulis mesej WhatsApp, anda tekan hantar">
+                            <source src="{{ asset('video/dyno-lead-demo.mp4') }}" type="video/mp4">
+                        </video>
+                    </div>
+                    <p class="mt-3 text-center text-xs text-slate-400">Video demo · data kedai contoh</p>
                 </div>
             </div>
         </section>

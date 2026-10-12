@@ -106,5 +106,26 @@ if (reduceMotion) {
     });
 }
 
+// The product video downloads and plays only while it is on screen (it is large).
+function initInViewVideos() {
+    const videos = document.querySelectorAll('video[data-play-inview]');
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+        return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(({ target, isIntersecting }) => {
+            if (isIntersecting) {
+                target.play().catch(() => {});
+            } else if (!target.paused) {
+                target.pause();
+            }
+        });
+    }, { threshold: 0.4 });
+
+    videos.forEach((video) => observer.observe(video));
+}
+
 initReveal();
 initVoiceNote();
+initInViewVideos();

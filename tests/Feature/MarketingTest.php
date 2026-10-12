@@ -105,6 +105,17 @@ it('plays Bob\'s voice note on the sales page, and shows who Dyno Lead is for', 
     expect(public_path('video/demo-lead.mp4'))->toBeFile()->and(public_path('video/demo-lead.jpg'))->toBeFile();
 });
 
+it('shows the product demo video, loaded only when it comes on screen', function () {
+    $this->get('/')
+        ->assertSee('id="video"', false)
+        ->assertSee('Tonton video 1 minit')
+        ->assertSee('video/dyno-lead-demo.mp4', false)
+        ->assertSee('data-play-inview', false)
+        ->assertSee('preload="none"', false);
+
+    expect(public_path('video/dyno-lead-demo.mp4'))->toBeFile()->and(public_path('video/dyno-lead-demo.jpg'))->toBeFile();
+});
+
 it('sends signed-in users to their leads', function () {
     $this->actingAs($this->user)->get('/')->assertRedirect(route('leads'));
 });

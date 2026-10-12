@@ -167,3 +167,6 @@
   arahan beritahu "Tiada akaun dengan e-mel ..." dan bukan "Kata laluan terlalu pendek".
 - Blog Dyno SEO: `robots.txt` benarkan `/blog/` dan sebut `/blog/sitemap.xml`; pautan **Blog**
   di footer halaman jualan. Artikel ialah fail statik dalam `public/blog/` yang ditulis oleh Dyno SEO.
+- Halaman jualan: bahagian "Tonton 1 minit" dengan video demo premium (animasi, tanpa suara,
+  data contoh, logo baru). Video dimuat dan dimainkan hanya bila kelihatan di skrin
+  (`preload="none"`, `data-play-inview`). Butang hero "Tonton video 1 minit" pergi ke bahagian ini.
