@@ -63,6 +63,9 @@
                 @foreach ($topups as $amount)
                     <button type="button" wire:click="topup({{ $amount }})" wire:loading.attr="disabled" class="card py-4 text-center transition hover:ring-2 hover:ring-emerald-500">
                         <span class="block text-xl font-bold tabular-nums">RM{{ $amount }}</span>
+                        @if ($guide && ($guide['topups'][$amount] ?? 0) > 0)
+                            <span class="mt-0.5 block text-xs font-medium text-slate-500">± {{ $guide['topups'][$amount] }} lead</span>
+                        @endif
                     </button>
                 @endforeach
             </div>
@@ -71,8 +74,11 @@
     @endif
 
     <x-alert type="info">
-        Caj carian = kos sebenar AI{{ $includesPlaces ? ' dan Google Maps' : '' }} + {{ rtrim(rtrim(number_format($markup, 2), '0'), '.') }}%.
-        Anggaran ditunjuk sebelum setiap carian. Jana semula mesej dan follow-up AI percuma (had {{ config('billing.max_regenerations_per_lead') }} kali setiap lead).
+        @if ($guide)
+            Lebih kurang <b>RM{{ number_format($guide['per_lead_sen'] / 100, 2) }} setiap lead</b>. Caj ikut guna sebenar, dan anggaran ditunjuk sebelum setiap carian.
+        @else
+            Caj ikut guna sebenar untuk setiap carian. Anggaran ditunjuk sebelum setiap carian.
+        @endif Jana semula mesej dan follow-up AI percuma (had {{ config('billing.max_regenerations_per_lead') }} kali setiap lead).
     </x-alert>
 
     @if ($payments->isNotEmpty())

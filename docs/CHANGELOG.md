@@ -173,3 +173,5 @@
 - Logo baru Dyno Lead (dinosaur logam, oren-hijau) di header app, header halaman jualan, footer,
   halaman Masuk/Daftar, favicon, ikon telefon (apple-touch-icon), logo schema dan gambar kongsi
   (og.png, tagline "Kita cari lead, bukan lead cari kita!"). Latar putih logo dibuang (lutsinar).
+- Halaman Baki: tunjuk "lebih kurang RMx.xx setiap lead" dan ± bilangan lead untuk setiap pilihan
+  tambah baki (dari `PriceGuide`), bukan "kos sebenar + 20%" (markup ialah maklumat dalaman).

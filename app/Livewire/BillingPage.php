@@ -6,6 +6,7 @@ use App\Exceptions\AccountLimitReached;
 use App\Exceptions\ChipException;
 use App\Models\Payment;
 use App\Services\Billing\BillingService;
+use App\Services\Billing\PriceGuide;
 use App\Services\Billing\WalletService;
 use App\Support\Tenancy\CurrentWorkspace;
 use InvalidArgumentException;
@@ -39,7 +40,7 @@ class BillingPage extends Component
         return redirect()->away($url);
     }
 
-    public function render(WalletService $wallet)
+    public function render(WalletService $wallet, PriceGuide $guide)
     {
         return view('livewire.billing-page', [
             'unlimited' => $wallet->isUnlimited(),
@@ -50,8 +51,7 @@ class BillingPage extends Component
             'trialLeads' => (int) config('billing.trial_leads'),
             'fee' => WalletService::rm($wallet->activationFeeSen()),
             'balance' => $wallet->balanceSen(),
-            'markup' => (float) config('billing.markup_percent'),
-            'includesPlaces' => (bool) config('billing.include_places_cost'),
+            'guide' => $guide->get(),
             'topups' => (array) config('billing.topup_options'),
             'payments' => Payment::query()->whereIn('status', ['paid', 'manual'])->latest('id')->limit(12)->get(),
         ]);
