@@ -1,7 +1,7 @@
 @props(['title', 'subtitle' => null])
 <div class="pb-10 pt-12">
     <a href="{{ url('/') }}" class="inline-flex items-center gap-3 text-white">
-        <x-logo size="lg" class="ring-2 ring-white/40" />
+        <x-logo size="lg" class="drop-shadow-lg" />
         <span class="text-lg font-bold tracking-tight">Dyno Lead</span>
     </a>
     <h1 class="mt-6 text-3xl font-bold tracking-tight text-white">{{ $title }}</h1>

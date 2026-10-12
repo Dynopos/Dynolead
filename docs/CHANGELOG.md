@@ -170,3 +170,6 @@
 - Halaman jualan: bahagian "Tonton 1 minit" dengan video demo premium (animasi, tanpa suara,
   data contoh, logo baru). Video dimuat dan dimainkan hanya bila kelihatan di skrin
   (`preload="none"`, `data-play-inview`). Butang hero "Tonton video 1 minit" pergi ke bahagian ini.
+- Logo baru Dyno Lead (dinosaur logam, oren-hijau) di header app, header halaman jualan, footer,
+  halaman Masuk/Daftar, favicon, ikon telefon (apple-touch-icon), logo schema dan gambar kongsi
+  (og.png, tagline "Kita cari lead, bukan lead cari kita!"). Latar putih logo dibuang (lutsinar).
