@@ -389,3 +389,15 @@ contoh kos RM50 kita caj RM60." Ini **menggantikan** model kredit (commit sebelu
   masih tolak harga RM yang tiada dalam profil).
 - Fakta tetap wajib: AI tidak boleh reka harga atau promosi, jadi sumbernya mesti pelanggan.
 - CTA pilihan. Jika kosong, `Product::ctaText()` beri ayat tetap dalam kod (bukan reka AI).
+
+## 2026-10-17 — Penilaian ikut keutamaan, bukan kelayakan
+
+- Bob: "semua carian tak sesuai". Prompt lama minta AI menilai sama ada kedai "sesuai" dari
+  kosong, dan AI tidak diberitahu sama ada kedai ada website. Haiku cenderung memberi markah
+  rendah untuk produk umum (contoh website untuk semua bisnes).
+- `score-v3`: jenis bisnes dan kawasan ialah pilihan pengguna. AI mula dari 65 untuk bisnes
+  aktif yang sepadan, naik dengan tanda kuat, dan turun bawah 50 hanya dengan sebab jelas
+  (francais/rangkaian, tutup, sudah ada produk serupa, tiada kaitan langsung). Data kedai kini
+  termasuk status operasi dan ada/tiada website. `fit_threshold` kekal 50.
+- Lead lama dinilai semula hanya bila admin jalankan `dynoleads:rescore` (kos AI kecil, model
+  murah, had `--limit`, bajet AI tetap dikuatkuasa).

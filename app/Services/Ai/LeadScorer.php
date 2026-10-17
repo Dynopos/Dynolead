@@ -53,6 +53,8 @@ class LeadScorer
             'business_type' => $lead->business_type ?? '-',
             'place_types' => implode(', ', array_slice($place['types'] ?? [], 0, 5)),
             'area' => $lead->area ?? ($place['address'] ?? '-'),
+            'business_status' => ($place['business_status'] ?? 'OPERATIONAL') === 'OPERATIONAL' ? 'beroperasi' : 'mungkin tutup',
+            'website' => filled($place['website'] ?? null) ? 'ada' : 'tiada',
             'rating' => $place['rating'] ?? '-',
             'review_count' => $place['review_count'] ?? 0,
             'reviews' => $this->formatReviews($place['reviews'] ?? []),
