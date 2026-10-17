@@ -27,7 +27,7 @@ class LeadFactory extends Factory
             'gap' => 'Pelanggan komplen kaunter lambat.',
             'flag' => null,
             'message' => "Salam Kedai Contoh 👋\n\nSaya Bob dari DynoPOS.\n\nKalau tak berminat, balas STOP, saya tak ganggu lagi 🙏",
-            'score_prompt_version' => 'score-v2',
+            'score_prompt_version' => 'score-v3',
             'prompt_version' => 'write-v2',
         ];
     }

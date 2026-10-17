@@ -175,3 +175,8 @@
   (og.png, tagline "Kita cari lead, bukan lead cari kita!"). Latar putih logo dibuang (lutsinar).
 - Halaman Baki: tunjuk "lebih kurang RMx.xx setiap lead" dan ± bilangan lead untuk setiap pilihan
   tambah baki (dari `PriceGuide`), bukan "kos sebenar + 20%" (markup ialah maklumat dalaman).
+- Penilaian AI `score-v3`: pengguna yang pilih jenis bisnes, jadi AI menilai keutamaan prospek
+  (mula dari 65, turun bawah 50 hanya dengan sebab jelas), bukan kelayakan jenis bisnes. AI kini
+  diberitahu sama ada kedai ada website dan masih beroperasi.
+- `php artisan dynoleads:rescore`: nilai semula lead "Tak sesuai" yang dinilai dengan prompt lama
+  (sekali setiap versi prompt, langkau STOP; `--dry-run` untuk kira dahulu).

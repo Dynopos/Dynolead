@@ -8,6 +8,7 @@ use App\Models\AiUsage;
 use App\Models\Lead;
 use App\Models\PlaceCache;
 use App\Models\Product;
+use App\Models\Suppression;
 use App\Services\Ai\AiBudget;
 use App\Services\Ai\AiGateway;
 use App\Services\Ai\LeadScorer;
@@ -328,7 +329,7 @@ it('runs the full pipeline: search to scored leads with messages', function () {
             ->and($lead->reason)->not->toBeEmpty()
             ->and($lead->message)->toContain('STOP')
             ->and($lead->prompt_version)->toBe('write-v2')
-            ->and($lead->score_prompt_version)->toBe('score-v2');
+            ->and($lead->score_prompt_version)->toBe('score-v3');
     });
 
     expect(AiUsage::where('purpose', 'score')->count())->toBe(2)
@@ -371,4 +372,48 @@ it('asks the AI to rewrite the product facts attractively without adding any, an
             && str_contains($system, 'Jangan tambah fakta')
             && str_contains($system, 'Kalau berminat, balas je mesej ni ya.');
     });
+});
+
+it('scores prospects from a fair baseline and tells the AI whether the shop has a website', function () {
+    fakeClaude();
+
+    app(LeadScorer::class)->score(leadFor($this->murah, ['business_type' => 'kontraktor']));
+
+    Http::assertSent(function (Request $r) {
+        if (! str_contains($r->url(), 'anthropic')) {
+            return false;
+        }
+        $system = json_encode($r['system'], JSON_UNESCAPED_UNICODE);
+        $user = json_encode($r['messages'], JSON_UNESCAPED_UNICODE);
+
+        return str_contains($system, 'Mula dari 65')
+            && str_contains($system, 'BUKAN menilai sama ada')
+            && preg_match('/Website: (ada|tiada)/', $user) === 1
+            && str_contains($user, 'Status: beroperasi');
+    });
+});
+
+it('re-scores "Tak sesuai" leads from an older prompt once, skipping STOP shops', function () {
+    $old = leadFor($this->murah, ['fit' => 15, 'status' => LeadStatus::TakSesuai, 'score_prompt_version' => 'score-v2', 'message' => null]);
+    $current = leadFor($this->murah, ['fit' => 20, 'status' => LeadStatus::TakSesuai, 'score_prompt_version' => app(PromptRepository::class)->version('score')]);
+    $stopped = leadFor($this->murah, ['fit' => 10, 'status' => LeadStatus::TakSesuai, 'score_prompt_version' => 'score-v1']);
+    Suppression::create(['place_id' => $stopped->place_id, 'reason' => 'STOP']);
+    $fresh = leadFor($this->murah, ['fit' => 80, 'status' => LeadStatus::Baru, 'score_prompt_version' => 'score-v1']);
+
+    fakeClaude([claudeReply(['fit' => 72, 'reason' => 'Bisnes aktif tanpa website.', 'hook' => '', 'gap' => '', 'flag' => null])]);
+
+    $this->artisan('dynoleads:rescore', ['--dry-run' => true])->expectsOutputToContain('1 lead akan dinilai semula')->assertSuccessful();
+    Http::assertNothingSent();
+
+    $this->artisan('dynoleads:rescore')->assertSuccessful();
+
+    expect($old->refresh()->fit)->toBe(72)
+        ->and($old->status)->toBe(LeadStatus::Baru)
+        ->and($old->message)->not->toBeNull()
+        ->and($current->refresh()->fit)->toBe(20)
+        ->and($stopped->refresh()->fit)->toBe(10)
+        ->and($fresh->refresh()->fit)->toBe(80);
+
+    // Second run: nothing left from the old prompt.
+    $this->artisan('dynoleads:rescore', ['--dry-run' => true])->expectsOutputToContain('0 lead akan dinilai semula');
 });
