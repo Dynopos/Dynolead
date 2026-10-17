@@ -401,3 +401,18 @@ contoh kos RM50 kita caj RM60." Ini **menggantikan** model kredit (commit sebelu
   termasuk status operasi dan ada/tiada website. `fit_threshold` kekal 50.
 - Lead lama dinilai semula hanya bila admin jalankan `dynoleads:rescore` (kos AI kecil, model
   murah, had `--limit`, bajet AI tetap dikuatkuasa).
+
+## 2026-10-17 — Analisis bisnes sebelum cari lead
+
+- Bob mahu app "buat business analysis dulu, baru cari lead". Satu panggilan model tulis
+  (`CLAUDE_MODEL_WRITE`) setiap analisis, melalui `AiGateway` (bajet AI dan `ai_usage`
+  dikuatkuasa). Hasil disimpan pada `products.analysis`; tiada panggilan semula tanpa
+  permintaan pengguna (butang "Analisis semula").
+- Percuma untuk pelanggan tetapi dihadkan 5 kali setiap produk (`analysis_count`), sama seperti
+  jana semula. Tidak dicaj dari baki: kosnya kecil dan ia membantu pelanggan guna app dengan betul.
+- Analisis hanya panduan dalaman (sasaran carian dan penilaian). Mesej WhatsApp masih terikat
+  pada fakta produk sahaja (peraturan 6); `angle` belum dihantar kepada penulis mesej.
+- Analisis menggantikan `default_place_types` (cadangan carian). `fit_signals` hanya diisi bila
+  kosong supaya tulisan pemilik kekal.
+- Analisis dijalankan secara serentak (bukan queue) kerana worker giliran di pelayan tidak boleh
+  diharap; satu panggilan mengambil kira-kira 10–20 saat dan butang menunjukkan "AI sedang analisis".

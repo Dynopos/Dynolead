@@ -175,3 +175,20 @@ function actingAsAdmin(): TestCase
 
     return test()->actingAs(test()->user);
 }
+
+/** A business analysis reply from Claude (Analisis bisnes). */
+function analysisReply(array $overrides = []): array
+{
+    return claudeReply(array_replace([
+        'summary' => 'Website premium untuk bisnes tempatan yang belum ada kehadiran online.',
+        'targets' => [
+            ['type' => 'Kontraktor', 'why' => 'Pelanggan cari portfolio sebelum upah kontraktor.', 'angle' => 'Tunjuk projek siap kepada bakal pelanggan.'],
+            ['type' => 'klinik gigi', 'why' => 'Pesakit baru cari waktu buka dan lokasi.', 'angle' => 'Mudahkan pesakit buat temujanji.'],
+            ['type' => 'kontraktor', 'why' => 'Duplikat.', 'angle' => '-'],
+            ['type' => 'bengkel kereta', 'why' => 'Pelanggan banding servis dan harga.', 'angle' => 'Senarai servis yang jelas.'],
+        ],
+        'signals' => ['Review banyak tapi tiada website', 'Gambar kerja dalam review'],
+        'red_flags' => ['Francais besar', 'Kedai tutup'],
+        'require_no_website' => true,
+    ], $overrides));
+}

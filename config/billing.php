@@ -31,6 +31,9 @@ return [
 
     // Jana semula dan follow-up AI percuma, tapi dihadkan setiap lead.
     'max_regenerations_per_lead' => 3,
+
+    // Free AI business analyses per product (Analisis bisnes). Internal workspace: unlimited.
+    'max_analyses_per_product' => (int) env('MAX_ANALYSES_PER_PRODUCT', 5),
     'max_followups_per_lead' => 3,
 
     'max_products' => 20,

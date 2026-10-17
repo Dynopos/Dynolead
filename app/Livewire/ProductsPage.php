@@ -3,7 +3,11 @@
 namespace App\Livewire;
 
 use App\Exceptions\AccountLimitReached;
+use App\Exceptions\BudgetExceeded;
+use App\Exceptions\ClaudeException;
+use App\Exceptions\PricesNotConfigured;
 use App\Models\Product;
+use App\Services\Ai\BusinessAnalyst;
 use App\Services\Products\ProductService;
 use App\Support\Tenancy\CurrentWorkspace;
 use Livewire\Attributes\Title;
@@ -126,7 +130,30 @@ class ProductsPage extends Component
         $this->pitch_variants = array_values($this->pitch_variants);
     }
 
-    public function save(ProductService $service): void
+    /** Message under a product card after "Analisis bisnes" (errors only). */
+    public array $analysisNote = [];
+
+    public function analyse(int $id, BusinessAnalyst $analyst): void
+    {
+        // Workspace-scoped: another customer's product is simply not found.
+        $this->runAnalysis(Product::query()->findOrFail($id), $analyst);
+    }
+
+    private function runAnalysis(Product $product, BusinessAnalyst $analyst): void
+    {
+        unset($this->analysisNote[$product->id]);
+
+        try {
+            $analyst->analyse($product);
+        } catch (AccountLimitReached|BudgetExceeded|PricesNotConfigured $e) {
+            $this->analysisNote[$product->id] = $e->getMessage();
+        } catch (ClaudeException $e) {
+            report($e);
+            $this->analysisNote[$product->id] = 'Analisis AI tak berjaya kali ini. Cuba lagi sebentar.';
+        }
+    }
+
+    public function save(ProductService $service, BusinessAnalyst $analyst): void
     {
         $data = $this->validate();
 
@@ -138,8 +165,14 @@ class ProductsPage extends Component
             return;
         }
 
-        session()->flash('status', "Produk {$product->name} disimpan.");
         $this->resetForm();
+
+        // First save: analyse the business straight away so Cari can suggest the best targets.
+        if ($product->analysis === null) {
+            $this->runAnalysis($product, $analyst);
+        }
+
+        session()->flash('status', "Produk {$product->name} disimpan.");
     }
 
     public function cancel(): void

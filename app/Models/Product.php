@@ -13,7 +13,7 @@ class Product extends Model
 
     protected $fillable = [
         'name', 'slug', 'sender_name', 'company', 'pitch_core', 'pitch_variants', 'cta',
-        'banned_words', 'fit_signals', 'filters', 'default_place_types', 'contact_info', 'active',
+        'banned_words', 'fit_signals', 'analysis', 'filters', 'default_place_types', 'contact_info', 'active',
     ];
 
     protected function casts(): array
@@ -23,6 +23,8 @@ class Product extends Model
             'banned_words' => 'array',
             'filters' => 'array',
             'default_place_types' => 'array',
+            'analysis' => 'array',
+            'analysed_at' => 'datetime',
             'active' => 'boolean',
         ];
     }

@@ -3,9 +3,14 @@
 use App\Livewire\ProductsPage;
 use App\Models\Product;
 use Database\Seeders\ProductSeeder;
+use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 
-beforeEach(fn () => $this->seed(ProductSeeder::class));
+beforeEach(function () {
+    $this->seed(ProductSeeder::class);
+    // Saving a product starts a business analysis; here the AI is down, so saving must still work.
+    Http::fake(['api.anthropic.com/*' => Http::response(['error' => ['message' => 'overloaded']], 529)]);
+});
 
 it('lists the seeded products', function () {
     actingAsOwner()->get('/produk')->assertOk()->assertSee('DynoPOS')->assertSee('murahwebsite.my')->assertSee('Dilarang: demo');
