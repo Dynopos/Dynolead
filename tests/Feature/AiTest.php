@@ -329,7 +329,7 @@ it('runs the full pipeline: search to scored leads with messages', function () {
             ->and($lead->reason)->not->toBeEmpty()
             ->and($lead->message)->toContain('STOP')
             ->and($lead->prompt_version)->toBe('write-v2')
-            ->and($lead->score_prompt_version)->toBe('score-v3');
+            ->and($lead->score_prompt_version)->toBe('score-v4');
     });
 
     expect(AiUsage::where('purpose', 'score')->count())->toBe(2)

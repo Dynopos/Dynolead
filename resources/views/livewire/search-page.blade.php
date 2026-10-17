@@ -35,13 +35,22 @@
                     <input type="text" wire:model.blur="business_type" class="input pl-11" placeholder="cth: kedai runcit">
                 </div>
             </x-field>
+            @if ($needsAnalysis)
+                <a href="{{ route('products') }}" wire:navigate class="mt-2 flex items-center gap-2 rounded-xl bg-orange-50 px-3 py-2.5 text-xs text-orange-900 ring-1 ring-inset ring-orange-200">
+                    <x-icon name="sparkles" class="h-4 w-4 shrink-0 text-orange-500" />
+                    <span><b>Belum pasti nak cari siapa?</b> Buat <u>analisis bisnes</u> dulu di Produk. AI akan cadangkan pelanggan terbaik untuk anda.</span>
+                </a>
+            @endif
             @if ($suggestedTypes)
                 <div class="mt-2 flex flex-wrap gap-1.5">
                     @foreach ($suggestedTypes as $type)
-                        <button type="button" wire:click="pickType(@js($type))"
+                        <button type="button" wire:click="pickType(@js($type))" @isset($targetWhy[$type]) title="{{ $targetWhy[$type] }}" @endisset
                                 @class(['rounded-full px-3 py-1.5 text-xs font-medium ring-1 ring-inset transition', 'bg-emerald-600 text-white ring-emerald-600' => $business_type === $type, 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50' => $business_type !== $type])>{{ $type }}</button>
                     @endforeach
                 </div>
+                @if (isset($targetWhy[$business_type]))
+                    <p class="mt-2 flex gap-1.5 rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-800"><x-icon name="sparkles" class="mt-0.5 h-3.5 w-3.5 shrink-0" /><span><b>Kenapa sasaran ini:</b> {{ $targetWhy[$business_type] }}</span></p>
+                @endif
             @endif
         </div>
 

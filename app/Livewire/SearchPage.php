@@ -29,7 +29,12 @@ class SearchPage extends Component
 
     public function mount(): void
     {
-        $this->product_id = Product::query()->where('active', true)->orderBy('id')->value('id');
+        // "Cari ini" from a business analysis: /cari?produk=ID&jenis=kedai+runcit
+        $requested = (int) request()->query('produk');
+        $this->product_id = $requested && Product::query()->where('active', true)->whereKey($requested)->exists()
+            ? $requested
+            : Product::query()->where('active', true)->orderBy('id')->value('id');
+        $this->business_type = mb_substr(trim((string) request()->query('jenis')), 0, 80);
         $this->max_candidates = (int) config('dynoleads.search.default_max', 20);
     }
 
@@ -147,6 +152,8 @@ class SearchPage extends Component
         return view('livewire.search-page', [
             'products' => Product::query()->where('active', true)->orderBy('name')->get(),
             'suggestedTypes' => $product?->default_place_types ?? [],
+            'needsAnalysis' => $product !== null && $product->analysis === null,
+            'targetWhy' => collect($product?->analysis['targets'] ?? [])->pluck('why', 'type')->all(),
             'searches' => $searches,
             'running' => $searches->contains(fn ($s) => ! $s->status->isFinished()),
             'blocker' => $service->blocker($this->max_candidates, max(1, count(SearchService::parseAreas($this->areas)))),

@@ -180,3 +180,10 @@
   diberitahu sama ada kedai ada website dan masih beroperasi.
 - `php artisan dynoleads:rescore`: nilai semula lead "Tak sesuai" yang dinilai dengan prompt lama
   (sekali setiap versi prompt, langkau STOP; `--dry-run` untuk kira dahulu).
+- **Analisis bisnes** (AI, sebelum cari lead): untuk setiap produk, AI ringkaskan apa yang dijual,
+  cadangkan 4–6 jenis bisnes pelanggan terbaik (dengan sebab), tanda prospek bagus dan tanda tak
+  berbaloi. Butang "Cari" pada setiap sasaran buka skrin Cari siap terisi; skrin Cari tunjuk
+  "Kenapa sasaran ini". Analisis berjalan sendiri selepas wizard Mula dan bila produk pertama kali
+  disimpan. Percuma, had 5 kali setiap produk untuk pelanggan (`MAX_ANALYSES_PER_PRODUCT`).
+- Penilaian lead `score-v4` guna pelanggan sasaran dan tanda tak berbaloi dari analisis.
+- Wizard Mula: tapisan lalai lebih longgar (rating ≥ 3.0, review ≥ 3).

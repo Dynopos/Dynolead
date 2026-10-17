@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Exceptions\AccountLimitReached;
+use App\Services\Ai\BusinessAnalyst;
 use App\Services\Products\ProductService;
 use App\Support\Tenancy\CurrentWorkspace;
 use Livewire\Attributes\Layout;
@@ -51,7 +52,7 @@ class OnboardingPage extends Component
         $this->step = 1;
     }
 
-    public function finish(ProductService $products, CurrentWorkspace $current)
+    public function finish(ProductService $products, CurrentWorkspace $current, BusinessAnalyst $analyst)
     {
         $data = $this->validate([
             'name' => 'required|string|max:100',
@@ -69,17 +70,25 @@ class OnboardingPage extends Component
         $workspace = $current->get();
 
         try {
-            $products->save(null, $data + [
+            $product = $products->save(null, $data + [
                 'sender_name' => $workspace->sender_name ?: auth()->user()->name,
                 'company' => $workspace->name,
-                'min_rating' => 3.5,
-                'min_reviews' => 10,
+                // Loose rule filter: the business analysis and AI scoring do the ranking.
+                'min_rating' => 3.0,
+                'min_reviews' => 3,
                 'active' => true,
             ]);
         } catch (AccountLimitReached $e) {
             $this->addError('name', $e->getMessage());
 
             return null;
+        }
+
+        // Analyse the business before the first search. Never blocks onboarding.
+        try {
+            $analyst->analyse($product);
+        } catch (\Throwable $e) {
+            report($e);
         }
 
         $workspace->forceFill(['onboarded_at' => now()])->save();

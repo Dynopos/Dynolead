@@ -34,6 +34,7 @@ return [
         'max_tokens_score' => 600,
         'max_tokens_write' => 2000,
         'max_tokens_followup' => 600,
+        'max_tokens_analyse' => 1500,
         'fit_threshold' => 50,
         'review_limit' => 5,
         'review_chars' => 300,

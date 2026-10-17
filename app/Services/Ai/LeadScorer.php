@@ -48,6 +48,9 @@ class LeadScorer
             'company' => $product->company,
             'pitch_core' => $product->pitch_core,
             'fit_signals' => $product->fit_signals ?: '-',
+            'targets' => collect($product->analysis['targets'] ?? [])
+                ->map(fn (array $t) => $t['type'].' ('.$t['why'].')')->implode('; ') ?: '-',
+            'red_flags' => implode('; ', $product->analysis['red_flags'] ?? []) ?: '-',
         ], [
             'shop_name' => $place['name'] ?? '-',
             'business_type' => $lead->business_type ?? '-',
